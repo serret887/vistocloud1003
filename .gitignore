@@ -1,0 +1,15 @@
+/.firebase
+/.next
+/out
+/node_modules
+
+
+# IDE files
+.idea
+.vscode
+*.swp
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
