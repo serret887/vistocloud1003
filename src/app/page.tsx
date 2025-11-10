@@ -1,65 +1,144 @@
-import Image from "next/image";
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { db } from "@/lib/firebase";
+import {
+  addDoc,
+  collection,
+  getDocs,
+  query,
+  serverTimestamp,
+  where,
+} from "firebase/firestore";
+
+type Application = {
+  id: string;
+  applicationNumber: string;
+  status: string;
+  createdAt?: unknown;
+};
 
 export default function Home() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const ownerId = searchParams.get("ownerId") || "";
+  const workspaceId = searchParams.get("workspaceId") || "";
+  const canCreate = useMemo(() => Boolean(ownerId && workspaceId), [ownerId, workspaceId]);
+
+  const [apps, setApps] = useState<Application[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [creating, setCreating] = useState<boolean>(false);
+
+  const fetchApps = useCallback(async () => {
+    setLoading(true);
+    try {
+      const appsRef = collection(db, "applications");
+      const q = ownerId && workspaceId
+        ? query(appsRef, where("ownerId", "==", ownerId), where("workspaceId", "==", workspaceId))
+        : appsRef;
+      const snap = await getDocs(q);
+      const results: Application[] = snap.docs.map((d) => {
+        const data = d.data() as any;
+        return {
+          id: d.id,
+          applicationNumber: data.applicationNumber ?? "",
+          status: data.status ?? "",
+          createdAt: data.createdAt,
+        };
+      });
+      setApps(results);
+    } finally {
+      setLoading(false);
+    }
+  }, [ownerId, workspaceId]);
+
+  useEffect(() => {
+    void fetchApps();
+  }, [fetchApps]);
+
+  const onCreate = useCallback(async () => {
+    if (!canCreate) return;
+    setCreating(true);
+    try {
+      const appsRef = collection(db, "applications");
+      const applicationNumber = `APP-${Date.now()}`;
+      const docRef = await addDoc(appsRef, {
+        applicationNumber,
+        status: "draft",
+        ownerId,
+        workspaceId,
+        createdAt: serverTimestamp(),
+      });
+      // Navigate to step form for the created application
+      router.push(`/application?appId=${docRef.id}`);
+    } finally {
+      setCreating(false);
+    }
+  }, [canCreate, ownerId, workspaceId, router]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="max-w-5xl mx-auto p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-semibold">Applications</h1>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onCreate}
+            disabled={!canCreate || creating}
+            className="px-3 py-2 rounded bg-black text-white disabled:opacity-50"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            {creating ? "Creating…" : "Create application"}
+          </button>
         </div>
-      </main>
+      </div>
+
+      {!ownerId || !workspaceId ? (
+        <div className="mb-3 text-sm text-gray-600">
+          Missing owner context. Provide ownerId and workspaceId in the URL.
+        </div>
+      ) : null}
+
+      {loading ? (
+        <div>Loading…</div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-left text-sm">
+            <thead>
+              <tr>
+                <th className="px-2 py-1">Application Number</th>
+                <th className="px-2 py-1">Created At</th>
+                <th className="px-2 py-1">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {apps.map((a) => {
+                const createdAt: any = (a as any).createdAt;
+                const createdAtStr =
+                  createdAt && typeof createdAt?.toDate === "function"
+                    ? createdAt.toDate().toLocaleString()
+                    : typeof createdAt === "string"
+                      ? createdAt
+                      : "";
+                return (
+                  <tr key={a.id} className="border-t">
+                    <td className="px-2 py-1">{a.applicationNumber}</td>
+                    <td className="px-2 py-1">{createdAtStr}</td>
+                    <td className="px-2 py-1">{a.status}</td>
+                  </tr>
+                );
+              })}
+              {apps.length === 0 && (
+                <tr>
+                  <td className="px-2 py-3" colSpan={3}>
+                    No applications yet
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

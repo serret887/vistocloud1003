@@ -1,4 +1,6 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+"use client";
+
+import { Routes, Route, Navigate, BrowserRouter } from 'react-router-dom'
 import ApplicationForm from './ApplicationForm'
 import ClientInfoStep from './steps/ClientInfoStep'
 import EmploymentStep from './steps/EmploymentStep'
@@ -9,9 +11,10 @@ import AssetStep from './steps/AssetStep'
 import DictateStep from './steps/DictateStep'
 import ReviewStep from './steps/ReviewStep'
 
-export default function ApplicationRoutes() {
+export default function ApplicationPage() {
   return (
-    <Routes>
+    <BrowserRouter basename="/application">
+      <Routes>
       <Route path="/" element={<ApplicationForm />}>
         <Route index element={<Navigate to="client-info" replace />} />
         <Route path="client-info" element={<ClientInfoStep />} />
@@ -24,7 +27,8 @@ export default function ApplicationRoutes() {
         <Route path="review" element={<ReviewStep />} />
       </Route>
     </Routes>
-  )
+    </BrowserRouter>
+  );
 }
 
 
