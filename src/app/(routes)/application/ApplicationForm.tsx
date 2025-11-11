@@ -1,4 +1,3 @@
-import TwoSidebarLayout from '../../components/layout/TwoSidebarLayout'
 import { useEffect, useMemo, useState } from 'react'
 import { useAutoSave } from '../../hooks/useAutoSave'
 import { createLocalDraftService } from '../../services/application/drafts'
