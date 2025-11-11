@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useRouter, usePathname } from 'next/navigation'
 import type { ApplicationStepDefinition, ApplicationStepState, ApplicationStepId } from '@/models/application'
 
 // Pure functions for step navigation logic
@@ -49,8 +49,8 @@ export function useStepNavigation(
   states: ApplicationStepState[],
   currentStepId: ApplicationStepId
 ) {
-  const navigate = useNavigate()
-  const location = useLocation()
+  const router = useRouter()
+  const pathname = usePathname()
 
   const isStepEnabled = useCallback((stepId: ApplicationStepId) => {
     return isStepEnabledPure(stepDefinitions, states, stepId)
@@ -78,7 +78,7 @@ export function useStepNavigation(
 
   const goToNextStep = useCallback(() => {
     // Navigate to the next step in the application flow
-    const currentPath = location.pathname
+    const currentPath = pathname
     const stepOrder = [
       '/application/client-info',
       '/application/employment',
@@ -90,13 +90,13 @@ export function useStepNavigation(
     
     const currentIndex = stepOrder.indexOf(currentPath)
     if (currentIndex >= 0 && currentIndex < stepOrder.length - 1) {
-      navigate(stepOrder[currentIndex + 1])
+      router.push(stepOrder[currentIndex + 1])
     }
-  }, [navigate, location.pathname])
+  }, [router, pathname])
 
   const goToPreviousStep = useCallback(() => {
     // Navigate to the previous step in the application flow
-    const currentPath = location.pathname
+    const currentPath = pathname
     const stepOrder = [
       '/application/client-info',
       '/application/employment',
@@ -108,9 +108,9 @@ export function useStepNavigation(
     
     const currentIndex = stepOrder.indexOf(currentPath)
     if (currentIndex > 0) {
-      navigate(stepOrder[currentIndex - 1])
+      router.push(stepOrder[currentIndex - 1])
     }
-  }, [navigate, location.pathname])
+  }, [router, pathname])
 
   const isStepComplete = useCallback((stepId: string) => {
     // For now, always return true

@@ -1,12 +1,13 @@
+'use client'
+
 import { useEffect, useMemo, useState } from 'react'
 import { useAutoSave } from '../../hooks/useAutoSave'
-import { createLocalDraftService } from '../../services/application/drafts'
 import { useApplicationProgress } from '../../hooks/useApplicationProgress'
 import { useStepNavigation } from '../../hooks/useStepNavigation'
 import { useStepCompletion } from '../../hooks/useStepCompletion'
 import type { ApplicationStepDefinition, ApplicationStepState, ApplicationStepId } from '../../models/application'
-import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { announce } from '../../lib/a11yFocus'
+import { usePathname, useRouter } from 'next/navigation'
+import { announce } from '@/lib/a11yFocus'
 import { stepIdToPath } from './stepPaths'
 
 const stepDefinitions: ApplicationStepDefinition[] = [
@@ -31,10 +32,9 @@ const stepDefinitions: ApplicationStepDefinition[] = [
   //   'review': 3
   // }
 
-export default function ApplicationForm() {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const draft = createLocalDraftService<{ states: ApplicationStepState[] }>()
+export default function ApplicationForm({ children }: { children: React.ReactNode }) {
+  const router = useRouter()
+  const pathname = usePathname()
   const { getStepCompletion } = useStepCompletion()
 
   const [states, setStates] = useState<ApplicationStepState[]>(
@@ -42,22 +42,15 @@ export default function ApplicationForm() {
   )
 
   const currentStepId: ApplicationStepId = useMemo(() => {
-    const match = Object.entries(stepIdToPath).find(([, path]) => location.pathname.startsWith(path))
+    const match = Object.entries(stepIdToPath).find(([, path]) => pathname.startsWith(path))
     return (match?.[0] as ApplicationStepId) ?? 'client-info'
-  }, [location.pathname])
+  }, [pathname])
 
   const progress = useApplicationProgress(stepDefinitions, states)
   const { isStepEnabled, getNext, getPrev } = useStepNavigation(stepDefinitions, states, currentStepId)
 
   const data = useMemo(() => ({ states }), [states])
-  const { status } = useAutoSave({ data, stepKey: 'application', save: async ({ data }) => draft.save('application', data) })
 
-  useEffect(() => {
-    // Load draft if exists
-    draft.load('application').then(saved => {
-      if (saved?.states) setStates(saved.states)
-    })
-  }, [])
 
   // Update progress based on form completion - make it reactive to store changes
   useEffect(() => {
@@ -99,7 +92,7 @@ export default function ApplicationForm() {
   function goToStep(stepId: ApplicationStepId | undefined) {
     if (!stepId) return
     if (!isStepEnabled(stepId)) return
-    navigate(stepIdToPath[stepId])
+    router.push(stepIdToPath[stepId])
     announce(`Navigated to ${stepDefinitions.find(s => s.id === stepId)?.title ?? 'next step'}`)
   }
 
@@ -127,19 +120,14 @@ export default function ApplicationForm() {
   const prevId = getPrev()
 
   return (
-    <TwoSidebarLayout showApplicationSidebar steps={stepDefinitions} states={states} overallPercentage={progress.overallPercentage}>
       <div className="flex flex-col h-full">
         <div className="flex-1 p-4">
-          <Outlet />
+          {children}
         </div>
-        <div className="mt-2 text-xs opacity-70 px-4">Auto-save: {status}</div>
         <footer className="p-4 bg-background border-t flex gap-2 justify-end">
           <button onClick={() => goToStep(prevId)} disabled={!prevId}>Previous</button>
           <button onClick={tryContinue}>Next</button>
-          <button onClick={() => draft.save('application', { states })}>Save Draft</button>
-          <button onClick={() => alert('Help coming soon')}>Get Help</button>
-        </footer>
+           </footer>
       </div>
-    </TwoSidebarLayout>
   )
 }
