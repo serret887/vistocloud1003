@@ -6,9 +6,10 @@ import { useApplicationProgress } from '../../hooks/useApplicationProgress'
 import { useStepNavigation } from '../../hooks/useStepNavigation'
 import { useStepCompletion } from '../../hooks/useStepCompletion'
 import type { ApplicationStepDefinition, ApplicationStepState, ApplicationStepId } from '../../models/application'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { announce } from '@/lib/a11yFocus'
 import { stepIdToPath } from './stepPaths'
+import { useApplicationStore } from '@/stores/applicationStore'
 
 const stepDefinitions: ApplicationStepDefinition[] = [
   { id: 'client-info', title: 'Client Information', description: 'Personal details', estimatedTime: '2 min', fields: [] },
@@ -35,11 +36,26 @@ const stepDefinitions: ApplicationStepDefinition[] = [
 export default function ApplicationForm({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const { getStepCompletion } = useStepCompletion()
+  const { loadApplicationFromFirestore, setCurrentApplicationId, currentApplicationId } = useApplicationStore()
 
   const [states, setStates] = useState<ApplicationStepState[]>(
     stepDefinitions.map(s => ({ id: s.id, status: 'pending', completionPercentage: 0, errorCount: 0 }))
   )
+
+  // Load application data from Firestore when appId is present in URL
+  useEffect(() => {
+    const appId = searchParams.get('appId')
+    if (appId && appId !== currentApplicationId) {
+      loadApplicationFromFirestore(appId).catch(err => {
+        console.error('Failed to load application:', err)
+      })
+    } else if (!appId && currentApplicationId) {
+      // Clear application ID if no appId in URL
+      setCurrentApplicationId(null)
+    }
+  }, [searchParams, currentApplicationId, loadApplicationFromFirestore, setCurrentApplicationId])
 
   const currentStepId: ApplicationStepId = useMemo(() => {
     const match = Object.entries(stepIdToPath).find(([, path]) => pathname.startsWith(path))

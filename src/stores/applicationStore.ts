@@ -11,8 +11,21 @@ import type { ConditionGeneratorInput } from '@/lib/conditions';
 import type { ClientData } from '@/types/client-data';
 import type { ChatMessage } from '@/types/voice-assistant';
 import { validateClientData, validateEmploymentRecord, logValidationResults } from '@/lib/dataValidator';
+import * as firestoreSync from './sync/firestoreSync';
+import {
+  generateClientId,
+  generateEmploymentId,
+  generateIncomeId,
+  generateAssetId,
+  generateRealEstateId,
+  generateConditionId,
+  generateChatMessageId,
+  generateDocumentId,
+  generateFallbackId,
+} from '@/lib/idGenerator';
 
 export type ApplicationState = {
+  currentApplicationId: string | null;
   clients: { [id: string]: ClientData };
   activeClientId: string;
   employmentData: { [clientId: string]: ClientEmploymentData };
@@ -112,12 +125,16 @@ export type ApplicationState = {
   addChatMessage: (message: ChatMessage) => void;
   getChatHistory: () => ChatMessage[];
   clearChatHistory: () => void;
+  // Firestore sync actions
+  setCurrentApplicationId: (applicationId: string | null) => void;
+  loadApplicationFromFirestore: (applicationId: string) => Promise<void>;
 };
 
 export const useApplicationStore = create<ApplicationState>()(
   persist(
     devtools(
       (set, get) => ({
+  currentApplicationId: null,
   clients: { 'c1': { firstName: '', lastName: '', email: '', phone: '', ssn: '', dob: '', citizenship: 'US Citizen', maritalStatus: 'Unmarried', hasMilitaryService: false, militaryNote: null } },
   activeClientId: 'c1',
   employmentData: {},
@@ -147,16 +164,34 @@ export const useApplicationStore = create<ApplicationState>()(
   setActiveClient: (id) => set({ activeClientId: id }),
   
   addClient: () => {
-    const id = Math.random().toString(36).slice(2);
-    set((state) => ({
-      clients: { ...state.clients, [id]: { firstName: '', lastName: '', email: '', phone: '', ssn: '', dob: '', citizenship: 'US Citizen', maritalStatus: 'Unmarried', hasMilitaryService: false, militaryNote: null } },
-      activeClientId: id,
-      employmentCounters: { ...state.employmentCounters, [id]: 0 }
-    }));
+    const state = get();
+    // Use Firestore ID if we have an application, otherwise use fallback
+    const id = state.currentApplicationId
+      ? generateClientId(state.currentApplicationId)
+      : generateFallbackId('client');
+    const newClient: ClientData = { firstName: '', lastName: '', email: '', phone: '', ssn: '', dob: '', citizenship: 'US Citizen', maritalStatus: 'Unmarried', hasMilitaryService: false, militaryNote: null };
+    set((state) => {
+      const updatedClients = { ...state.clients, [id]: newClient };
+      // Sync to Firestore
+      if (state.currentApplicationId) {
+        firestoreSync.saveClientToFirestore(state.currentApplicationId, id, newClient)
+          .catch(err => console.error('Failed to sync client to Firestore:', err));
+      }
+      return {
+        clients: updatedClients,
+        activeClientId: id,
+        employmentCounters: { ...state.employmentCounters, [id]: 0 }
+      };
+    });
     return id;
   },
   
   removeClient: (id) => set((state) => {
+    // Sync deletion to Firestore
+    if (state.currentApplicationId) {
+      firestoreSync.deleteClientFromFirestore(state.currentApplicationId, id)
+        .catch(err => console.error('Failed to delete client from Firestore:', err));
+    }
     // Remove all client-related data
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { [id]: _, ...newClients } = state.clients;
@@ -212,30 +247,41 @@ export const useApplicationStore = create<ApplicationState>()(
     
     if (!validationResult.isValid) {
       console.error('Client data validation failed, skipping update:', validationResult.errors)
+      return state
     }
     
-    return {
-      clients: { ...state.clients, [id]: { ...state.clients[id], ...validationResult.data } },
+    const updatedClient = { ...state.clients[id], ...validationResult.data }
+    const updatedClients = { ...state.clients, [id]: updatedClient }
+    
+    // Sync to Firestore
+    if (state.currentApplicationId) {
+      firestoreSync.saveClientToFirestore(state.currentApplicationId, id, updatedClient)
+        .catch(err => console.error('Failed to sync client to Firestore:', err))
     }
+    
+    return { clients: updatedClients }
   }),
 
-  // Employment helpers
+  // Employment helpers (kept for backward compatibility, but now uses Firestore IDs)
   getNextEmploymentId: (clientId) => {
     const state = get();
-    const current = state.employmentCounters[clientId] || 0;
-    const next = current + 1;
-    set({ employmentCounters: { ...state.employmentCounters, [clientId]: next } });
-    return `emp-${clientId}-${next}`;
+    // Use Firestore ID if we have an application, otherwise use fallback
+    if (state.currentApplicationId) {
+      return generateEmploymentId(state.currentApplicationId);
+    }
+    return generateFallbackId('emp');
   },
 
   // Employment actions
   addEmploymentRecord: (clientId) => {
-    const id = get().getNextEmploymentId(clientId);
+    const currentState = get();
+    const id = currentState.currentApplicationId
+      ? generateEmploymentId(currentState.currentApplicationId)
+      : generateFallbackId('emp');
     const now = new Date().toISOString();
     
     // Auto-fill endDate with the startDate of the previous employment to avoid gaps
-    const state = get();
-    const currentData = state.employmentData[clientId] || { clientId, records: [] };
+    const currentData = currentState.employmentData[clientId] || { clientId, records: [] };
     let autoEndDate: string | null = null;
     
     if (currentData.records.length > 0) {
@@ -278,6 +324,11 @@ export const useApplicationStore = create<ApplicationState>()(
         ...currentData,
         records: [...currentData.records, emptyRecord]
       };
+      // Sync to Firestore
+      if (state.currentApplicationId) {
+        firestoreSync.saveEmploymentToFirestore(state.currentApplicationId, id, emptyRecord)
+          .catch(err => console.error('Failed to sync employment to Firestore:', err))
+      }
       return {
         employmentData: {
           ...state.employmentData,
@@ -299,6 +350,7 @@ export const useApplicationStore = create<ApplicationState>()(
     
     if (!validationResult.isValid) {
       console.error('Employment data validation failed, skipping update:', validationResult.errors)
+      return state as any
     }
 
     const updatedRecords = currentData.records.map(record =>
@@ -306,6 +358,13 @@ export const useApplicationStore = create<ApplicationState>()(
         ? { ...record, ...validationResult.data, updatedAt: new Date().toISOString() }
         : record
     );
+
+    const updatedRecord = updatedRecords.find(r => r.id === recordId)
+    // Sync to Firestore
+    if (state.currentApplicationId && updatedRecord) {
+      firestoreSync.saveEmploymentToFirestore(state.currentApplicationId, recordId, updatedRecord)
+        .catch(err => console.error('Failed to sync employment to Firestore:', err))
+    }
 
     return {
       employmentData: {
@@ -321,6 +380,12 @@ export const useApplicationStore = create<ApplicationState>()(
   removeEmploymentRecord: (clientId, recordId) => set((state) => {
     const currentData = state.employmentData[clientId];
     if (!currentData) return state as any;
+
+    // Sync deletion to Firestore
+    if (state.currentApplicationId) {
+      firestoreSync.deleteEmploymentFromFirestore(state.currentApplicationId, recordId)
+        .catch(err => console.error('Failed to delete employment from Firestore:', err))
+    }
 
     const updatedRecords = currentData.records.filter(record => record.id !== recordId);
 
@@ -381,18 +446,21 @@ export const useApplicationStore = create<ApplicationState>()(
     } as any;
   }),
 
-  // Income actions
+  // Income actions (kept for backward compatibility, but now uses Firestore IDs)
   getNextIncomeId: (clientId) => {
     const state = get();
-    const counter = (state.incomeCounters[clientId] || 0) + 1;
-    set((state) => ({
-      incomeCounters: { ...state.incomeCounters, [clientId]: counter }
-    }));
-    return `income-${clientId}-${counter}`;
+    // Use Firestore ID if we have an application, otherwise use fallback
+    if (state.currentApplicationId) {
+      return generateIncomeId(state.currentApplicationId, 'active');
+    }
+    return generateFallbackId('income');
   },
 
   addActiveIncome: (clientId) => {
-    const id = get().getNextIncomeId(clientId);
+    const state = get();
+    const id = state.currentApplicationId
+      ? generateIncomeId(state.currentApplicationId, 'active')
+      : generateFallbackId('income');
     const now = new Date().toISOString();
     const emptyRecord: ActiveIncomeRecord = {
       id,
@@ -409,12 +477,20 @@ export const useApplicationStore = create<ApplicationState>()(
       updatedAt: now
     };
     
-    set((state) => ({
-      activeIncomeData: {
-        ...state.activeIncomeData,
-        [clientId]: [...(state.activeIncomeData[clientId] || []), emptyRecord]
+    set((state) => {
+      const updatedRecords = [...(state.activeIncomeData[clientId] || []), emptyRecord];
+      // Sync to Firestore
+      if (state.currentApplicationId) {
+        firestoreSync.saveActiveIncomeToFirestore(state.currentApplicationId, id, emptyRecord)
+          .catch(err => console.error('Failed to sync active income to Firestore:', err))
       }
-    }));
+      return {
+        activeIncomeData: {
+          ...state.activeIncomeData,
+          [clientId]: updatedRecords
+        }
+      };
+    });
     
     return id;
   },
@@ -422,8 +498,14 @@ export const useApplicationStore = create<ApplicationState>()(
   updateActiveIncome: (clientId, recordId, updates) => set((state) => {
     const currentRecords = state.activeIncomeData[clientId] || [];
     const updatedRecords = currentRecords.map(record =>
-      record.id === recordId ? { ...record, ...updates } : record
+      record.id === recordId ? { ...record, ...updates, updatedAt: new Date().toISOString() } : record
     );
+    const updatedRecord = updatedRecords.find(r => r.id === recordId);
+    // Sync to Firestore
+    if (state.currentApplicationId && updatedRecord) {
+      firestoreSync.saveActiveIncomeToFirestore(state.currentApplicationId, recordId, updatedRecord)
+        .catch(err => console.error('Failed to sync active income to Firestore:', err))
+    }
     return {
       activeIncomeData: {
         ...state.activeIncomeData,
@@ -433,6 +515,11 @@ export const useApplicationStore = create<ApplicationState>()(
   }),
 
   removeActiveIncome: (clientId, recordId) => set((state) => {
+    // Sync deletion to Firestore
+    if (state.currentApplicationId) {
+      firestoreSync.deleteActiveIncomeFromFirestore(state.currentApplicationId, recordId)
+        .catch(err => console.error('Failed to delete active income from Firestore:', err))
+    }
     const currentRecords = state.activeIncomeData[clientId] || [];
     const updatedRecords = currentRecords.filter(record => record.id !== recordId);
     return {
@@ -449,7 +536,10 @@ export const useApplicationStore = create<ApplicationState>()(
   },
 
   addPassiveIncome: (clientId) => {
-    const id = get().getNextIncomeId(clientId);
+    const state = get();
+    const id = state.currentApplicationId
+      ? generateIncomeId(state.currentApplicationId, 'passive')
+      : generateFallbackId('income');
     const now = new Date().toISOString();
     const emptyRecord: PassiveIncomeRecord = {
       id,
@@ -462,12 +552,20 @@ export const useApplicationStore = create<ApplicationState>()(
       updatedAt: now
     };
     
-    set((state) => ({
-      passiveIncomeData: {
-        ...state.passiveIncomeData,
-        [clientId]: [...(state.passiveIncomeData[clientId] || []), emptyRecord]
+    set((state) => {
+      const updatedRecords = [...(state.passiveIncomeData[clientId] || []), emptyRecord];
+      // Sync to Firestore
+      if (state.currentApplicationId) {
+        firestoreSync.savePassiveIncomeToFirestore(state.currentApplicationId, id, emptyRecord)
+          .catch(err => console.error('Failed to sync passive income to Firestore:', err))
       }
-    }));
+      return {
+        passiveIncomeData: {
+          ...state.passiveIncomeData,
+          [clientId]: updatedRecords
+        }
+      };
+    });
     
     return id;
   },
@@ -475,8 +573,14 @@ export const useApplicationStore = create<ApplicationState>()(
   updatePassiveIncome: (clientId, recordId, updates) => set((state) => {
     const currentRecords = state.passiveIncomeData[clientId] || [];
     const updatedRecords = currentRecords.map(record =>
-      record.id === recordId ? { ...record, ...updates } : record
+      record.id === recordId ? { ...record, ...updates, updatedAt: new Date().toISOString() } : record
     );
+    const updatedRecord = updatedRecords.find(r => r.id === recordId);
+    // Sync to Firestore
+    if (state.currentApplicationId && updatedRecord) {
+      firestoreSync.savePassiveIncomeToFirestore(state.currentApplicationId, recordId, updatedRecord)
+        .catch(err => console.error('Failed to sync passive income to Firestore:', err))
+    }
     return {
       passiveIncomeData: {
         ...state.passiveIncomeData,
@@ -486,6 +590,11 @@ export const useApplicationStore = create<ApplicationState>()(
   }),
 
   removePassiveIncome: (clientId, recordId) => set((state) => {
+    // Sync deletion to Firestore
+    if (state.currentApplicationId) {
+      firestoreSync.deletePassiveIncomeFromFirestore(state.currentApplicationId, recordId)
+        .catch(err => console.error('Failed to delete passive income from Firestore:', err))
+    }
     const currentRecords = state.passiveIncomeData[clientId] || [];
     const updatedRecords = currentRecords.filter(record => record.id !== recordId);
     return {
@@ -501,19 +610,27 @@ export const useApplicationStore = create<ApplicationState>()(
     return state.passiveIncomeData[clientId] || [];
   },
 
-  updateIncomeTotal: (clientId, total) => set((state) => ({
-    incomeTotals: {
-      ...state.incomeTotals,
-      [clientId]: {
-        ...state.incomeTotals[clientId],
-        id: `total-${clientId}`,
-        clientId,
-        totalMonthlyIncome: 0,
-        ...total,
-        updatedAt: new Date().toISOString()
-      }
+  updateIncomeTotal: (clientId, total) => set((state) => {
+    const updatedTotal = {
+      ...state.incomeTotals[clientId],
+      id: `total-${clientId}`,
+      clientId,
+      totalMonthlyIncome: 0,
+      ...total,
+      updatedAt: new Date().toISOString()
+    };
+    // Sync to Firestore
+    if (state.currentApplicationId) {
+      firestoreSync.saveIncomeTotalToFirestore(state.currentApplicationId, clientId, updatedTotal)
+        .catch(err => console.error('Failed to sync income total to Firestore:', err))
     }
-  })),
+    return {
+      incomeTotals: {
+        ...state.incomeTotals,
+        [clientId]: updatedTotal
+      }
+    };
+  }),
 
   getIncomeTotal: (clientId) => {
     const state = get();
@@ -524,18 +641,22 @@ export const useApplicationStore = create<ApplicationState>()(
     };
   },
 
-  // Real estate helpers
+  // Real estate helpers (kept for backward compatibility, but now uses Firestore IDs)
   getNextRealEstateId: (clientId) => {
     const state = get();
-    const current = state.realEstateCounters[clientId] || 0;
-    const next = current + 1;
-    set({ realEstateCounters: { ...state.realEstateCounters, [clientId]: next } });
-    return `re-${clientId}-${next}`;
+    // Use Firestore ID if we have an application, otherwise use fallback
+    if (state.currentApplicationId) {
+      return generateRealEstateId(state.currentApplicationId);
+    }
+    return generateFallbackId('re');
   },
 
   // Real estate actions
   addRealEstateRecord: (clientId) => {
-    const id = get().getNextRealEstateId(clientId);
+    const state = get();
+    const id = state.currentApplicationId
+      ? generateRealEstateId(state.currentApplicationId)
+      : generateFallbackId('re');
     const now = new Date().toISOString();
     const emptyRecord: RealEstateOwned = {
       id,
@@ -558,6 +679,11 @@ export const useApplicationStore = create<ApplicationState>()(
         ...currentData,
         records: [...currentData.records, emptyRecord]
       };
+      // Sync to Firestore
+      if (state.currentApplicationId) {
+        firestoreSync.saveRealEstateToFirestore(state.currentApplicationId, id, emptyRecord)
+          .catch(err => console.error('Failed to sync real estate to Firestore:', err))
+      }
       return {
         realEstateData: {
           ...state.realEstateData,
@@ -579,6 +705,13 @@ export const useApplicationStore = create<ApplicationState>()(
         : record
     );
 
+    const updatedRecord = updatedRecords.find(r => r.id === recordId);
+    // Sync to Firestore
+    if (state.currentApplicationId && updatedRecord) {
+      firestoreSync.saveRealEstateToFirestore(state.currentApplicationId, recordId, updatedRecord)
+        .catch(err => console.error('Failed to sync real estate to Firestore:', err))
+    }
+
     return {
       realEstateData: {
         ...state.realEstateData,
@@ -593,6 +726,12 @@ export const useApplicationStore = create<ApplicationState>()(
   removeRealEstateRecord: (clientId, recordId) => set((state) => {
     const currentData = state.realEstateData[clientId];
     if (!currentData) return state as any;
+
+    // Sync deletion to Firestore
+    if (state.currentApplicationId) {
+      firestoreSync.deleteRealEstateFromFirestore(state.currentApplicationId, recordId)
+        .catch(err => console.error('Failed to delete real estate from Firestore:', err))
+    }
 
     const updatedRecords = currentData.records.filter(record => record.id !== recordId);
 
@@ -635,18 +774,22 @@ export const useApplicationStore = create<ApplicationState>()(
     return state.realEstateVisited[clientId] || false;
   },
 
-  // Assets helpers
+  // Assets helpers (kept for backward compatibility, but now uses Firestore IDs)
   getNextAssetId: (clientId) => {
     const state = get();
-    const current = state.assetCounters[clientId] || 0;
-    const next = current + 1;
-    set({ assetCounters: { ...state.assetCounters, [clientId]: next } });
-    return `asset-${clientId}-${next}`;
+    // Use Firestore ID if we have an application, otherwise use fallback
+    if (state.currentApplicationId) {
+      return generateAssetId(state.currentApplicationId);
+    }
+    return generateFallbackId('asset');
   },
 
   // Assets actions
   addAsset: (clientId: string) => {
-    const id = get().getNextAssetId(clientId);
+    const state = get();
+    const id = state.currentApplicationId
+      ? generateAssetId(state.currentApplicationId)
+      : generateFallbackId('asset');
     const now = new Date().toISOString();
     const emptyRecord: AssetRecord = {
       id,
@@ -662,11 +805,16 @@ export const useApplicationStore = create<ApplicationState>()(
     };
     
     set((state) => {
-      const list = state.assetsData[clientId] || [];
+      const updatedList = [...(state.assetsData[clientId] || []), emptyRecord];
+      // Sync to Firestore
+      if (state.currentApplicationId) {
+        firestoreSync.saveAssetToFirestore(state.currentApplicationId, id, emptyRecord)
+          .catch(err => console.error('Failed to sync asset to Firestore:', err))
+      }
       return {
         assetsData: {
           ...state.assetsData,
-          [clientId]: [...list, emptyRecord]
+          [clientId]: updatedList
         }
       };
     });
@@ -689,6 +837,11 @@ export const useApplicationStore = create<ApplicationState>()(
         return state as any;
       }
     }
+    // Sync to Firestore
+    if (state.currentApplicationId && updated) {
+      firestoreSync.saveAssetToFirestore(state.currentApplicationId, recordId, updated)
+        .catch(err => console.error('Failed to sync asset to Firestore:', err))
+    }
     return {
       assetsData: {
         ...state.assetsData,
@@ -698,6 +851,11 @@ export const useApplicationStore = create<ApplicationState>()(
   }),
 
   removeAsset: (clientId, recordId) => set((state) => {
+    // Sync deletion to Firestore
+    if (state.currentApplicationId) {
+      firestoreSync.deleteAssetFromFirestore(state.currentApplicationId, recordId)
+        .catch(err => console.error('Failed to delete asset from Firestore:', err))
+    }
     const list = state.assetsData[clientId] || [];
     const nextList = list.filter(r => r.id !== recordId);
     return {
@@ -711,6 +869,12 @@ export const useApplicationStore = create<ApplicationState>()(
   setSharedOwners: (clientId, recordId, sharedClientIds) => set((state) => {
     const list = state.assetsData[clientId] || [];
     const nextList = list.map(r => r.id === recordId ? { ...r, sharedClientIds, updatedAt: new Date().toISOString() } : r);
+    const updated = nextList.find(r => r.id === recordId);
+    // Sync to Firestore
+    if (state.currentApplicationId && updated) {
+      firestoreSync.saveAssetToFirestore(state.currentApplicationId, recordId, updated)
+        .catch(err => console.error('Failed to sync asset to Firestore:', err))
+    }
     return {
       assetsData: {
         ...state.assetsData,
@@ -762,14 +926,24 @@ export const useApplicationStore = create<ApplicationState>()(
       assets: state.assetsData[clientId] || []
     };
     
-    const conditions = generateConditions(clientData);
+    // Pass applicationId to condition generator for Firestore ID generation
+    const conditions = generateConditions(clientData, state.currentApplicationId || undefined);
     
-    set((state) => ({
-      conditionsData: {
-        ...state.conditionsData,
-        [clientId]: conditions
+    set((state) => {
+      // Sync each condition to Firestore
+      if (state.currentApplicationId) {
+        conditions.forEach(condition => {
+          firestoreSync.saveConditionToFirestore(state.currentApplicationId!, condition.id, condition)
+            .catch(err => console.error('Failed to sync condition to Firestore:', err))
+        })
       }
-    }));
+      return {
+        conditionsData: {
+          ...state.conditionsData,
+          [clientId]: conditions
+        }
+      };
+    });
   },
   
   updateConditionStatus: (clientId: string, conditionId: string, status: ConditionStatus) => set((state) => {
@@ -779,6 +953,13 @@ export const useApplicationStore = create<ApplicationState>()(
         ? updateConditionStatus(condition, status)
         : condition
     );
+    
+    const updatedCondition = updatedConditions.find(c => c.id === conditionId);
+    // Sync to Firestore
+    if (state.currentApplicationId && updatedCondition) {
+      firestoreSync.saveConditionToFirestore(state.currentApplicationId, conditionId, updatedCondition)
+        .catch(err => console.error('Failed to sync condition to Firestore:', err))
+    }
     
     return {
       conditionsData: {
@@ -796,6 +977,13 @@ export const useApplicationStore = create<ApplicationState>()(
         : condition
     );
     
+    const updatedCondition = updatedConditions.find(c => c.id === conditionId);
+    // Sync to Firestore
+    if (state.currentApplicationId && updatedCondition) {
+      firestoreSync.saveConditionToFirestore(state.currentApplicationId, conditionId, updatedCondition)
+        .catch(err => console.error('Failed to sync condition to Firestore:', err))
+    }
+    
     return {
       conditionsData: {
         ...state.conditionsData,
@@ -812,6 +1000,13 @@ export const useApplicationStore = create<ApplicationState>()(
         : condition
     );
     
+    const updatedCondition = updatedConditions.find(c => c.id === conditionId);
+    // Sync to Firestore
+    if (state.currentApplicationId && updatedCondition) {
+      firestoreSync.saveConditionToFirestore(state.currentApplicationId, conditionId, updatedCondition)
+        .catch(err => console.error('Failed to sync condition to Firestore:', err))
+    }
+    
     return {
       conditionsData: {
         ...state.conditionsData,
@@ -827,6 +1022,13 @@ export const useApplicationStore = create<ApplicationState>()(
         ? { ...condition, documents: condition.documents.filter(doc => doc.id !== documentId), updatedAt: new Date().toISOString() }
         : condition
     );
+    
+    const updatedCondition = updatedConditions.find(c => c.id === conditionId);
+    // Sync to Firestore
+    if (state.currentApplicationId && updatedCondition) {
+      firestoreSync.saveConditionToFirestore(state.currentApplicationId, conditionId, updatedCondition)
+        .catch(err => console.error('Failed to sync condition to Firestore:', err))
+    }
     
     return {
       conditionsData: {
@@ -869,9 +1071,22 @@ export const useApplicationStore = create<ApplicationState>()(
   })),
   
   // Chat history actions
-  addChatMessage: (message: ChatMessage) => set((state) => ({
-    chatHistory: [...state.chatHistory, message]
-  })),
+  addChatMessage: (message: ChatMessage) => set((state) => {
+    // Ensure message has an id - generate one if missing
+    const messageId = message.id || (state.currentApplicationId
+      ? generateChatMessageId(state.currentApplicationId)
+      : generateFallbackId('msg'));
+    const messageWithId = { ...message, id: messageId };
+    const updatedHistory = [...state.chatHistory, messageWithId];
+    // Sync to Firestore - chatHistory collection with application ID
+    if (state.currentApplicationId) {
+      firestoreSync.saveChatMessageToFirestore(state.currentApplicationId, messageId, messageWithId)
+        .catch(err => console.error('Failed to sync chat message to Firestore:', err))
+    }
+    return {
+      chatHistory: updatedHistory
+    };
+  }),
   
   getChatHistory: () => {
     const state = get();
@@ -889,12 +1104,19 @@ export const useApplicationStore = create<ApplicationState>()(
   }),
   
   // Address actions
-  updateAddressData: (clientId, data) => set((state) => ({
-    addressData: {
-      ...state.addressData,
-      [clientId]: data
+  updateAddressData: (clientId, data) => set((state) => {
+    // Sync to Firestore
+    if (state.currentApplicationId) {
+      firestoreSync.saveAddressToFirestore(state.currentApplicationId, clientId, data)
+        .catch(err => console.error('Failed to sync address to Firestore:', err))
     }
-  })),
+    return {
+      addressData: {
+        ...state.addressData,
+        [clientId]: data
+      }
+    };
+  }),
   
   getAddressData: (clientId) => {
     const state = get();
@@ -971,7 +1193,57 @@ export const useApplicationStore = create<ApplicationState>()(
     return {
       addressData: newAddressData
     };
-  })
+  }),
+
+  // Firestore sync actions
+  setCurrentApplicationId: (applicationId) => set({ currentApplicationId: applicationId }),
+
+  loadApplicationFromFirestore: async (applicationId) => {
+    try {
+      const data = await firestoreSync.loadApplicationDataFromFirestore(applicationId);
+      
+      // Initialize counters for all clients (counters are no longer used for ID generation
+      // since we use Firestore auto-IDs, but kept for backward compatibility)
+      const employmentCounters: { [clientId: string]: number } = {};
+      const incomeCounters: { [clientId: string]: number } = {};
+      const realEstateCounters: { [clientId: string]: number } = {};
+      const assetCounters: { [clientId: string]: number } = {};
+      const conditionCounters: { [clientId: string]: number } = {};
+      
+      // Initialize counters for all loaded clients
+      Object.keys(data.clients).forEach(clientId => {
+        employmentCounters[clientId] = 0;
+        incomeCounters[clientId] = 0;
+        realEstateCounters[clientId] = 0;
+        assetCounters[clientId] = 0;
+        conditionCounters[clientId] = 0;
+      });
+      
+      set({
+        currentApplicationId: applicationId,
+        clients: data.clients,
+        employmentData: data.employmentData,
+        employmentCounters,
+        activeIncomeData: data.activeIncomeData,
+        passiveIncomeData: data.passiveIncomeData,
+        incomeTotals: data.incomeTotals,
+        incomeCounters,
+        assetsData: data.assetsData,
+        assetCounters,
+        realEstateData: data.realEstateData,
+        realEstateCounters,
+        addressData: data.addressData,
+        conditionsData: data.conditionsData,
+        conditionCounters,
+        chatHistory: data.chatHistory,
+        // Set active client to first client if exists
+        activeClientId: Object.keys(data.clients)[0] || 'c1',
+      });
+    } catch (error) {
+      console.error('Failed to load application from Firestore:', error);
+      throw error;
+    }
+  }
       }),
       { name: 'application-store' }
     ),

@@ -6,13 +6,9 @@ export type Application = {
   ownerId: string;
   ownerWorkspace: string;
   source?: string;
-  clientCreateToken?: string;
-};
-
-export type CreateApplicationInput = {
-  ownerId: string;
-  ownerWorkspace: string;
-  clientCreateToken: string;
+  currentStepId?: string;
+  overallProgress?: number;
+  updatedAt?: unknown;
 };
 
 

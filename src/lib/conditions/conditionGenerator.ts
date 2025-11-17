@@ -14,6 +14,7 @@ import {
   generatePropertyConditions,
   generateCreditConditions
 } from './index';
+import { generateConditionId, generateFallbackId } from '@/lib/idGenerator';
 
 export type { ConditionGeneratorInput } from './types';
 
@@ -30,11 +31,11 @@ export interface ConditionGenerationResult {
  * Generate all conditions for a client based on their data
  * 
  * @param input - Client data including ID, citizenship, employment, and assets
+ * @param applicationId - Optional application ID for Firestore ID generation
  * @returns Array of generated conditions
  */
-export function generateConditions(input: ConditionGeneratorInput): Condition[] {
+export function generateConditions(input: ConditionGeneratorInput, applicationId?: string): Condition[] {
   const conditions: Condition[] = [];
-  let conditionCounter = 1;
 
   // Create a strongly-typed addCondition function
   const addCondition = (
@@ -44,8 +45,13 @@ export function generateConditions(input: ConditionGeneratorInput): Condition[] 
     priority: 'high' | 'medium' | 'low',
     daysUntilDue: number = 14
   ): Condition => {
+    // Use Firestore ID if applicationId is provided, otherwise use fallback
+    const id = applicationId
+      ? generateConditionId(applicationId)
+      : generateFallbackId('condition');
+    
     const condition: Condition = {
-      id: `${input.clientId}-condition-${conditionCounter++}`,
+      id,
       clientId: input.clientId,
       category,
       title,

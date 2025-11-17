@@ -3,6 +3,13 @@
 /out
 /node_modules
 
+# Environment files
+.env
+.env.*
+# Firebase emulator data
+/emulator-data
+firebase-debug.log
+firebase-debug.*.log
 
 # IDE files
 .idea

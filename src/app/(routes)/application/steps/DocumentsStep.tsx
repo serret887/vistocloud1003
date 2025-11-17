@@ -10,6 +10,7 @@ import { FileText, MessageSquare, ChevronDown, ChevronUp, MoreVertical, File, X 
 import ClientTabs from './ClientTabs'
 import DocumentUploadModal from '@/components/DocumentUploadModal'
 import type { Condition, ConditionDocument } from '@/types/conditions'
+import { generateDocumentId } from '@/lib/idGenerator'
 
 // Condition Card Component matching the design
 function ConditionCard({ condition, onUpload, onAddNote, onRemoveDocument, onStatusChange }: { 
@@ -265,11 +266,12 @@ export default function DocumentsStep() {
     if (!selectedConditionId || !activeClientId) return
 
     const userName = client?.firstName ? `${client.firstName} ${client.lastName}` : 'User'
+    const { currentApplicationId } = useApplicationStore.getState()
     
     // Handle new file uploads
     files.forEach((file) => {
       const document: ConditionDocument = {
-        id: `doc-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        id: generateDocumentId(currentApplicationId || undefined),
         name: file.name,
         size: file.size,
         type: file.type,
