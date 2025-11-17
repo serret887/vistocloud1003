@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect } from 'react'
 import { CheckCircle2, Plus, X } from 'lucide-react'
 import { useApplicationStore } from '@/stores/applicationStore';

@@ -2,6 +2,7 @@
  * RealEstateForm is a form component for adding or editing real estate owned records.
  * It includes fields for property details, address, and property questions.
  */
+'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'

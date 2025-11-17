@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useMemo, useState, useCallback, memo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'

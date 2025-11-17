@@ -179,8 +179,8 @@ export const useApplicationStore = create<ApplicationState>()(
       }
       return {
         clients: updatedClients,
-        activeClientId: id,
-        employmentCounters: { ...state.employmentCounters, [id]: 0 }
+      activeClientId: id,
+      employmentCounters: { ...state.employmentCounters, [id]: 0 }
       };
     });
     return id;
@@ -485,10 +485,10 @@ export const useApplicationStore = create<ApplicationState>()(
           .catch(err => console.error('Failed to sync active income to Firestore:', err))
       }
       return {
-        activeIncomeData: {
-          ...state.activeIncomeData,
+      activeIncomeData: {
+        ...state.activeIncomeData,
           [clientId]: updatedRecords
-        }
+      }
       };
     });
     
@@ -560,10 +560,10 @@ export const useApplicationStore = create<ApplicationState>()(
           .catch(err => console.error('Failed to sync passive income to Firestore:', err))
       }
       return {
-        passiveIncomeData: {
-          ...state.passiveIncomeData,
+      passiveIncomeData: {
+        ...state.passiveIncomeData,
           [clientId]: updatedRecords
-        }
+      }
       };
     });
     
@@ -612,23 +612,23 @@ export const useApplicationStore = create<ApplicationState>()(
 
   updateIncomeTotal: (clientId, total) => set((state) => {
     const updatedTotal = {
-      ...state.incomeTotals[clientId],
-      id: `total-${clientId}`,
-      clientId,
-      totalMonthlyIncome: 0,
-      ...total,
-      updatedAt: new Date().toISOString()
+        ...state.incomeTotals[clientId],
+        id: `total-${clientId}`,
+        clientId,
+        totalMonthlyIncome: 0,
+        ...total,
+        updatedAt: new Date().toISOString()
     };
     // Sync to Firestore
     if (state.currentApplicationId) {
       firestoreSync.saveIncomeTotalToFirestore(state.currentApplicationId, clientId, updatedTotal)
         .catch(err => console.error('Failed to sync income total to Firestore:', err))
-    }
+      }
     return {
       incomeTotals: {
         ...state.incomeTotals,
         [clientId]: updatedTotal
-      }
+    }
     };
   }),
 
@@ -938,10 +938,10 @@ export const useApplicationStore = create<ApplicationState>()(
         })
       }
       return {
-        conditionsData: {
-          ...state.conditionsData,
-          [clientId]: conditions
-        }
+      conditionsData: {
+        ...state.conditionsData,
+        [clientId]: conditions
+      }
       };
     });
   },
@@ -1111,10 +1111,10 @@ export const useApplicationStore = create<ApplicationState>()(
         .catch(err => console.error('Failed to sync address to Firestore:', err))
     }
     return {
-      addressData: {
-        ...state.addressData,
-        [clientId]: data
-      }
+    addressData: {
+      ...state.addressData,
+      [clientId]: data
+    }
     };
   }),
   

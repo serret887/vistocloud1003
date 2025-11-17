@@ -1,5 +1,6 @@
 // PassiveIncomeCard component
 // Displays and manages passive income records (always shown)
+'use client'
 
 import { useState } from 'react';
 import { Plus, Edit2, Trash2, TrendingUp, Check, X } from 'lucide-react';

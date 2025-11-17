@@ -2,6 +2,7 @@
  * RealEstateStep is the main component for the real estate owned information collection step in the application process.
  * It manages the display of real estate records, editing/adding new records, and navigation.
  */
+'use client'
 
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'

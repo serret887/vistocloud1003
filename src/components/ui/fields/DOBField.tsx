@@ -1,3 +1,5 @@
+'use client'
+
 import DateField from './DateField'
 
 function isAdult(dateStr: string): boolean {

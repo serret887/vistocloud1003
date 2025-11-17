@@ -1,3 +1,5 @@
+'use client'
+
 import { useMemo } from 'react'
 import { useApplicationStore } from '@/stores/applicationStore'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

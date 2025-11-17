@@ -2,6 +2,7 @@
  * EmploymentForm is a form component for adding or editing employment records.
  * It includes fields for employer details and employment questions.
  */
+'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -101,7 +102,7 @@ export const EmploymentForm: React.FC<EmploymentFormProps> = ({
   const handleCheckboxChange = (field: 'selfEmployed' | 'ownershipPercentage' | 'relatedParty' | 'currentlyEmployed' | 'hasOfferLetter') => {
     // Calculate the new values first
     const newValue = !formData[field]
-    let updates: Partial<EmploymentFormData> = { [field]: newValue }
+    const updates: Partial<EmploymentFormData> = { [field]: newValue }
     
     // Make currentlyEmployed and hasOfferLetter mutually exclusive
     if (field === 'currentlyEmployed' && newValue) {

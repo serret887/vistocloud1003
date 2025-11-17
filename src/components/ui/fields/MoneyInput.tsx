@@ -1,6 +1,6 @@
 // MoneyInput component
 // A specialized input for currency values with auto-formatting
-
+'use client'
 import React, { useState, useEffect, forwardRef } from 'react';
 import { DollarSign } from 'lucide-react';
 import { Input } from '@/components/ui/input';

@@ -1,3 +1,5 @@
+'use client'
+
 import ClientPersonalInfoCard from '@/components/application/ClientPersonalInfoCard'
 import AddressPresentCard from '@/components/application/AddressPresentCard'
 import AddressMailingCard from '@/components/application/AddressMailingCard'

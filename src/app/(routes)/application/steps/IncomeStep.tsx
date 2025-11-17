@@ -1,5 +1,6 @@
 // Income Step component
 // Displays income cards based on client employment status
+'use client'
 
 import { useApplicationStore } from '@/stores/applicationStore';
 import ClientTabs from './ClientTabs';

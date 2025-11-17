@@ -1,3 +1,5 @@
+'use client'
+
 import ClientTabs from './ClientTabs'
 import AssetsCard from '@/components/application/AssetsCard'
 import AssetsSummary from '@/components/application/AssetsSummary'

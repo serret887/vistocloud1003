@@ -2,6 +2,7 @@
  * EmploymentStep is the main component for the employment information collection step in the application process.
  * It manages the display of employment records, editing/adding new records, and navigation.
  */
+'use client'
 
 import { useCallback, memo, useState } from 'react'
 import { Button } from '@/components/ui/button'

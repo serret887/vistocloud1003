@@ -1,5 +1,6 @@
 // ActiveIncomeCard component
 // Displays income form for a specific employment record
+'use client'
 
 import { useState, useEffect } from 'react';
 import { Briefcase } from 'lucide-react';

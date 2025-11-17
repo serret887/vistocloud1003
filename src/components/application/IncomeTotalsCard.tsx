@@ -1,5 +1,6 @@
 // IncomeTotalsCard component
 // Displays simplified income totals (always shown)
+'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApplicationStore } from '@/stores/applicationStore';
