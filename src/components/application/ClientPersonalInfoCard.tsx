@@ -79,7 +79,7 @@ export default function ClientPersonalInfoCard() {
             Personal Information
           </CardTitle>
           <CardDescription>
-            Provide the applicant's basic personal details and contact information.
+            Provide the applicant&apos;s basic personal details and contact information.
           </CardDescription>
         </CardHeader>
         <CardContent key={activeId} className="space-y-4">
@@ -139,7 +139,7 @@ export default function ClientPersonalInfoCard() {
             <Label className="text-base font-medium">Military Status</Label>
             <div className="flex items-center space-x-2">
               <Switch id="hasMilitaryService" checked={currentData.hasMilitaryService} onCheckedChange={(checked: boolean) => handleFieldBlur('hasMilitaryService', checked)} />
-              <Label htmlFor="hasMilitaryService">Did your client (or client's deceased spouse) ever serve, or are they currently serving, in the United States Armed Forces?</Label>
+              <Label htmlFor="hasMilitaryService">Did your client (or client&apos;s deceased spouse) ever serve, or are they currently serving, in the United States Armed Forces?</Label>
             </div>
           </div>
         </CardContent>

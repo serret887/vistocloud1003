@@ -53,6 +53,7 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({
 
   useEffect(() => {
     if (record) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         address: record.address || {
           address1: '',
@@ -245,7 +246,7 @@ export const RealEstateForm: React.FC<RealEstateFormProps> = ({
                 onChange={() => handleCheckboxChange('currentResidence')}
                 className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
               />
-              <Label htmlFor="currentResidence">Is this property your client's current residence?</Label>
+              <Label htmlFor="currentResidence">Is this property your client&apos;s current residence?</Label>
             </div>
           </div>
 

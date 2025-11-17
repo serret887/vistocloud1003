@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { isAlphaName } from '@/lib/validators'
@@ -8,14 +8,22 @@ import { isAlphaName } from '@/lib/validators'
 export default function NameField({ id, name, label, value, onChange, onBlur, required = true }: { id: string; name?: string; label: string; value?: string; onChange?: (v: string) => void; onBlur?: (v: string) => void; required?: boolean }) {
   const [val, setVal] = useState(value ?? '')
   const [touched, setTouched] = useState(false)
+  const prevValueRef = useRef(value)
   const valid = !val ? !required : isAlphaName(val)
   
   // Sync internal state with external value prop
   useEffect(() => {
-    setVal(value ?? '')
+    if (prevValueRef.current !== value) {
+      prevValueRef.current = value
+      setVal(value ?? '')
+    }
   }, [value])
   
-  useEffect(() => { onChange?.(val) }, [val])
+  useEffect(() => { 
+    if (onChange) {
+      onChange(val)
+    }
+  }, [val, onChange])
   
   const handleBlur = () => {
     setTouched(true)

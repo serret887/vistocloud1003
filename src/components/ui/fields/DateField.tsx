@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
@@ -51,15 +51,21 @@ export default function DateField({
   }
   
   const valid = isValid()
+  const prevValueRef = useRef(value)
   
   // Sync internal state with external value prop
   useEffect(() => {
-    setVal(value ?? '')
+    if (prevValueRef.current !== value) {
+      prevValueRef.current = value
+      setVal(value ?? '')
+    }
   }, [value])
   
   useEffect(() => { 
-    onChange?.(val) 
-  }, [val])
+    if (onChange) {
+      onChange(val)
+    }
+  }, [val, onChange])
   
   const handleBlur = () => {
     setTouched(true)

@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { MoneyInput } from '@/components/ui/fields/MoneyInput';
 import { useApplicationStore } from '@/stores/applicationStore';
 import type { EmploymentRecord } from '@/types/employment';
+import type { ActiveIncomeRecord } from '@/types/income';
 
 interface ActiveIncomeCardProps {
   clientId: string;
@@ -42,6 +43,7 @@ export function ActiveIncomeCard({ clientId, employmentRecord }: ActiveIncomeCar
   // Generate ID after mount, not during render
   useEffect(() => {
     if (!existingRecord && !newRecordId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setNewRecordId(getNextIncomeId(clientId));
     }
   }, [existingRecord, newRecordId, clientId, getNextIncomeId]);
@@ -49,11 +51,12 @@ export function ActiveIncomeCard({ clientId, employmentRecord }: ActiveIncomeCar
   // Load existing data when component mounts or record changes
   useEffect(() => {
     if (existingRecord) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         monthlyAmount: existingRecord.monthlyAmount || 0,
-        bonus: (existingRecord as any).bonus || 0,
-        commissions: (existingRecord as any).commissions || 0,
-        overtime: (existingRecord as any).overtime || 0
+        bonus: ('bonus' in existingRecord ? existingRecord.bonus : undefined) || 0,
+        commissions: ('commissions' in existingRecord ? existingRecord.commissions : undefined) || 0,
+        overtime: ('overtime' in existingRecord ? existingRecord.overtime : undefined) || 0
       });
     }
   }, [existingRecord]);
@@ -74,8 +77,8 @@ export function ActiveIncomeCard({ clientId, employmentRecord }: ActiveIncomeCar
   };
 
   const saveData = (data: typeof formData) => {
-    const incomeData: any = {
-      id: existingRecord?.id || newRecordId,
+    const incomeData: Partial<ActiveIncomeRecord> = {
+      id: existingRecord?.id || newRecordId || '',
       clientId,
       employmentRecordId: employmentRecord.id,
       companyName: employmentRecord.employerName,

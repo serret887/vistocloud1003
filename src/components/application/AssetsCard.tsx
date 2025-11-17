@@ -133,7 +133,7 @@ export default function AssetsCard({ clientId }: Props) {
             ))}
             {assets.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
-                No assets added yet. Click "Add Asset" to get started.
+                No assets added yet. Click &quot;Add Asset&quot; to get started.
               </div>
             )}
           </div>
@@ -171,6 +171,7 @@ function AssetForm({ asset, onSubmit, onCancel, categoryOptions, getTypeOptions 
   // Ensure the current type is valid for the selected category
   useEffect(() => {
     if (!typeOptions.includes(formData.type)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData(prev => ({ ...prev, type: typeOptions[0] }))
     }
   }, [formData.category, typeOptions, formData.type])

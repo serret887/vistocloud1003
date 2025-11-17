@@ -61,6 +61,7 @@ export const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(
       if (!isFocused) {
         setDisplayValue(numValue === 0 ? '' : formatCurrency(numValue));
       }
+       
     }, [value, isFocused]);
 
     // Handle input changes

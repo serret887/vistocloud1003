@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { validateUSPhone, formatUSPhone } from '@/lib/validators'
@@ -9,11 +9,13 @@ export default function PhoneField({ id = 'phone', label = 'Phone', value, onCha
   const [val, setVal] = useState(value ?? '')
   const [touched, setTouched] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
+  const prevValueRef = useRef(value)
   const valid = !val ? !required : validateUSPhone(val)
   
   // Sync internal state with external value prop, but only when not focused
   useEffect(() => {
-    if (!isFocused) {
+    if (!isFocused && prevValueRef.current !== value) {
+      prevValueRef.current = value
       setVal(value ?? '')
     }
   }, [value, isFocused])

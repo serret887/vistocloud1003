@@ -26,7 +26,8 @@ export default function Home() {
   const ownerId = searchParams.get("ownerId") || "";
   const ownerWorkspace = searchParams.get("ownerWorkspace") || "";
   // TODO: Change this when you go to production
-  const canCreate = true || useMemo(() => Boolean(ownerId && ownerWorkspace), [ownerId, ownerWorkspace]);
+  const canCreateMemo = useMemo(() => Boolean(ownerId && ownerWorkspace), [ownerId, ownerWorkspace]);
+  const canCreate = true || canCreateMemo;
 
   const [apps, setApps] = useState<Application[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -41,7 +42,7 @@ export default function Home() {
         : appsRef;
       const snap = await getDocs(q);
       const results: Application[] = snap.docs.map((d) => {
-        const data = d.data() as any;
+        const data = d.data() as { applicationNumber?: string; status?: string; createdAt?: unknown };
         return {
           id: d.id,
           applicationNumber: data.applicationNumber ?? "",
@@ -140,9 +141,9 @@ export default function Home() {
             </thead>
             <tbody>
               {apps.map((a) => {
-                const createdAt: any = (a as any).createdAt;
+                const createdAt = a.createdAt;
                 const createdAtStr =
-                  createdAt && typeof createdAt?.toDate === "function"
+                  createdAt && typeof createdAt === "object" && "toDate" in createdAt && typeof createdAt.toDate === "function"
                     ? createdAt.toDate().toLocaleString()
                     : typeof createdAt === "string"
                       ? createdAt

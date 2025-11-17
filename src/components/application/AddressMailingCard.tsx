@@ -49,12 +49,12 @@ export default function AddressMailingCard() {
     <Card>
       <CardHeader>
         <CardTitle>Mailing Address</CardTitle>
-        <CardDescription>The client's mailing address is their present address.</CardDescription>
+        <CardDescription>The client&apos;s mailing address is their present address.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={currentData.sameAsPresent} onChange={e => updateData({ sameAsPresent: e.target.checked })} />
-          The client's mailing address is their present address.
+          The client&apos;s mailing address is their present address.
         </label>
         <div className="space-y-2">
           <Label>Street Address</Label>

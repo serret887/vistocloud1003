@@ -168,10 +168,15 @@ export default function AddressDialog(
 	};
 
 	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setAddress1(address.address1);
+		 
 		setAddress2(address.address2 || "");
+		 
 		setPostalCode(address.postalCode);
+		 
 		setCity(address.city);
+		 
 		setRegion(address.region);
 	}, [address]);
 

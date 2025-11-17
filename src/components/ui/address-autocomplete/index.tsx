@@ -265,6 +265,7 @@ function AddressAutoCompleteInput(props: CommonProps) {
 
 	// Reset highlighted index when predictions change
 	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setHighlightedIndex(-1);
 	}, [predictions]);
 
@@ -295,7 +296,7 @@ function AddressAutoCompleteInput(props: CommonProps) {
 		setSearchInput("");
 		setSelectedPlaceId(prediction.placeResource);
 		close();
-	}, [setSearchInput, close]);
+	}, [setSearchInput, setSelectedPlaceId, close]);
 
 	const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
 		if (!isOpen) {

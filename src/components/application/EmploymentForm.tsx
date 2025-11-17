@@ -61,6 +61,7 @@ export const EmploymentForm: React.FC<EmploymentFormProps> = ({
 
   useEffect(() => {
     if (record) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         employerName: record.employerName || '',
         phoneNumber: record.phoneNumber || '',

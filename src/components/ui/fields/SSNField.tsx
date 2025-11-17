@@ -6,8 +6,18 @@ import { Label } from '@/components/ui/label'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
+function digitsOnly(v: string) {
+  return v.replace(/\D/g, '').slice(0, 9)
+}
+
+function format(digits: string) {
+  if (digits.length <= 3) return digits
+  if (digits.length <= 5) return `${digits.slice(0,3)}-${digits.slice(3)}`
+  return `${digits.slice(0,3)}-${digits.slice(3,5)}-${digits.slice(5)}`
+}
+
 export default function SSNField({ id = 'ssn', label = 'SSN', value, onChange, onBlur, required = true, "data-testid": dataTestId }: { id?: string; label?: string; value?: string; onChange?: (v: string) => void; onBlur?: (v: string) => void; required?: boolean; "data-testid"?: string }) {
-  const [rawSSN, setRawSSN] = useState(digitsOnly(value ?? ''))
+  const [rawSSN, setRawSSN] = useState(() => digitsOnly(value ?? ''))
   const [isRevealed, setIsRevealed] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
   const [touched, setTouched] = useState(false)
@@ -22,16 +32,6 @@ export default function SSNField({ id = 'ssn', label = 'SSN', value, onChange, o
       onChange?.(formatted)
     }
   }, [rawSSN, value, onChange])
-
-  function digitsOnly(v: string) {
-    return v.replace(/\D/g, '').slice(0, 9)
-  }
-
-  function format(digits: string) {
-    if (digits.length <= 3) return digits
-    if (digits.length <= 5) return `${digits.slice(0,3)}-${digits.slice(3)}`
-    return `${digits.slice(0,3)}-${digits.slice(3,5)}-${digits.slice(5)}`
-  }
 
   function masked(digits: string) {
     if (digits.length < 4) return format(digits)
