@@ -15,7 +15,7 @@ export default function EmailField({ id = 'email', label = 'Email', value, onCha
   useEffect(() => {
     if (prevValueRef.current !== value) {
       prevValueRef.current = value
-      setVal(value ?? '')
+    setVal(value ?? '')
     }
   }, [value])
   

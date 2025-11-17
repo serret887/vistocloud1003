@@ -15,7 +15,7 @@ export default function NameField({ id, name, label, value, onChange, onBlur, re
   useEffect(() => {
     if (prevValueRef.current !== value) {
       prevValueRef.current = value
-      setVal(value ?? '')
+    setVal(value ?? '')
     }
   }, [value])
   

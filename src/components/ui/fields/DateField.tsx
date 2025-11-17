@@ -57,7 +57,7 @@ export default function DateField({
   useEffect(() => {
     if (prevValueRef.current !== value) {
       prevValueRef.current = value
-      setVal(value ?? '')
+    setVal(value ?? '')
     }
   }, [value])
   
