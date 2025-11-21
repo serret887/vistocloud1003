@@ -10,6 +10,8 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { announce } from '@/lib/a11yFocus'
 import { stepIdToPath } from './stepPaths'
 import { useApplicationStore } from '@/stores/applicationStore'
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { ApplicationSidebar } from '@/components/application/ApplicationSidebar'
 
 const stepDefinitions: ApplicationStepDefinition[] = [
   { id: 'client-info', title: 'Client Information', description: 'Personal details', estimatedTime: '2 min', fields: [] },
@@ -108,7 +110,9 @@ export default function ApplicationForm({ children }: { children: React.ReactNod
   function goToStep(stepId: ApplicationStepId | undefined) {
     if (!stepId) return
     if (!isStepEnabled(stepId)) return
-    router.push(stepIdToPath[stepId])
+    const appId = searchParams.get('appId')
+    const url = appId ? `${stepIdToPath[stepId]}?appId=${appId}` : stepIdToPath[stepId]
+    router.push(url)
     announce(`Navigated to ${stepDefinitions.find(s => s.id === stepId)?.title ?? 'next step'}`)
   }
 
@@ -136,14 +140,48 @@ export default function ApplicationForm({ children }: { children: React.ReactNod
   const prevId = getPrev()
 
   return (
-      <div className="flex flex-col h-full">
-        <div className="flex-1 p-4">
-          {children}
-        </div>
-        <footer className="p-4 bg-background border-t flex gap-2 justify-end">
-          <button onClick={() => goToStep(prevId)} disabled={!prevId}>Previous</button>
-          <button onClick={tryContinue}>Next</button>
-           </footer>
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "25%",
+          "--sidebar-width-icon": "3rem",
+        } as React.CSSProperties
+      }
+    >
+      <ApplicationSidebar stepStates={states} overallProgress={progress.overallPercentage} />
+      <div className="flex h-screen w-full">
+        {/* Main Content Area - 50% (middle) */}
+        <main className="flex flex-col w-[50%] ml-[25%]">
+          <div className="flex items-center gap-3 p-5 border-b bg-background">
+            <SidebarTrigger className="h-9 w-9" />
+            <h1 className="text-xl font-semibold">
+              {stepDefinitions.find(s => s.id === currentStepId)?.title ?? 'Application'}
+            </h1>
+          </div>
+          <div className="flex-1 p-6 overflow-auto bg-background">
+            {children}
+          </div>
+          <footer className="p-5 bg-background border-t flex gap-3 justify-end">
+            <button 
+              onClick={() => goToStep(prevId)} 
+              disabled={!prevId}
+              className="px-6 py-2.5 text-base rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Previous
+            </button>
+            <button 
+              onClick={tryContinue}
+              className="px-6 py-2.5 text-base rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              Next
+            </button>
+          </footer>
+        </main>
+        {/* Right Side - 25% (reserved for future use) */}
+        <aside className="w-[25%] border-l border-border bg-background">
+          {/* Reserved for future content */}
+        </aside>
       </div>
+    </SidebarProvider>
   )
 }

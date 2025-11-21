@@ -11,13 +11,10 @@ import {
   serverTimestamp,
   where,
 } from "firebase/firestore";
-
-type Application = {
-  id: string;
-  applicationNumber: string;
-  status: string;
-  createdAt?: unknown;
-};
+import { DataTable } from "@/components/data-table";
+import { applicationsColumns } from "@/components/ApplicationsTableColumns";
+import { Button } from "@/components/ui/button";
+import type { Application } from "@/types/application";
 
 export default function Home() {
   const searchParams = useSearchParams();
@@ -42,12 +39,17 @@ export default function Home() {
         : appsRef;
       const snap = await getDocs(q);
       const results: Application[] = snap.docs.map((d) => {
-        const data = d.data() as { applicationNumber?: string; status?: string; createdAt?: unknown };
+        const data = d.data();
         return {
           id: d.id,
           applicationNumber: data.applicationNumber ?? "",
-          status: data.status ?? "",
+          status: data.status ?? "draft",
           createdAt: data.createdAt,
+          ownerId: data.ownerId ?? "",
+          ownerWorkspace: data.ownerWorkspace ?? "",
+          currentStepId: data.currentStepId,
+          overallProgress: data.overallProgress,
+          updatedAt: data.updatedAt,
         };
       });
       setApps(results);
@@ -106,18 +108,21 @@ export default function Home() {
     }
   }, [canCreate, ownerId, ownerWorkspace, router]);
 
+  const handleRowClick = useCallback((application: Application) => {
+    router.push(`/application?appId=${application.id}`);
+  }, [router]);
+
   return (
-    <div className="max-w-5xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold">Applications</h1>
         <div className="flex items-center gap-3">
-          <button
+          <Button
             onClick={onCreate}
             disabled={!canCreate || creating}
-            className="px-3 py-2 rounded bg-black text-white disabled:opacity-50"
           >
             {creating ? "Creating…" : "Create application"}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -128,44 +133,17 @@ export default function Home() {
       ) : null}
 
       {loading ? (
-        <div>Loading…</div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
-            <thead>
-              <tr>
-                <th className="px-2 py-1">Application Number</th>
-                <th className="px-2 py-1">Created At</th>
-                <th className="px-2 py-1">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {apps.map((a) => {
-                const createdAt = a.createdAt;
-                const createdAtStr =
-                  createdAt && typeof createdAt === "object" && "toDate" in createdAt && typeof createdAt.toDate === "function"
-                    ? createdAt.toDate().toLocaleString()
-                    : typeof createdAt === "string"
-                      ? createdAt
-                      : "";
-                return (
-                  <tr key={a.id} className="border-t">
-                    <td className="px-2 py-1">{a.applicationNumber}</td>
-                    <td className="px-2 py-1">{createdAtStr}</td>
-                    <td className="px-2 py-1">{a.status}</td>
-                  </tr>
-                );
-              })}
-              {apps.length === 0 && (
-                <tr>
-                  <td className="px-2 py-3" colSpan={3}>
-                    No applications yet
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-muted-foreground">Loading applications...</div>
         </div>
+      ) : (
+        <DataTable
+          columns={applicationsColumns}
+          data={apps}
+          searchKey="applicationNumber"
+          searchPlaceholder="Search by application number..."
+          onRowClick={handleRowClick}
+        />
       )}
     </div>
   );
