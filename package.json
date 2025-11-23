@@ -11,7 +11,8 @@
     "emulators:start": "firebase emulators:start --only firestore,ui",
     "emulators:export": "firebase emulators:export ./emulator-data",
     "emulators:import": "firebase emulators:start --import=./emulator-data --export-on-exit --only firestore,ui",
-    "dev:emulator": "concurrently \"npm run emulators:start\" \"npm run dev\""
+    "dev:emulator": "concurrently \"npm run emulators:start\" \"npm run dev\"",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.3",
@@ -40,6 +41,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@playwright/test": "^1.48.2",
     "concurrently": "^9.2.1",
     "eslint": "^9",
     "eslint-config-next": "16.0.1",

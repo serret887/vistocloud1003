@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useApplicationStore } from '@/stores/applicationStore'
 import { FileText, MessageSquare, ChevronDown, ChevronUp, MoreVertical, File, X } from 'lucide-react'
 import ClientTabs from './ClientTabs'
-import DocumentUploadModal from '@/components/DocumentUploadModal'
+import DocumentUploadModal from '@/components/application/DocumentUploadModal'
 import type { Condition, ConditionDocument } from '@/types/conditions'
 import { generateDocumentId } from '@/lib/idGenerator'
 

@@ -1,4 +1,4 @@
-import EmploymentStep from '../steps/EmploymentStep'
+import EmploymentStep from '@/components/steps/EmploymentStep'
 
 export default function EmploymentPage() {
   return <EmploymentStep />

@@ -1,4 +1,4 @@
-import AssetStep from '../steps/AssetStep'
+import AssetStep from '@/components/steps/AssetStep'
 
 export default function AssetsPage() {
   return <AssetStep />

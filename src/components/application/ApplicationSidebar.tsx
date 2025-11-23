@@ -2,7 +2,7 @@
 
 import { useMemo } from "react"
 import Link from "next/link"
-import { usePathname, useSearchParams } from "next/navigation"
+import { usePathname, useParams } from "next/navigation"
 import {
   User,
   Briefcase,
@@ -26,20 +26,13 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar"
-import { cn } from "@/lib/utils"
-import type { ApplicationStepDefinition, ApplicationStepState, ApplicationStepId } from "@/app/models/application"
-import { stepIdToPath } from "@/app/(routes)/application/stepPaths"
-
-const stepDefinitions: ApplicationStepDefinition[] = [
-  { id: 'client-info', title: 'Client Information', description: 'Personal details', estimatedTime: '2 min', fields: [] },
-  { id: 'employment', title: 'Employment', description: 'Employment', estimatedTime: '5 min', fields: [] },
-  { id: 'income', title: 'Income', description: 'Financial info', estimatedTime: '4 min', fields: [] },
-  { id: 'assets', title: 'Assets', description: 'Assets Owned', estimatedTime: '6 min', fields: [] },
-  { id: 'real-estate', title: 'Real Estate Owned', description: 'Properties', estimatedTime: '4 min', fields: [] },
-  { id: 'documents', title: 'Documentation', description: 'Required documents', estimatedTime: '10 min', fields: [] },
-  { id: 'dictate', title: 'Voice Dictation', description: 'Fill by voice', estimatedTime: '5 min', fields: [] },
-  { id: 'review', title: 'Review & Submit', description: 'Review all information', estimatedTime: '3 min', fields: [] },
-]
+import type { ApplicationStepState, ApplicationStepId } from "@/app/models/application"
+import {
+  getStepIdFromPath,
+  getStepPath,
+  getRemainingEstimatedMinutes,
+  stepDefinitions,
+} from "@/lib/applicationSteps"
 
 const stepIcons: Record<ApplicationStepId, typeof User> = {
   'client-info': User,
@@ -59,23 +52,22 @@ interface ApplicationSidebarProps {
 
 export function ApplicationSidebar({ stepStates, overallProgress }: ApplicationSidebarProps) {
   const pathname = usePathname()
-  const searchParams = useSearchParams()
+  const params = useParams<{ appId?: string }>()
 
   const currentStepId = useMemo(() => {
-    const match = Object.entries(stepIdToPath).find(([, path]) => pathname.startsWith(path))
-    return (match?.[0] as ApplicationStepId) ?? 'client-info'
+    return getStepIdFromPath(pathname)
   }, [pathname])
 
-  const appId = searchParams.get('appId')
+  const appId = params?.appId ?? null
 
   const getStepStatus = (stepId: ApplicationStepId) => {
-    const state = stepStates.find(s => s.id === stepId)
-    if (!state) return 'pending'
-    
-    if (state.completionPercentage === 100) return 'completed'
-    if (state.completionPercentage > 0) return 'in-progress'
-    if (state.errorCount > 0) return 'error'
-    return 'pending'
+      const state = stepStates.find(s => s.id === stepId)
+      if (!state) return 'pending'
+      
+      if (state.errorCount > 0) return 'error'
+      if (state.completionPercentage === 100) return 'completed'
+      if (state.completionPercentage > 0) return 'in-progress'
+      return 'pending'
   }
 
   const getStepIcon = (stepId: ApplicationStepId) => {
@@ -93,12 +85,12 @@ export function ApplicationSidebar({ stepStates, overallProgress }: ApplicationS
     if (status === 'in-progress') {
       return <Circle className="h-6 w-6 text-blue-600 fill-blue-600 shrink-0" />
     }
-    return null
+  return null
   }
 
   const getStepUrl = (stepId: ApplicationStepId) => {
-    const basePath = stepIdToPath[stepId]
-    return appId ? `${basePath}?appId=${appId}` : basePath
+    if (!appId) return "#"
+    return getStepPath(appId, stepId)
   }
 
   return (
@@ -138,7 +130,17 @@ export function ApplicationSidebar({ stepStates, overallProgress }: ApplicationS
                       size="lg"
                       className="gap-4 py-4"
                     >
-                      <Link href={getStepUrl(step.id)} className="flex items-center gap-4 w-full">
+                      <Link
+                        href={getStepUrl(step.id)}
+                        className="flex items-center gap-4 w-full"
+                        aria-disabled={!appId}
+                        onClick={(event) => {
+                          if (!appId) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                          }
+                        }}
+                      >
                         {/* Step icon on the left - always visible */}
                         {getStepIcon(step.id)}
                         {/* Text content in the middle */}
@@ -172,12 +174,7 @@ export function ApplicationSidebar({ stepStates, overallProgress }: ApplicationS
         <div className="text-base text-muted-foreground">
           <p className="font-medium">Estimated time remaining</p>
           <p className="font-bold mt-2 text-lg">
-            {stepDefinitions
-              .slice(stepDefinitions.findIndex(s => s.id === currentStepId))
-              .reduce((acc, step) => {
-                const timeMatch = step.estimatedTime.match(/(\d+)/)
-                return acc + (timeMatch ? parseInt(timeMatch[1], 10) : 0)
-              }, 0)} min
+            {getRemainingEstimatedMinutes(currentStepId)} min
           </p>
         </div>
       </SidebarFooter>

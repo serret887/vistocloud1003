@@ -1,4 +1,4 @@
-import DictateStep from '../steps/DictateStep'
+import DictateStep from '@/components/steps/DictateStep'
 
 export default function DictatePage() {
   return <DictateStep />

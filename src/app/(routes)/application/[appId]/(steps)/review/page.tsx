@@ -1,4 +1,4 @@
-import ReviewStep from '../steps/ReviewStep'
+import ReviewStep from '@/components/steps/ReviewStep'
 
 export default function ReviewPage() {
   return <ReviewStep />

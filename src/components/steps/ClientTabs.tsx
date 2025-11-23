@@ -8,12 +8,17 @@ import type { ApplicationState } from '@/stores/applicationStore';
 
 
 export default function ClientTabs() {
-  // Replace local state with store
-  const tabs = Object.entries(useApplicationStore((state: ApplicationState) => state.clients)).map(([id, data]) => ({
+  const clients = useApplicationStore((state: ApplicationState) => state.clients);
+  const tabs = Object.entries(clients).map(([id, data], index) => ({
     id,
-    name: data.firstName || `Client ${Object.keys(useApplicationStore.getState().clients).indexOf(id) + 1}`,
-    complete: isAlphaName(data.firstName) && isAlphaName(data.lastName) && validateEmail(data.email) && validatePhoneLoose(data.phone) && (data.ssn.replace(/\D/g, '').length === 9) && (new Date(data.dob) <= new Date(new Date().getFullYear() - 18, new Date().getMonth(), new Date().getDate()))
-    // Use validation logic here or from store
+    name: data.firstName || `Client ${index + 1}`,
+    complete:
+      isAlphaName(data.firstName) &&
+      isAlphaName(data.lastName) &&
+      validateEmail(data.email) &&
+      validatePhoneLoose(data.phone) &&
+      data.ssn.replace(/\D/g, '').length === 9 &&
+      new Date(data.dob) <= new Date(new Date().getFullYear() - 18, new Date().getMonth(), new Date().getDate()),
   }));
   // Use store's activeClientId and setActiveClient
   const activeId = useApplicationStore((state: ApplicationState) => state.activeClientId);

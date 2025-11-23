@@ -85,12 +85,18 @@ export async function deleteEmploymentFromFirestore(
 }
 
 // Helper to save active income
+const activeIncomeCollectionPath = "incomeActive"
+const passiveIncomeCollectionPath = "incomePassive"
+const incomeTotalsCollectionPath = "incomeTotals"
+
+const appDoc = (applicationId: string) => doc(db, "applications", applicationId)
+
 export async function saveActiveIncomeToFirestore(
   applicationId: string,
   incomeId: string,
   incomeData: ActiveIncomeRecord
 ): Promise<void> {
-  const incomeRef = doc(db, 'applications', applicationId, 'income', 'active', incomeId)
+  const incomeRef = doc(db, 'applications', applicationId, activeIncomeCollectionPath, incomeId)
   await setDoc(incomeRef, {
     ...incomeData,
     updatedAt: serverTimestamp(),
@@ -102,7 +108,7 @@ export async function deleteActiveIncomeFromFirestore(
   applicationId: string,
   incomeId: string
 ): Promise<void> {
-  const incomeRef = doc(db, 'applications', applicationId, 'income', 'active', incomeId)
+  const incomeRef = doc(db, 'applications', applicationId, activeIncomeCollectionPath, incomeId)
   await deleteDoc(incomeRef)
 }
 
@@ -112,7 +118,7 @@ export async function savePassiveIncomeToFirestore(
   incomeId: string,
   incomeData: PassiveIncomeRecord
 ): Promise<void> {
-  const incomeRef = doc(db, 'applications', applicationId, 'income', 'passive', incomeId)
+  const incomeRef = doc(db, 'applications', applicationId, passiveIncomeCollectionPath, incomeId)
   await setDoc(incomeRef, {
     ...incomeData,
     updatedAt: serverTimestamp(),
@@ -124,7 +130,7 @@ export async function deletePassiveIncomeFromFirestore(
   applicationId: string,
   incomeId: string
 ): Promise<void> {
-  const incomeRef = doc(db, 'applications', applicationId, 'income', 'passive', incomeId)
+  const incomeRef = doc(db, 'applications', applicationId, passiveIncomeCollectionPath, incomeId)
   await deleteDoc(incomeRef)
 }
 
@@ -134,7 +140,7 @@ export async function saveIncomeTotalToFirestore(
   clientId: string,
   totalData: IncomeTotal
 ): Promise<void> {
-  const totalRef = doc(db, 'applications', applicationId, 'income', 'totals', clientId)
+  const totalRef = doc(db, 'applications', applicationId, incomeTotalsCollectionPath, clientId)
   await setDoc(totalRef, {
     ...totalData,
     updatedAt: serverTimestamp(),
@@ -246,18 +252,20 @@ export async function loadApplicationDataFromFirestore(
   chatHistory: ChatMessage[];
 }> {
   // Load all subcollections in parallel
+  const applicationRef = appDoc(applicationId)
+
   const [clientsSnap, employmentSnap, activeIncomeSnap, passiveIncomeSnap, incomeTotalsSnap, 
          assetsSnap, realEstateSnap, addressesSnap, conditionsSnap, chatHistorySnap] = await Promise.all([
-    getDocs(collection(db, 'applications', applicationId, 'clients')),
-    getDocs(collection(db, 'applications', applicationId, 'employment')),
-    getDocs(collection(db, 'applications', applicationId, 'income', 'active')),
-    getDocs(collection(db, 'applications', applicationId, 'income', 'passive')),
-    getDocs(collection(db, 'applications', applicationId, 'income', 'totals')),
-    getDocs(collection(db, 'applications', applicationId, 'assets')),
-    getDocs(collection(db, 'applications', applicationId, 'realEstate')),
-    getDocs(collection(db, 'applications', applicationId, 'addresses')),
-    getDocs(collection(db, 'applications', applicationId, 'conditions')),
-    getDocs(collection(db, 'applications', applicationId, 'chatHistory')),
+    getDocs(collection(applicationRef, 'clients')),
+    getDocs(collection(applicationRef, 'employment')),
+    getDocs(collection(applicationRef, activeIncomeCollectionPath)),
+    getDocs(collection(applicationRef, passiveIncomeCollectionPath)),
+    getDocs(collection(applicationRef, incomeTotalsCollectionPath)),
+    getDocs(collection(applicationRef, 'assets')),
+    getDocs(collection(applicationRef, 'realEstate')),
+    getDocs(collection(applicationRef, 'addresses')),
+    getDocs(collection(applicationRef, 'conditions')),
+    getDocs(collection(applicationRef, 'chatHistory')),
   ])
   
   // Transform clients

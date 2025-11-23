@@ -3,7 +3,8 @@ import { ArrowUpDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
-import type { Application } from '@/types/application'
+import type { Application, ApplicationStatus } from '@/types/application'
+import { defaultStepId, getStepPath } from '@/lib/applicationSteps'
 
 export const applicationsColumns: ColumnDef<Application>[] = [
   {
@@ -24,7 +25,10 @@ export const applicationsColumns: ColumnDef<Application>[] = [
       const application = row.original
       return (
         <Link 
-          href={`/application?appId=${application.id}`}
+          href={getStepPath(
+            application.id,
+            application.currentStepId ?? defaultStepId
+          )}
           className="font-medium text-blue-600 hover:text-blue-800 underline"
           onClick={(e) => e.stopPropagation()}
         >
@@ -48,8 +52,8 @@ export const applicationsColumns: ColumnDef<Application>[] = [
       )
     },
     cell: ({ row }) => {
-      const status = row.getValue('status') as string
-      const statusColors: Record<string, string> = {
+      const status = row.getValue('status') as ApplicationStatus | undefined
+      const statusColors: Partial<Record<ApplicationStatus, string>> = {
         'draft': 'bg-gray-100 text-gray-800',
         'in-progress': 'bg-blue-100 text-blue-800',
         'completed': 'bg-green-100 text-green-800',
@@ -57,11 +61,11 @@ export const applicationsColumns: ColumnDef<Application>[] = [
         'declined': 'bg-red-100 text-red-800',
       }
       
-      const colorClass = statusColors[status] || 'bg-gray-100 text-gray-800'
+      const colorClass = (status && statusColors[status]) || 'bg-gray-100 text-gray-800'
       
       return (
         <Badge className={colorClass}>
-          {status}
+          {status ?? 'draft'}
         </Badge>
       )
     },

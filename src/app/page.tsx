@@ -4,17 +4,19 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
 import {
-  addDoc,
   collection,
+  doc,
   getDocs,
   query,
   serverTimestamp,
+  setDoc,
   where,
 } from "firebase/firestore";
 import { DataTable } from "@/components/data-table";
 import { applicationsColumns } from "@/components/ApplicationsTableColumns";
 import { Button } from "@/components/ui/button";
 import type { Application } from "@/types/application";
+import { defaultStepId, getStepPath } from "@/lib/applicationSteps";
 
 export default function Home() {
   const searchParams = useSearchParams();
@@ -73,7 +75,8 @@ export default function Home() {
     
     try {
       const appsRef = collection(db, "applications");
-      const applicationNumber = `APP-${Date.now()}`;
+      const docRef = doc(appsRef);
+      const applicationNumber = docRef.id;
       
       console.log('Adding document to Firestore...', {
         applicationNumber,
@@ -81,12 +84,12 @@ export default function Home() {
         ownerWorkspace
       });
       
-      const docRef = await addDoc(appsRef, {
+      await setDoc(docRef, {
         applicationNumber,
         status: "draft",
-        ownerId: ownerId || "default-owner", // Fallback if empty
-        ownerWorkspace: ownerWorkspace || "default-workspace", // Fallback if empty
-        currentStepId: "client-info",
+        ownerId,
+        ownerWorkspace,
+        currentStepId: defaultStepId,
         overallProgress: 0,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -98,7 +101,7 @@ export default function Home() {
       });
       
       // Navigate to step form for the created application
-      router.push(`/application?appId=${docRef.id}`);
+      router.push(getStepPath(docRef.id, defaultStepId));
     } catch (error) {
       console.error('Failed to create application:', error);
       // Optionally show user-friendly error message
@@ -109,9 +112,11 @@ export default function Home() {
   }, [canCreate, ownerId, ownerWorkspace, router]);
 
   const handleRowClick = useCallback((application: Application) => {
-    router.push(`/application?appId=${application.id}`);
+    const targetStep = application.currentStepId ?? defaultStepId;
+    router.push(getStepPath(application.id, targetStep));
   }, [router]);
 
+  console.log('canCreate', canCreate);
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="flex items-center justify-between mb-4">
@@ -125,13 +130,6 @@ export default function Home() {
           </Button>
         </div>
       </div>
-
-      {!ownerId || !ownerWorkspace ? (
-        <div className="mb-3 text-sm text-gray-600">
-          Missing owner context. Provide ownerId and ownerWorkspace in the URL.
-        </div>
-      ) : null}
-
       {loading ? (
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">Loading applications...</div>

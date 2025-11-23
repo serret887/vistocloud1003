@@ -1,46 +1,26 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useAutoSave } from '../../hooks/useAutoSave'
 import { useApplicationProgress } from '../../hooks/useApplicationProgress'
 import { useStepNavigation } from '../../hooks/useStepNavigation'
 import { useStepCompletion } from '../../hooks/useStepCompletion'
-import type { ApplicationStepDefinition, ApplicationStepState, ApplicationStepId } from '../../models/application'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import type { ApplicationStepState, ApplicationStepId } from '../../models/application'
+import { usePathname, useRouter, useParams } from 'next/navigation'
 import { announce } from '@/lib/a11yFocus'
-import { stepIdToPath } from './stepPaths'
+import { getStepPath, getStepIdFromPath, stepDefinitions } from '@/lib/applicationSteps'
 import { useApplicationStore } from '@/stores/applicationStore'
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { ApplicationSidebar } from '@/components/application/ApplicationSidebar'
 
-const stepDefinitions: ApplicationStepDefinition[] = [
-  { id: 'client-info', title: 'Client Information', description: 'Personal details', estimatedTime: '2 min', fields: [] },
-  { id: 'employment', title: 'Employment', description: 'Employment', estimatedTime: '5 min', fields: [] },
-  { id: 'income', title: 'Income', description: 'Financial info', estimatedTime: '4 min', fields: [] },
-  { id: 'assets', title: 'Assets', description: 'Assets Owned', estimatedTime: '6 min', fields: [] },
-  { id: 'real-estate', title: 'Real Estate Owned', description: 'Properties', estimatedTime: '4 min', fields: [] },
-  { id: 'documents', title: 'Documentation', description: 'Required documents', estimatedTime: '10 min', fields: [] },
-  { id: 'dictate', title: 'Voice Dictation', description: 'Fill by voice', estimatedTime: '5 min', fields: [] },
-  { id: 'review', title: 'Review & Submit', description: 'Review all information', estimatedTime: '3 min', fields: [] },
-]
-
-  // Time weights for progress calculation (in minutes)
-  // const stepTimeWeights: Record<string, number> = {
-  //   'client-info': 2,
-  //   'employment': 5,
-  //   'income': 4,
-  //   'assets': 6,
-  //   'real-estate': 4,
-  //   'documents': 10,
-  //   'review': 3
-  // }
-
 export default function ApplicationForm({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
-  const searchParams = useSearchParams()
+  const params = useParams<{ appId?: string }>()
+  const appId = params?.appId ?? null
   const { getStepCompletion } = useStepCompletion()
-  const { loadApplicationFromFirestore, setCurrentApplicationId, currentApplicationId } = useApplicationStore()
+  const loadApplicationFromFirestore = useApplicationStore(state => state.loadApplicationFromFirestore)
+  const setCurrentApplicationId = useApplicationStore(state => state.setCurrentApplicationId)
+  const currentApplicationId = useApplicationStore(state => state.currentApplicationId)
 
   const [states, setStates] = useState<ApplicationStepState[]>(
     stepDefinitions.map(s => ({ id: s.id, status: 'pending', completionPercentage: 0, errorCount: 0 }))
@@ -48,7 +28,6 @@ export default function ApplicationForm({ children }: { children: React.ReactNod
 
   // Load application data from Firestore when appId is present in URL
   useEffect(() => {
-    const appId = searchParams.get('appId')
     if (appId && appId !== currentApplicationId) {
       loadApplicationFromFirestore(appId).catch(err => {
         console.error('Failed to load application:', err)
@@ -57,38 +36,34 @@ export default function ApplicationForm({ children }: { children: React.ReactNod
       // Clear application ID if no appId in URL
       setCurrentApplicationId(null)
     }
-  }, [searchParams, currentApplicationId, loadApplicationFromFirestore, setCurrentApplicationId])
+  }, [appId, currentApplicationId, loadApplicationFromFirestore, setCurrentApplicationId])
 
   const currentStepId: ApplicationStepId = useMemo(() => {
-    const match = Object.entries(stepIdToPath).find(([, path]) => pathname.startsWith(path))
-    return (match?.[0] as ApplicationStepId) ?? 'client-info'
+    return getStepIdFromPath(pathname)
   }, [pathname])
 
   const progress = useApplicationProgress(stepDefinitions, states)
   const { isStepEnabled, getNext, getPrev } = useStepNavigation(stepDefinitions, states, currentStepId)
 
-  const data = useMemo(() => ({ states }), [states])
-
-
-  // Update progress based on form completion - make it reactive to store changes
+  // Update progress when the store changes instead of polling
   useEffect(() => {
     const updateProgress = () => {
       setStates(prevStates => {
         const newStates = prevStates.map(state => {
           const completion = getStepCompletion(state.id)
-          // Only update if the completion percentage actually changed
-          if (state.completionPercentage !== completion.completionPercentage || 
-              state.errorCount !== completion.errorCount) {
+          if (
+            state.completionPercentage !== completion.completionPercentage ||
+            state.errorCount !== completion.errorCount
+          ) {
             return {
               ...state,
               completionPercentage: completion.completionPercentage,
-              errorCount: completion.errorCount
+              errorCount: completion.errorCount,
             }
           }
           return state
         })
         
-        // Only update if something actually changed
         const hasChanges = newStates.some((newState, index) => 
           newState.completionPercentage !== prevStates[index].completionPercentage ||
           newState.errorCount !== prevStates[index].errorCount
@@ -98,20 +73,15 @@ export default function ApplicationForm({ children }: { children: React.ReactNod
       })
     }
 
-    // Update progress immediately
     updateProgress()
-
-    // Set up interval to update progress more frequently for real-time updates
-    const interval = setInterval(updateProgress, 1000) // Check every second
-
-    return () => clearInterval(interval)
-  }, [getStepCompletion]) // Add getStepCompletion dependency to make it reactive
+    const unsubscribe = useApplicationStore.subscribe(updateProgress)
+    return () => unsubscribe()
+  }, [getStepCompletion])
 
   function goToStep(stepId: ApplicationStepId | undefined) {
-    if (!stepId) return
+    if (!stepId || !appId) return
     if (!isStepEnabled(stepId)) return
-    const appId = searchParams.get('appId')
-    const url = appId ? `${stepIdToPath[stepId]}?appId=${appId}` : stepIdToPath[stepId]
+    const url = getStepPath(appId, stepId)
     router.push(url)
     announce(`Navigated to ${stepDefinitions.find(s => s.id === stepId)?.title ?? 'next step'}`)
   }
@@ -160,7 +130,7 @@ export default function ApplicationForm({ children }: { children: React.ReactNod
           </div>
           <div className="flex-1 p-6 overflow-auto bg-background">
             {children}
-          </div>
+        </div>
           <footer className="p-5 bg-background border-t flex gap-3 justify-end">
             <button 
               onClick={() => goToStep(prevId)} 
@@ -175,7 +145,7 @@ export default function ApplicationForm({ children }: { children: React.ReactNod
             >
               Next
             </button>
-          </footer>
+           </footer>
         </main>
         {/* Right Side - 25% (reserved for future use) */}
         <aside className="w-[25%] border-l border-border bg-background">

@@ -78,7 +78,7 @@ export default function AddressAutoComplete(props: AddressAutoCompleteProps) {
 
             if (!isGooglePlacesAvailable()) {
                 // Fallback: create a simple prediction for manual resolution
-                console.warn("VITE_GOOGLE_MAPS_API_KEY is not set; using basic address parsing");
+                console.warn("NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is not set; using basic address parsing");
                 const prediction: PlaceSuggestion = {
                     text: input,
                     placeResource: input // Use the input as the resource for resolution

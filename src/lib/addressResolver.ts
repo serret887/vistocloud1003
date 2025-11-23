@@ -21,8 +21,11 @@ export interface AddressType {
  * @param addressString - The address string from voice input (e.g., "4027 Pierce Street, Hollywood")
  * @returns Complete address data with all fields populated
  */
+const getGoogleMapsApiKey = () =>
+  process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? process.env.GOOGLE_MAPS_API_KEY
+
 export async function resolveAddress(addressString: string): Promise<AddressType | null> {
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
+  const apiKey = getGoogleMapsApiKey();
   // Lazy import avoided: keep bundle size minimal and tree-shakeable
   // Small helper to log usage without blocking UX
   let didLogAutocomplete = false;
@@ -34,7 +37,7 @@ export async function resolveAddress(addressString: string): Promise<AddressType
   
   // Fallback: If no API key, parse the address string manually
   if (!apiKey) {
-    console.warn('VITE_GOOGLE_MAPS_API_KEY not set; using basic address parsing');
+    console.warn('NEXT_PUBLIC_GOOGLE_MAPS_API_KEY not set; using basic address parsing');
     return parseAddressManually(input);
   }
   
@@ -186,10 +189,10 @@ export async function getPlaceSuggestions(
   input: string, 
   sessionToken: string
 ): Promise<PlaceSuggestion[]> {
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
+  const apiKey = getGoogleMapsApiKey();
   
   if (!apiKey) {
-    console.warn('VITE_GOOGLE_MAPS_API_KEY not set; autocomplete disabled');
+    console.warn('NEXT_PUBLIC_GOOGLE_MAPS_API_KEY not set; autocomplete disabled');
     return [];
   }
   
@@ -237,10 +240,10 @@ export async function getPlaceSuggestions(
  * @returns Complete address data or null if failed
  */
 export async function getPlaceDetails(placeId: string): Promise<AddressType | null> {
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
+  const apiKey = getGoogleMapsApiKey();
   
   if (!apiKey) {
-    console.warn('VITE_GOOGLE_MAPS_API_KEY not set; cannot fetch place details');
+    console.warn('NEXT_PUBLIC_GOOGLE_MAPS_API_KEY not set; cannot fetch place details');
     return null;
   }
   
@@ -307,7 +310,7 @@ export async function getPlaceDetails(placeId: string): Promise<AddressType | nu
  * @returns true if API key is set, false otherwise
  */
 export function isGooglePlacesAvailable(): boolean {
-  return !!import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  return Boolean(getGoogleMapsApiKey());
 }
 
 /**

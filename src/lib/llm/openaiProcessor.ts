@@ -13,10 +13,9 @@ export async function processWithOpenAI(
   currentState: LLMApplicationState,
   conversationHistory: any[] = []
 ): Promise<LLMResponse> {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY
-  
+  const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) {
-    throw new Error('OpenAI API key not found')
+    throw new Error('OPENAI_API_KEY environment variable not set')
   }
   
   try {
