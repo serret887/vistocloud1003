@@ -22,7 +22,7 @@ export interface AddressType {
  * @returns Complete address data with all fields populated
  */
 const getGoogleMapsApiKey = () =>
-  process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? process.env.GOOGLE_MAPS_API_KEY
+  process.env.GOOGLE_MAPS_API_KEY ?? process.env.GOOGLE_MAPS_API_KEY
 
 export async function resolveAddress(addressString: string): Promise<AddressType | null> {
   const apiKey = getGoogleMapsApiKey();
@@ -37,7 +37,7 @@ export async function resolveAddress(addressString: string): Promise<AddressType
   
   // Fallback: If no API key, parse the address string manually
   if (!apiKey) {
-    console.warn('NEXT_PUBLIC_GOOGLE_MAPS_API_KEY not set; using basic address parsing');
+    console.warn('GOOGLE_MAPS_API_KEY not set; using basic address parsing');
     return parseAddressManually(input);
   }
   
@@ -192,7 +192,7 @@ export async function getPlaceSuggestions(
   const apiKey = getGoogleMapsApiKey();
   
   if (!apiKey) {
-    console.warn('NEXT_PUBLIC_GOOGLE_MAPS_API_KEY not set; autocomplete disabled');
+    console.warn('GOOGLE_MAPS_API_KEY not set; autocomplete disabled');
     return [];
   }
   
@@ -243,7 +243,7 @@ export async function getPlaceDetails(placeId: string): Promise<AddressType | nu
   const apiKey = getGoogleMapsApiKey();
   
   if (!apiKey) {
-    console.warn('NEXT_PUBLIC_GOOGLE_MAPS_API_KEY not set; cannot fetch place details');
+    console.warn('GOOGLE_MAPS_API_KEY not set; cannot fetch place details');
     return null;
   }
   

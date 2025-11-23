@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { User, CreditCard, Calendar } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useMemo, useCallback, useState } from 'react'
 import NameField from '@/components/ui/fields/NameField'
 import EmailField from '@/components/ui/fields/EmailField'
 import PhoneField from '@/components/ui/fields/PhoneField'
@@ -26,20 +26,72 @@ type ClientData = {
   hasMilitaryService: boolean
 }
 
+// Stable fallback object to avoid creating new references
+const DEFAULT_CLIENT_DATA: ClientData = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  ssn: '',
+  dob: '',
+  citizenship: '',
+  maritalStatus: '',
+  hasMilitaryService: false,
+}
+
 export default function ClientPersonalInfoCard() {
   const activeId = useApplicationStore((state) => state.activeClientId);
-  const currentData = useApplicationStore((state) => state.clients[activeId] || { firstName: '', lastName: '', email: '', phone: '', ssn: '', dob: '', citizenship: '', maritalStatus: '', hasMilitaryService: false, });
+  const client = useApplicationStore((state) => state.clients[activeId]);
+  
+  // Memoize the currentData to ensure stable reference and ensure all string fields are always strings
+  const currentData = useMemo(() => {
+    if (!client) {
+      return DEFAULT_CLIENT_DATA;
+    }
+    // Ensure all string fields are always strings (never undefined) to keep Select controlled
+    return {
+      ...DEFAULT_CLIENT_DATA,
+      ...client,
+      citizenship: client.citizenship ?? '',
+      maritalStatus: client.maritalStatus ?? '',
+      firstName: client.firstName ?? '',
+      lastName: client.lastName ?? '',
+      email: client.email ?? '',
+      phone: client.phone ?? '',
+      ssn: client.ssn ?? '',
+      dob: client.dob ?? '',
+      hasMilitaryService: client.hasMilitaryService ?? false,
+    };
+  }, [client]);
 
-  const updateData = (updates: Partial<ClientData>) => {
-    useApplicationStore.getState().updateClientData(activeId, updates);
-  }
+  // Track if validation should be shown (after user interaction or continue attempt)
+  const [showValidation, setShowValidation] = useState(false);
+  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
+
+  // Get update function from store selector to avoid calling getState() during render
+  const updateClientData = useApplicationStore((state) => state.updateClientData);
+  
+  const updateData = useCallback((updates: Partial<ClientData>) => {
+    updateClientData(activeId, updates);
+  }, [activeId, updateClientData]);
 
   const handleFieldBlur = (field: keyof ClientData, value: string | boolean) => {
     updateData({ [field]: value });
+    // Mark field as touched
+    setTouchedFields(prev => new Set(prev).add(field));
+  }
+
+  const handleSelectChange = (field: 'citizenship' | 'maritalStatus', value: string) => {
+    handleFieldBlur(field, value);
+    // Mark field as touched when value changes
+    setTouchedFields(prev => new Set(prev).add(field));
   }
 
   useEffect(() => {
     const handler = (e: Event) => {
+      // Show validation when user tries to continue
+      setShowValidation(true);
+      
       // Check all required fields
       const isFirstNameValid = !!currentData.firstName
       const isLastNameValid = !!currentData.lastName
@@ -53,6 +105,12 @@ export default function ClientPersonalInfoCard() {
     window.addEventListener('application:attempt-continue', handler)
     return () => window.removeEventListener('application:attempt-continue', handler)
   }, [currentData.firstName, currentData.lastName, currentData.citizenship, currentData.maritalStatus])
+
+  // Reset validation state when active client changes
+  useEffect(() => {
+    setShowValidation(false);
+    setTouchedFields(new Set());
+  }, [activeId])
 
   // Remove the immediate onChange function - we'll use onBlur instead
 
@@ -102,8 +160,11 @@ export default function ClientPersonalInfoCard() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="citizenship" className="flex items-center gap-1">Citizenship *</Label>
-              <Select value={currentData.citizenship} onValueChange={(v: string) => handleFieldBlur('citizenship', v)} required>
-                <SelectTrigger id="citizenship" className={!currentData.citizenship ? 'border-red-500 focus-visible:ring-red-500' : ''}>
+              <Select value={currentData.citizenship || ''} onValueChange={(v: string) => handleSelectChange('citizenship', v)} required>
+                <SelectTrigger 
+                  id="citizenship" 
+                  className={(!currentData.citizenship && (showValidation || touchedFields.has('citizenship'))) ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                >
                   <SelectValue placeholder="Select citizenship" />
                 </SelectTrigger>
                 <SelectContent>
@@ -112,14 +173,17 @@ export default function ClientPersonalInfoCard() {
                   <SelectItem value="Non Permanent Resident">Non Permanent Resident</SelectItem>
                 </SelectContent>
               </Select>
-              {!currentData.citizenship && (
+              {!currentData.citizenship && (showValidation || touchedFields.has('citizenship')) && (
                 <div role="alert" className="text-xs text-red-600">Please select a citizenship status</div>
               )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="maritalStatus" className="flex items-center gap-1">Marital Status *</Label>
-              <Select value={currentData.maritalStatus} onValueChange={(v: string) => handleFieldBlur('maritalStatus', v)} required>
-                <SelectTrigger id="maritalStatus" className={!currentData.maritalStatus ? 'border-red-500 focus-visible:ring-red-500' : ''}>
+              <Select value={currentData.maritalStatus || ''} onValueChange={(v: string) => handleSelectChange('maritalStatus', v)} required>
+                <SelectTrigger 
+                  id="maritalStatus" 
+                  className={(!currentData.maritalStatus && (showValidation || touchedFields.has('maritalStatus'))) ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                >
                   <SelectValue placeholder="Select One" />
                 </SelectTrigger>
                 <SelectContent>
@@ -130,7 +194,7 @@ export default function ClientPersonalInfoCard() {
                   <SelectItem value="Widowed">Widowed</SelectItem>
                 </SelectContent>
               </Select>
-              {!currentData.maritalStatus && (
+              {!currentData.maritalStatus && (showValidation || touchedFields.has('maritalStatus')) && (
                 <div role="alert" className="text-xs text-red-600">Please select a marital status</div>
               )}
             </div>
