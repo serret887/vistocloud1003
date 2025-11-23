@@ -4,7 +4,7 @@
  */
 'use client'
 
-import { useCallback, memo, useState } from 'react'
+import { useCallback, memo, useState, useMemo, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { useApplicationStore } from '@/stores/applicationStore'
@@ -42,25 +42,69 @@ const EmploymentFormWrapper = memo(({
       autoFocus={autoFocus}
     />
   )
+}, (prevProps, nextProps) => {
+  // Custom comparison: only re-render if record data actually changed or callbacks changed
+  // Compare by ID and updatedAt to detect actual data changes (updatedAt changes when record is modified)
+  if (prevProps.record.id !== nextProps.record.id) return false
+  if (prevProps.record.updatedAt !== nextProps.record.updatedAt) return false
+  if (prevProps.onBlurSave !== nextProps.onBlurSave) return false
+  if (prevProps.onDelete !== nextProps.onDelete) return false
+  if (prevProps.autoFocus !== nextProps.autoFocus) return false
+  
+  // If all the above are the same, skip re-render (return true means props are equal)
+  return true
 })
 
 EmploymentFormWrapper.displayName = 'EmploymentFormWrapper'
 
+// Stable empty array to prevent creating new arrays on every selector call
+const EMPTY_RECORDS: EmploymentRecord[] = []
+
 export default function EmploymentStep() {
-  const {
-    activeClientId,
-    employmentData,
-    addEmploymentRecord,
-    updateEmploymentRecord,
-    removeEmploymentRecord
-  } = useApplicationStore()
+  // Use selectors to only subscribe to specific parts of the store
+  const activeClientId = useApplicationStore((state) => state.activeClientId)
+  
+  // Get the employment data object for the active client
+  // This selector returns the entire object, which has a stable reference when unchanged
+  const clientEmploymentData = useApplicationStore(
+    (state) => state.employmentData[activeClientId]
+  )
+  
+  // Get all employment data to debug
+  const allEmploymentData = useApplicationStore((state) => state.employmentData)
+  
+  // Extract records with stable empty array fallback
+  // This useMemo ensures we return the same EMPTY_RECORDS reference when no records exist
+  const employmentRecords: EmploymentRecord[] = useMemo(() => {
+    const records = clientEmploymentData?.records ?? EMPTY_RECORDS
+    console.log(`[EmploymentStep] Active client: ${activeClientId}, Records count: ${records.length}`, {
+      allEmploymentDataKeys: Object.keys(allEmploymentData),
+      clientEmploymentData: clientEmploymentData ? { clientId: clientEmploymentData.clientId, recordCount: clientEmploymentData.records.length } : null,
+      records: records.map(r => ({ id: r.id, employerName: r.employerName }))
+    })
+    return records
+  }, [clientEmploymentData?.records, activeClientId, allEmploymentData])
+  
+  // Get store actions - these should be stable in Zustand
+  const addEmploymentRecord = useApplicationStore((state) => state.addEmploymentRecord)
+  const updateEmploymentRecord = useApplicationStore((state) => state.updateEmploymentRecord)
+  const removeEmploymentRecord = useApplicationStore((state) => state.removeEmploymentRecord)
 
   const [newlyAddedRecordId, setNewlyAddedRecordId] = useState<string | null>(null)
-
-  const employmentRecords: EmploymentRecord[] = employmentData[activeClientId]?.records || []
+  
+  // Store callbacks in refs to prevent re-renders when they change
+  const updateEmploymentRecordRef = useRef(updateEmploymentRecord)
+  const removeEmploymentRecordRef = useRef(removeEmploymentRecord)
+  const activeClientIdRef = useRef(activeClientId)
+  
+  useEffect(() => {
+    updateEmploymentRecordRef.current = updateEmploymentRecord
+    removeEmploymentRecordRef.current = removeEmploymentRecord
+    activeClientIdRef.current = activeClientId
+  }, [updateEmploymentRecord, removeEmploymentRecord, activeClientId])
 
   // Check if employment note should be shown (less than 2 years of history)
-  const shouldShowEmploymentNote = (() => {
+  const shouldShowEmploymentNote = useMemo(() => {
     if (!employmentRecords.length) return false
 
     const now = new Date()
@@ -80,15 +124,16 @@ export default function EmploymentStep() {
     }
     
     return totalMonths < 24 // Less than 2 years
-  })()
+  }, [employmentRecords])
 
+  // Use refs in callbacks to avoid dependency on changing functions
   const handleBlurSave = useCallback((recordId: string, field: keyof EmploymentFormData, value: EmploymentFormData[keyof EmploymentFormData]) => {
-    updateEmploymentRecord(activeClientId, recordId, { [field]: value })
-  }, [activeClientId, updateEmploymentRecord])
+    updateEmploymentRecordRef.current(activeClientIdRef.current, recordId, { [field]: value })
+  }, []) // Empty deps - use refs instead
 
   const handleDelete = useCallback((recordId: string) => {
-    removeEmploymentRecord(activeClientId, recordId)
-  }, [activeClientId, removeEmploymentRecord])
+    removeEmploymentRecordRef.current(activeClientIdRef.current, recordId)
+  }, []) // Empty deps - use refs instead
 
   const handleAddEmployer = useCallback(() => {
     const newRecordId = addEmploymentRecord(activeClientId)
@@ -99,7 +144,8 @@ export default function EmploymentStep() {
 
   // Always render all persisted records plus one empty placeholder at the end
   const recordsToRender = employmentRecords
-
+console.log("EmploymentStep is being rendered")
+console.log(recordsToRender)
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Client tabs */}

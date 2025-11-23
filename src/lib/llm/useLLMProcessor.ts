@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useCallback } from 'react'
 import { useApplicationStore } from '@/stores/applicationStore'
 import type { VoiceUpdate } from '@/types/voice-assistant'

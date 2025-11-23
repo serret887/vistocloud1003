@@ -22,7 +22,7 @@ export interface AddressType {
  * @returns Complete address data with all fields populated
  */
 const getGoogleMapsApiKey = () =>
-  process.env.GOOGLE_MAPS_API_KEY ?? process.env.GOOGLE_MAPS_API_KEY
+  process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? process.env.GOOGLE_MAPS_API_KEY ?? ''
 
 export async function resolveAddress(addressString: string): Promise<AddressType | null> {
   const apiKey = getGoogleMapsApiKey();

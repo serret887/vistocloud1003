@@ -4,7 +4,7 @@
  */
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -58,9 +58,23 @@ export const EmploymentForm: React.FC<EmploymentFormProps> = ({
   })
 
   const [submitError] = useState<string | null>(null)
-
+  
+  // Track the record ID to only initialize formData once per record
+  const recordIdRef = useRef<string>('')
+  
+  // Store the latest onFieldBlur in a ref to avoid re-renders when it changes
+  const onFieldBlurRef = useRef(onFieldBlur)
   useEffect(() => {
-    if (record) {
+    onFieldBlurRef.current = onFieldBlur
+  }, [onFieldBlur])
+  
+  // Only initialize formData when record ID changes (new record loaded)
+  useEffect(() => {
+    if (!record) return
+    
+    // Only update if this is a different record
+    if (recordIdRef.current !== record.id) {
+      recordIdRef.current = record.id
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         employerName: record.employerName || '',
@@ -87,7 +101,7 @@ export const EmploymentForm: React.FC<EmploymentFormProps> = ({
         hasOfferLetter: record.hasOfferLetter || false
       })
     }
-  }, [record])
+  }, [record?.id]) // Only depend on record ID, not the entire record object
 
   // Note: Auto-save is handled via onFieldBlur callbacks, not via useEffect
   // Removed the formData useEffect to prevent unnecessary re-renders
@@ -148,6 +162,17 @@ export const EmploymentForm: React.FC<EmploymentFormProps> = ({
     }, 0)
   }, [onFieldBlur])
 
+  // Memoize the Select change handler to prevent re-renders
+  const handleIncomeTypeChange = useCallback((value: string) => {
+    // Update local state first
+    setFormData(prev => ({ ...prev, incomeType: value }))
+    // Save to store after a brief delay to avoid re-render loop
+    // Use ref to avoid dependency on onFieldBlur changing
+    setTimeout(() => {
+      onFieldBlurRef.current?.('incomeType', value)
+    }, 0)
+  }, []) // Empty deps - use ref instead
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -198,10 +223,10 @@ export const EmploymentForm: React.FC<EmploymentFormProps> = ({
             <div className="space-y-2">
               <Label htmlFor="incomeType">Income Type</Label>
               <Select
-                value={formData.incomeType}
-                onValueChange={(value) => handleInputChange('incomeType', value)}
+                value={formData.incomeType || ''}
+                onValueChange={handleIncomeTypeChange}
               >
-                <SelectTrigger id="incomeType" onBlur={() => onFieldBlur?.('incomeType', formData.incomeType)}>
+                <SelectTrigger id="incomeType">
                   <SelectValue placeholder="Select one" />
                 </SelectTrigger>
                 <SelectContent>

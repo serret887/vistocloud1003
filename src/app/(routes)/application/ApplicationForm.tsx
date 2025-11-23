@@ -28,15 +28,22 @@ export default function ApplicationForm({ children }: { children: React.ReactNod
 
   // Load application data from Firestore when appId is present in URL
   useEffect(() => {
-    if (appId && appId !== currentApplicationId) {
-      loadApplicationFromFirestore(appId).catch(err => {
-        console.error('Failed to load application:', err)
-      })
+    if (appId) {
+      // Always reload from Firestore when appId changes, even if currentApplicationId matches
+      // This ensures we have the latest data from Firestore
+      console.log(`Loading application data from Firestore for appId: ${appId}, currentApplicationId: ${currentApplicationId}`)
+      loadApplicationFromFirestore(appId)
+        .then(() => {
+          console.log('Successfully loaded application data from Firestore')
+        })
+        .catch(err => {
+          console.error('Failed to load application:', err)
+        })
     } else if (!appId && currentApplicationId) {
       // Clear application ID if no appId in URL
       setCurrentApplicationId(null)
     }
-  }, [appId, currentApplicationId, loadApplicationFromFirestore, setCurrentApplicationId])
+  }, [appId, loadApplicationFromFirestore, setCurrentApplicationId]) // Removed currentApplicationId from deps to always reload
 
   const currentStepId: ApplicationStepId = useMemo(() => {
     return getStepIdFromPath(pathname)
@@ -87,11 +94,14 @@ export default function ApplicationForm({ children }: { children: React.ReactNod
   }
 
   function tryContinue(): void {
-    // Validate current step before continuing
+    // Always trigger validation first to show errors
+    const ev = new Event('application:attempt-continue', { cancelable: true })
+    const validationPassed = window.dispatchEvent(ev)
+    
+    // Update the current step's progress
     const currentStepCompletion = getStepCompletion(currentStepId)
     console.log(`Validating step ${currentStepId}: ${currentStepCompletion.completionPercentage}% complete`)
     
-    // Update the current step's progress
     setStates(prevStates => 
       prevStates.map(state => 
         state.id === currentStepId 
@@ -100,11 +110,21 @@ export default function ApplicationForm({ children }: { children: React.ReactNod
       )
     )
     
-    const ev = new Event('application:attempt-continue', { cancelable: true })
-    const ok = window.dispatchEvent(ev)
-    if (!ok) return
-    const nextId = getNext()
-    goToStep(nextId)
+    // Only prevent navigation if validation explicitly prevented it
+    if (!validationPassed) {
+      console.log('Validation failed, preventing navigation')
+      return
+    }
+    
+    // Get next step - allow navigation even if step isn't 100% complete
+    const currentIndex = stepDefinitions.findIndex(s => s.id === currentStepId)
+    if (currentIndex === -1 || currentIndex >= stepDefinitions.length - 1) {
+      console.log('No next step available')
+      return
+    }
+    
+    const nextStep = stepDefinitions[currentIndex + 1]
+    goToStep(nextStep.id)
   }
 
   const prevId = getPrev()

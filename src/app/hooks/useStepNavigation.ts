@@ -28,8 +28,9 @@ export function getNextPure(
   const currentIndex = stepDefinitions.findIndex(s => s.id === currentStepId)
   if (currentIndex === -1 || currentIndex >= stepDefinitions.length - 1) return undefined
   
-  const nextStep = stepDefinitions[currentIndex + 1]
-  return isStepEnabledPure(stepDefinitions, states, nextStep.id) ? nextStep.id : undefined
+  // Always return the next step - don't block navigation based on completion
+  // Validation will handle preventing navigation if needed
+  return stepDefinitions[currentIndex + 1].id
 }
 
 export function getPrevPure(

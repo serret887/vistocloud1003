@@ -65,10 +65,12 @@ export async function deleteClientFromFirestore(
 // Helper to save employment record
 export async function saveEmploymentToFirestore(
   applicationId: string,
+  clientId: string,
   employmentId: string,
   employmentData: EmploymentRecord
 ): Promise<void> {
-  const employmentRef = doc(db, 'applications', applicationId, 'employment', employmentId)
+  // Store employment records in client subcollection: applications/{appId}/clients/{clientId}/employment/{recordId}
+  const employmentRef = doc(db, 'applications', applicationId, 'clients', clientId, 'employment', employmentId)
   await setDoc(employmentRef, {
     ...employmentData,
     updatedAt: serverTimestamp(),
@@ -78,9 +80,11 @@ export async function saveEmploymentToFirestore(
 // Helper to delete employment record
 export async function deleteEmploymentFromFirestore(
   applicationId: string,
+  clientId: string,
   employmentId: string
 ): Promise<void> {
-  const employmentRef = doc(db, 'applications', applicationId, 'employment', employmentId)
+  // Delete from client subcollection: applications/{appId}/clients/{clientId}/employment/{recordId}
+  const employmentRef = doc(db, 'applications', applicationId, 'clients', clientId, 'employment', employmentId)
   await deleteDoc(employmentRef)
 }
 
@@ -254,10 +258,9 @@ export async function loadApplicationDataFromFirestore(
   // Load all subcollections in parallel
   const applicationRef = appDoc(applicationId)
 
-  const [clientsSnap, employmentSnap, activeIncomeSnap, passiveIncomeSnap, incomeTotalsSnap, 
+  const [clientsSnap, activeIncomeSnap, passiveIncomeSnap, incomeTotalsSnap, 
          assetsSnap, realEstateSnap, addressesSnap, conditionsSnap, chatHistorySnap] = await Promise.all([
     getDocs(collection(applicationRef, 'clients')),
-    getDocs(collection(applicationRef, 'employment')),
     getDocs(collection(applicationRef, activeIncomeCollectionPath)),
     getDocs(collection(applicationRef, passiveIncomeCollectionPath)),
     getDocs(collection(applicationRef, incomeTotalsCollectionPath)),
@@ -274,18 +277,100 @@ export async function loadApplicationDataFromFirestore(
     clients[doc.id] = doc.data() as ClientData
   })
   
-  // Transform employment data by clientId
+  // Load employment data from each client's subcollection
   const employmentData: { [clientId: string]: ClientEmploymentData } = {}
-  employmentSnap.docs.forEach(doc => {
-    const record = doc.data() as EmploymentRecord
-    if (!employmentData[record.clientId]) {
-      employmentData[record.clientId] = {
-        clientId: record.clientId,
-        records: []
+  console.log(`Loading employment records from client subcollections for ${Object.keys(clients).length} clients`)
+  
+  // Load employment records for each client in parallel
+  const employmentPromises = Object.keys(clients).map(async (clientId) => {
+    const clientRef = doc(applicationRef, 'clients', clientId)
+    const employmentSnap = await getDocs(collection(clientRef, 'employment'))
+    return { clientId, employmentSnap }
+  })
+  
+  const employmentResults = await Promise.all(employmentPromises)
+  
+  employmentResults.forEach(({ clientId, employmentSnap }) => {
+    const records: EmploymentRecord[] = []
+    employmentSnap.docs.forEach(doc => {
+      const record = { ...doc.data(), id: doc.id } as EmploymentRecord
+      records.push(record)
+    })
+    
+    if (records.length > 0) {
+      employmentData[clientId] = {
+        clientId,
+        records
       }
     }
-    employmentData[record.clientId].records.push(record)
   })
+  
+  // MIGRATION: Check for old employment records in flat collection and migrate them
+  try {
+    const oldEmploymentSnap = await getDocs(collection(applicationRef, 'employment'))
+    if (oldEmploymentSnap.docs.length > 0) {
+      console.log(`[MIGRATION] Found ${oldEmploymentSnap.docs.length} old employment records in flat collection, migrating to client subcollections...`)
+      
+      const clientIds = Object.keys(clients)
+      if (clientIds.length === 0) {
+        console.warn('[MIGRATION] No clients found, cannot migrate employment records')
+      } else {
+        // Use first client as default for records without clientId
+        const defaultClientId = clientIds[0]
+        
+        const migrationPromises = oldEmploymentSnap.docs.map(async (oldDoc) => {
+          const record = oldDoc.data() as EmploymentRecord & { clientId?: string }
+          const recordId = oldDoc.id
+          
+          // Determine which client this record belongs to
+          let targetClientId = record.clientId || defaultClientId
+          
+          // If clientId doesn't exist in clients, use default
+          if (!clients[targetClientId]) {
+            console.warn(`[MIGRATION] Record ${recordId} has invalid clientId "${record.clientId}", using default client "${defaultClientId}"`)
+            targetClientId = defaultClientId
+          }
+          
+          // Create the record without clientId field (since it's in the path now)
+          const { clientId: _, ...recordWithoutClientId } = record
+          const cleanRecord: EmploymentRecord = {
+            ...recordWithoutClientId,
+            id: recordId
+          }
+          
+          // Save to new location (client subcollection)
+          const newRef = doc(applicationRef, 'clients', targetClientId, 'employment', recordId)
+          await setDoc(newRef, cleanRecord, { merge: true })
+          
+          // Delete from old location
+          const oldRef = doc(applicationRef, 'employment', recordId)
+          await deleteDoc(oldRef)
+          
+          // Add to employmentData if not already there
+          if (!employmentData[targetClientId]) {
+            employmentData[targetClientId] = {
+              clientId: targetClientId,
+              records: []
+            }
+          }
+          employmentData[targetClientId].records.push(cleanRecord)
+          
+          return { recordId, targetClientId }
+        })
+        
+        const migrationResults = await Promise.all(migrationPromises)
+        console.log(`[MIGRATION] Successfully migrated ${migrationResults.length} employment records to client subcollections`)
+      }
+    }
+  } catch (error) {
+    console.error('[MIGRATION] Error during employment record migration:', error)
+    // Don't throw - continue with loading even if migration fails
+  }
+  
+  console.log(`Loaded employment data for ${Object.keys(employmentData).length} clients:`, Object.keys(employmentData).map(clientId => ({
+    clientId,
+    recordCount: employmentData[clientId].records.length
+  })))
   
   // Transform active income by clientId
   const activeIncomeData: { [clientId: string]: ActiveIncomeRecord[] } = {}

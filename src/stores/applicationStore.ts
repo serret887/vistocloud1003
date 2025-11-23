@@ -324,9 +324,9 @@ export const useApplicationStore = create<ApplicationState>()(
         ...currentData,
         records: [...currentData.records, emptyRecord]
       };
-      // Sync to Firestore
+      // Sync to Firestore - save to client subcollection
       if (state.currentApplicationId) {
-        firestoreSync.saveEmploymentToFirestore(state.currentApplicationId, id, emptyRecord)
+        firestoreSync.saveEmploymentToFirestore(state.currentApplicationId, clientId, id, emptyRecord)
           .catch(err => console.error('Failed to sync employment to Firestore:', err))
       }
       return {
@@ -360,9 +360,9 @@ export const useApplicationStore = create<ApplicationState>()(
     );
 
     const updatedRecord = updatedRecords.find(r => r.id === recordId)
-    // Sync to Firestore
+    // Sync to Firestore - save to client subcollection
     if (state.currentApplicationId && updatedRecord) {
-      firestoreSync.saveEmploymentToFirestore(state.currentApplicationId, recordId, updatedRecord)
+      firestoreSync.saveEmploymentToFirestore(state.currentApplicationId, clientId, recordId, updatedRecord)
         .catch(err => console.error('Failed to sync employment to Firestore:', err))
     }
 
@@ -381,9 +381,9 @@ export const useApplicationStore = create<ApplicationState>()(
     const currentData = state.employmentData[clientId];
     if (!currentData) return state as any;
 
-    // Sync deletion to Firestore
+    // Sync deletion to Firestore - delete from client subcollection
     if (state.currentApplicationId) {
-      firestoreSync.deleteEmploymentFromFirestore(state.currentApplicationId, recordId)
+      firestoreSync.deleteEmploymentFromFirestore(state.currentApplicationId, clientId, recordId)
         .catch(err => console.error('Failed to delete employment from Firestore:', err))
     }
 
@@ -1200,7 +1200,17 @@ export const useApplicationStore = create<ApplicationState>()(
 
   loadApplicationFromFirestore: async (applicationId) => {
     try {
+      console.log(`[Store] Loading application ${applicationId} from Firestore...`)
       const data = await firestoreSync.loadApplicationDataFromFirestore(applicationId);
+      
+      console.log(`[Store] Loaded data:`, {
+        clientCount: Object.keys(data.clients).length,
+        employmentDataKeys: Object.keys(data.employmentData),
+        employmentDataDetails: Object.entries(data.employmentData).map(([clientId, empData]) => ({
+          clientId,
+          recordCount: empData.records.length
+        }))
+      })
       
       // Initialize counters for all clients (counters are no longer used for ID generation
       // since we use Firestore auto-IDs, but kept for backward compatibility)
@@ -1239,6 +1249,8 @@ export const useApplicationStore = create<ApplicationState>()(
         // Set active client to first client if exists
         activeClientId: Object.keys(data.clients)[0] || 'c1',
       });
+      
+      console.log(`[Store] Application ${applicationId} loaded successfully. Active client: ${Object.keys(data.clients)[0] || 'c1'}`)
     } catch (error) {
       console.error('Failed to load application from Firestore:', error);
       throw error;
