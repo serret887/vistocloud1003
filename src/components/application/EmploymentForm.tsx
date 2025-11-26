@@ -32,7 +32,6 @@ export const EmploymentForm: React.FC<EmploymentFormProps> = ({
   onDelete,
   autoFocus
 }) => {
-  console.log("EmploymentForm is being rendered")
   const [formData, setFormData] = useState<EmploymentFormData>({
     employerName: '',
     phoneNumber: '',
@@ -62,117 +61,122 @@ export const EmploymentForm: React.FC<EmploymentFormProps> = ({
   
   // Track the record ID to only initialize formData once per record
   const recordIdRef = useRef<string>('')
+  const isUpdatingRef = useRef(false) // Track if we're currently updating to avoid sync loops
   
   // Store the latest onFieldBlur in a ref to avoid re-renders when it changes
-  // const onFieldBlurRef = useRef(onFieldBlur)
-  // useEffect(() => {
-  //   onFieldBlurRef.current = onFieldBlur
-  // }, [onFieldBlur])
+  const onFieldBlurRef = useRef(onFieldBlur)
+  useEffect(() => {
+    onFieldBlurRef.current = onFieldBlur
+  }, [onFieldBlur])
   
   // Only initialize formData when record ID changes (new record loaded)
-  // useEffect(() => {
-  //   if (!record) return
+  // Don't sync when record updates because we manage formData locally
+  useEffect(() => {
+    if (!record) return
     
-  //   // Only update if this is a different record
-  //   if (recordIdRef.current !== record.id) {
-  //     recordIdRef.current = record.id
-  //     // eslint-disable-next-line react-hooks/set-state-in-effect
-  //     setFormData({
-  //       employerName: record.employerName || '',
-  //       phoneNumber: record.phoneNumber || '',
-  //       jobTitle: record.jobTitle || '',
-  //       incomeType: record.incomeType || '',
-  //       employerAddress: record.employerAddress || {
-  //         address1: '',
-  //         address2: '',
-  //         formattedAddress: '',
-  //         city: '',
-  //         region: '',
-  //         postalCode: '',
-  //         country: '',
-  //         lat: 0,
-  //         lng: 0
-  //       },
-  //       selfEmployed: record.selfEmployed || false,
-  //       ownershipPercentage: record.ownershipPercentage || false,
-  //       relatedParty: record.relatedParty || false,
-  //       currentlyEmployed: record.currentlyEmployed || false,
-  //       startDate: record.startDate || '',
-  //       endDate: record.endDate ?? null,
-  //       hasOfferLetter: record.hasOfferLetter || false
-  //     })
-  //   }
-  // }, [record?.id]) // Only depend on record ID, not the entire record object
+    // Only update if this is a different record
+    if (recordIdRef.current !== record.id) {
+      recordIdRef.current = record.id
+      isUpdatingRef.current = false // Reset update flag for new record
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFormData({
+        employerName: record.employerName || '',
+        phoneNumber: record.phoneNumber || '',
+        jobTitle: record.jobTitle || '',
+        incomeType: record.incomeType || '',
+        employerAddress: record.employerAddress || {
+          address1: '',
+          address2: '',
+          formattedAddress: '',
+          city: '',
+          region: '',
+          postalCode: '',
+          country: '',
+          lat: 0,
+          lng: 0
+        },
+        selfEmployed: record.selfEmployed || false,
+        ownershipPercentage: record.ownershipPercentage || false,
+        relatedParty: record.relatedParty || false,
+        currentlyEmployed: record.currentlyEmployed || false,
+        startDate: record.startDate || '',
+        endDate: record.endDate ?? null,
+        hasOfferLetter: record.hasOfferLetter || false
+      })
+    }
+  }, [record?.id]) // Only depend on record ID, not the entire record object
 
   // Note: Auto-save is handled via onFieldBlur callbacks, not via useEffect
-  // Removed the formData useEffect to prevent unnecessary re-renders
 
-  // const handleInputChange = (field: keyof EmploymentFormData, value: string) => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     [field]: value
-  //   }))
-  //   // Note: onFieldBlur is called separately in the onBlur handlers, not here
-  // }
+  const handleInputChange = (field: keyof EmploymentFormData, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+    // Note: onFieldBlur is called separately in the onBlur handlers, not here
+  }
 
-  // const handleCheckboxChange = (field: 'selfEmployed' | 'ownershipPercentage' | 'relatedParty' | 'currentlyEmployed' | 'hasOfferLetter') => {
-  //   // Calculate the new values first
-  //   const newValue = !formData[field]
-  //   const updates: Partial<EmploymentFormData> = { [field]: newValue }
+  const handleCheckboxChange = (field: 'selfEmployed' | 'ownershipPercentage' | 'relatedParty' | 'currentlyEmployed' | 'hasOfferLetter') => {
+    // Calculate the new values first
+    const newValue = !formData[field]
+    const updates: Partial<EmploymentFormData> = { [field]: newValue }
     
-  //   // Make currentlyEmployed and hasOfferLetter mutually exclusive
-  //   if (field === 'currentlyEmployed' && newValue) {
-  //     updates.hasOfferLetter = false
-  //     updates.endDate = null
-  //   } else if (field === 'hasOfferLetter' && newValue) {
-  //     updates.currentlyEmployed = false
-  //     updates.endDate = null
-  //   } else if ((field === 'currentlyEmployed' || field === 'hasOfferLetter') && newValue) {
-  //     updates.endDate = null
-  //   }
+    // Make currentlyEmployed and hasOfferLetter mutually exclusive
+    if (field === 'currentlyEmployed' && newValue) {
+      updates.hasOfferLetter = false
+      updates.endDate = null
+    } else if (field === 'hasOfferLetter' && newValue) {
+      updates.currentlyEmployed = false
+      updates.endDate = null
+    } else if ((field === 'currentlyEmployed' || field === 'hasOfferLetter') && newValue) {
+      updates.endDate = null
+    }
     
-  //   // Update local state
-  //   setFormData(prev => ({ ...prev, ...updates }))
+    // Update local state
+    setFormData(prev => ({ ...prev, ...updates }))
     
-  //   // Save to store AFTER state update, not during
-  //   setTimeout(() => {
-  //     Object.entries(updates).forEach(([key, value]) => {
-  //       onFieldBlur?.(key as keyof EmploymentFormData, value)
-  //     })
-  //   }, 0)
-  // }
+    // Save to store AFTER state update, not during
+    setTimeout(() => {
+      Object.entries(updates).forEach(([key, value]) => {
+        onFieldBlurRef.current?.(key as keyof EmploymentFormData, value)
+      })
+    }, 0)
+  }
 
-  // const handleAddressChange = useCallback((newAddress: AddressType | null) => {
-  //   const addressToSave = newAddress || {
-  //     address1: '', 
-  //     address2: '', 
-  //     formattedAddress: '', 
-  //     city: '', 
-  //     region: '', 
-  //     postalCode: '', 
-  //     country: '', 
-  //     lat: 0, 
-  //     lng: 0
-  //   }
+  const handleAddressChange = useCallback((newAddress: AddressType | null) => {
+    const addressToSave = newAddress || {
+      address1: '', 
+      address2: '', 
+      formattedAddress: '', 
+      city: '', 
+      region: '', 
+      postalCode: '', 
+      country: '', 
+      lat: 0, 
+      lng: 0
+    }
     
-  //   setFormData(prev => ({ ...prev, employerAddress: addressToSave }))
+    setFormData(prev => ({ ...prev, employerAddress: addressToSave }))
     
-  //   // Call onFieldBlur after state update completes
-  //   setTimeout(() => {
-  //     onFieldBlur?.('employerAddress', addressToSave)
-  //   }, 0)
-  // }, [onFieldBlur])
+    // Call onFieldBlur after state update completes
+    setTimeout(() => {
+      onFieldBlurRef.current?.('employerAddress', addressToSave)
+    }, 0)
+  }, [])
 
+  // Memoize the Select value to ensure it's always a string
+  const incomeTypeValue = useMemo(() => formData.incomeType || '', [formData.incomeType])
+  
   // Memoize the Select change handler to prevent re-renders
-  // const handleIncomeTypeChange = useCallback((value: string) => {
-  //   // Update local state first
-  //   setFormData(prev => ({ ...prev, incomeType: value }))
-  //   // Save to store after a brief delay to avoid re-render loop
-  //   // Use ref to avoid dependency on onFieldBlur changing
-  //   setTimeout(() => {
-  //     // onFieldBlurRef.current?.('incomeType', value)
-  //   }, 0)
-  // }, []) // Empty deps - use ref instead
+  const handleIncomeTypeChange = useCallback((value: string) => {
+    // Update local state first
+    setFormData(prev => ({ ...prev, incomeType: value }))
+    // Save to store after a brief delay to avoid re-render loop
+    // Use ref to avoid dependency on onFieldBlur changing
+    setTimeout(() => {
+      onFieldBlurRef.current?.('incomeType', value)
+    }, 0)
+  }, []) // Empty deps - use ref instead
 
   return (
     <Card className="w-full">
@@ -194,8 +198,8 @@ export const EmploymentForm: React.FC<EmploymentFormProps> = ({
               <Input
                 id="employerName"
                 value={formData.employerName}
-                onChange={(e) =>{}}// handleInputChange('employerName', e.target.value)}
-                onBlur={(e) =>{}} // onFieldBlur?.('employerName', e.target.value)}
+                onChange={(e) => handleInputChange('employerName', e.target.value)}
+                onBlur={(e) => onFieldBlurRef.current?.('employerName', e.target.value)}
                 placeholder="Enter employer name"
                 autoFocus={autoFocus}
               />
@@ -205,8 +209,8 @@ export const EmploymentForm: React.FC<EmploymentFormProps> = ({
               <PhoneField
                 id="phoneNumber"
                 value={formData.phoneNumber}
-                onChange={(v) =>{}}// handleInputChange('phoneNumber', v)}
-                onBlur={(v) => onFieldBlur?.('phoneNumber', v)}
+                onChange={(v) => handleInputChange('phoneNumber', v)}
+                onBlur={(v) => onFieldBlurRef.current?.('phoneNumber', v)}
               />
             </div>
 
@@ -215,8 +219,8 @@ export const EmploymentForm: React.FC<EmploymentFormProps> = ({
               <Input
                 id="jobTitle"
                 value={formData.jobTitle}
-                onChange={(e) =>{}}// handleInputChange('jobTitle', e.target.value)}
-                onBlur={(e) => onFieldBlur?.('jobTitle', e.target.value)}
+                onChange={(e) => handleInputChange('jobTitle', e.target.value)}
+                onBlur={(e) => onFieldBlurRef.current?.('jobTitle', e.target.value)}
                 placeholder="Enter job title"
               />
             </div>
@@ -224,8 +228,8 @@ export const EmploymentForm: React.FC<EmploymentFormProps> = ({
             <div className="space-y-2">
               <Label htmlFor="incomeType">Income Type</Label>
               <Select
-                value={formData.incomeType || ''}
-                onValueChange={() =>{}}// handleIncomeTypeChange}
+                value={incomeTypeValue}
+                onValueChange={handleIncomeTypeChange}
               >
                 <SelectTrigger id="incomeType">
                   <SelectValue placeholder="Select one" />
@@ -243,7 +247,7 @@ export const EmploymentForm: React.FC<EmploymentFormProps> = ({
               <Label>Employer Address</Label>
               <AddressAutoComplete
                 address={formData.employerAddress as AddressType}
-                setAddress={() =>{}}// handleAddressChange}  
+                setAddress={handleAddressChange}  
                 dialogTitle="Employer Address"
                 placeholder="Enter employer address"
               />
@@ -254,25 +258,25 @@ export const EmploymentForm: React.FC<EmploymentFormProps> = ({
           <div className="space-y-4 pt-4 border-t">
             <h3 className="text-lg font-medium">Employment Questions</h3>
             <div className="flex items-center space-x-2">
-              <Checkbox id="selfEmployed" checked={formData.selfEmployed} onCheckedChange={() =>{}}/>{/* handleCheckboxChange('selfEmployed')} */}
+              <Checkbox id="selfEmployed" checked={formData.selfEmployed} onCheckedChange={() => handleCheckboxChange('selfEmployed')} />
               <Label htmlFor="selfEmployed">Is your client self-employed or business owner?</Label>
             </div>
             {formData.selfEmployed && (
               <div className="flex items-center space-x-2 ml-6">
-                <Checkbox id="ownershipPercentage" checked={formData.ownershipPercentage} onCheckedChange={() =>{}}/>{/* handleCheckboxChange('ownershipPercentage')} */}
+                <Checkbox id="ownershipPercentage" checked={formData.ownershipPercentage} onCheckedChange={() => handleCheckboxChange('ownershipPercentage')} />
                 <Label htmlFor="ownershipPercentage">Does he own 25% or more?</Label>
               </div>
             )}
             <div className="flex items-center space-x-2">
-              <Checkbox id="relatedParty" checked={formData.relatedParty} onCheckedChange={() =>{}}/>{/* handleCheckboxChange('relatedParty')} */}
+              <Checkbox id="relatedParty" checked={formData.relatedParty} onCheckedChange={() => handleCheckboxChange('relatedParty')} />
               <Label htmlFor="relatedParty">Is your client employed by a family member, property seller, real estate agent or other party in the transaction?</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Checkbox id="currentlyEmployed" checked={formData.currentlyEmployed} onCheckedChange={() =>{}}/>{/* handleCheckboxChange('currentlyEmployed')} */}
+              <Checkbox id="currentlyEmployed" checked={formData.currentlyEmployed} onCheckedChange={() => handleCheckboxChange('currentlyEmployed')} />
               <Label htmlFor="currentlyEmployed">Is he employed currently on this job?</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Checkbox id="hasOfferLetter" checked={formData.hasOfferLetter} onCheckedChange={() =>{}}/>{/* handleCheckboxChange('hasOfferLetter')} */}
+              <Checkbox id="hasOfferLetter" checked={formData.hasOfferLetter} onCheckedChange={() => handleCheckboxChange('hasOfferLetter')} />
               <Label htmlFor="hasOfferLetter">Does your client have an offer letter in the future from this employer?</Label>
             </div>
           </div>
@@ -285,8 +289,8 @@ export const EmploymentForm: React.FC<EmploymentFormProps> = ({
                 id="startDate"
                 label="Start Date"
                 value={formData.startDate}
-                onChange={(value) =>{}}// handleInputChange('startDate', value)}
-                onBlur={(value) => onFieldBlur?.('startDate', value)}
+                onChange={(value) => handleInputChange('startDate', value)}
+                onBlur={(value) => onFieldBlurRef.current?.('startDate', value)}
                 maxDate={formData.hasOfferLetter ? undefined : new Date().toISOString().split('T')[0]}
                 required={true}
               />
@@ -296,7 +300,7 @@ export const EmploymentForm: React.FC<EmploymentFormProps> = ({
                   label="End Date"
                   value={formData.endDate ?? ''}
                   onChange={(value) => setFormData(prev => ({ ...prev, endDate: value || null }))}
-                  onBlur={(value) => onFieldBlur?.('endDate', value || null)}
+                  onBlur={(value) => onFieldBlurRef.current?.('endDate', value || null)}
                   maxDate={new Date().toISOString().split('T')[0]}
                   required={false}
                 />

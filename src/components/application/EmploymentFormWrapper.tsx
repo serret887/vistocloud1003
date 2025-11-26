@@ -4,7 +4,7 @@
  */
 'use client'
 
-import { memo, useCallback } from 'react'
+import { memo, useCallback, useRef } from 'react'
 import { EmploymentForm } from './EmploymentForm'
 import type { EmploymentRecord, EmploymentFormData } from '@/types/employment'
 
@@ -18,11 +18,23 @@ interface EmploymentFormWrapperProps {
 /**
  * Custom comparison function for React.memo
  * Only re-renders if record data actually changed or callbacks changed
+ * 
+ * Note: We compare by reference first for performance, then by specific fields
  */
 function arePropsEqual(
   prevProps: EmploymentFormWrapperProps,
   nextProps: EmploymentFormWrapperProps
 ): boolean {
+  // Fast path: if record object reference is the same, props are equal (unless callbacks changed)
+  if (prevProps.record === nextProps.record) {
+    // Still need to check callbacks and autoFocus
+    return (
+      prevProps.onBlurSave === nextProps.onBlurSave &&
+      prevProps.onDelete === nextProps.onDelete &&
+      prevProps.autoFocus === nextProps.autoFocus
+    )
+  }
+  
   // Re-render if record ID changed (different record)
   if (prevProps.record.id !== nextProps.record.id) return false
   
@@ -46,14 +58,31 @@ export const EmploymentFormWrapper = memo<EmploymentFormWrapperProps>(({
   onDelete,
   autoFocus
 }) => {
+  // Use refs to store callbacks and record ID to avoid recreating callbacks on every render
+  const onBlurSaveRef = useRef(onBlurSave)
+  const onDeleteRef = useRef(onDelete)
+  const recordIdRef = useRef(record.id)
+  
+  // Update refs when props change (this doesn't trigger re-renders)
+  if (onBlurSaveRef.current !== onBlurSave) {
+    onBlurSaveRef.current = onBlurSave
+  }
+  if (onDeleteRef.current !== onDelete) {
+    onDeleteRef.current = onDelete
+  }
+  if (recordIdRef.current !== record.id) {
+    recordIdRef.current = record.id
+  }
+  
+  // Create stable callbacks that use refs - these never change
   const handleFieldBlur = useCallback((field: keyof EmploymentFormData, value: EmploymentFormData[keyof EmploymentFormData]) => {
-    onBlurSave(record.id, field, value)
-  }, [record.id, onBlurSave])
+    onBlurSaveRef.current(recordIdRef.current, field, value)
+  }, []) // Empty deps - use refs instead
 
   const handleDelete = useCallback(() => {
-    onDelete(record.id)
-  }, [record.id, onDelete])
-console.log("EmploymentFormWrapper is being rendered")
+    onDeleteRef.current(recordIdRef.current)
+  }, []) // Empty deps - use refs instead
+
   return (
     <EmploymentForm
       record={record}
