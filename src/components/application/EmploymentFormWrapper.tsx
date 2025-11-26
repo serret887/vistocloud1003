@@ -52,7 +52,7 @@ function arePropsEqual(
   return true
 }
 
-export const EmploymentFormWrapper = memo<EmploymentFormWrapperProps>(({ 
+const EmploymentFormWrapperComponent = memo<EmploymentFormWrapperProps>(({ 
   record, 
   onBlurSave, 
   onDelete,
@@ -94,5 +94,13 @@ export const EmploymentFormWrapper = memo<EmploymentFormWrapperProps>(({
   )
 }, arePropsEqual)
 
-EmploymentFormWrapper.displayName = 'EmploymentFormWrapper'
+EmploymentFormWrapperComponent.displayName = 'EmploymentFormWrapper'
+
+// Enable why-did-you-render tracking in development
+if (process.env.NODE_ENV === 'development') {
+  // @ts-ignore - why-did-you-render property
+  EmploymentFormWrapperComponent.whyDidYouRender = true
+}
+
+export const EmploymentFormWrapper = EmploymentFormWrapperComponent
 

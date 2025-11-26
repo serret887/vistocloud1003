@@ -10,9 +10,11 @@ type Props = { clientId: string }
 const EMPTY_ARRAY: any[] = []
 
 export default function ClientAssetsSummary({ clientId }: Props) {
-  // Use a stable selector that doesn't create new references
-  const assets = useApplicationStore(state => state.assetsData[clientId] ?? EMPTY_ARRAY)
-  const client = useApplicationStore(state => state.clients[clientId])
+  // Optimize: Use a single selector to get both values at once
+  const { assets, client } = useApplicationStore(state => ({
+    assets: state.assetsData[clientId] ?? EMPTY_ARRAY,
+    client: state.clients[clientId]
+  }))
 
   const categoryTotals = useMemo(() => {
     const totals: { [key: string]: number } = {}

@@ -1,5 +1,10 @@
 'use client'
 
+// Import why-did-you-render in development mode
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  require('@/wdyr')
+}
+
 import { useEffect, useMemo, useState } from 'react'
 import { useApplicationProgress } from '../../hooks/useApplicationProgress'
 import { useStepNavigation } from '../../hooks/useStepNavigation'

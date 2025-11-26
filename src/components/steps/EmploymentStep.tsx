@@ -17,7 +17,7 @@ import {
   useShouldShowEmploymentNote
 } from './EmploymentStep.hooks'
 
-export default function EmploymentStep() {
+function EmploymentStep() {
   const { activeClientId, employmentRecords } = useEmploymentRecords()
   const {
     addEmploymentRecord,
@@ -76,4 +76,10 @@ export default function EmploymentStep() {
   )
 }
 
+// Enable why-did-you-render tracking in development
+if (process.env.NODE_ENV === 'development') {
+  // @ts-ignore - why-did-you-render property
+  EmploymentStep.whyDidYouRender = true
+}
 
+export default EmploymentStep

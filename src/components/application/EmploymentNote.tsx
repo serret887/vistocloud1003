@@ -13,11 +13,12 @@ interface EmploymentNoteProps {
 }
 
 export default function EmploymentNote({ clientId }: EmploymentNoteProps) {
-  const { employmentData, updateEmploymentNote } = useApplicationStore()
+  // Optimize: Use a selector to only subscribe to the specific client's employment note
+  const currentNote = useApplicationStore(
+    (state) => state.employmentData[clientId]?.employmentNote || ''
+  )
+  const updateEmploymentNote = useApplicationStore((state) => state.updateEmploymentNote)
   const [note, setNote] = useState('')
-  
-  const employmentDataForClient = employmentData[clientId]
-  const currentNote = employmentDataForClient?.employmentNote || ''
 
   useEffect(() => {
     setNote(currentNote)

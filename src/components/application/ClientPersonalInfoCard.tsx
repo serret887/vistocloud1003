@@ -40,8 +40,12 @@ const DEFAULT_CLIENT_DATA: ClientData = {
 }
 
 export default function ClientPersonalInfoCard() {
-  const activeId = useApplicationStore((state) => state.activeClientId);
-  const client = useApplicationStore((state) => state.clients[activeId]);
+  // Optimize: Use a single selector to get both values at once
+  const { activeId, client, updateClientData } = useApplicationStore((state) => ({
+    activeId: state.activeClientId,
+    client: state.clients[state.activeClientId],
+    updateClientData: state.updateClientData,
+  }))
   
   // Memoize the currentData to ensure stable reference and ensure all string fields are always strings
   const currentData = useMemo(() => {
@@ -67,9 +71,6 @@ export default function ClientPersonalInfoCard() {
   // Track if validation should be shown (after user interaction or continue attempt)
   const [showValidation, setShowValidation] = useState(false);
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
-
-  // Get update function from store selector to avoid calling getState() during render
-  const updateClientData = useApplicationStore((state) => state.updateClientData);
   
   const updateData = useCallback((updates: Partial<ClientData>) => {
     updateClientData(activeId, updates);

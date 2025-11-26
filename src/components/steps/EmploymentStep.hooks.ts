@@ -12,16 +12,18 @@ const EMPTY_RECORDS: EmploymentRecord[] = []
 
 /**
  * Hook to get employment records for the active client
+ * Optimized to use a single selector to prevent double renders
  */
 export function useEmploymentRecords() {
-  const activeClientId = useApplicationStore((state) => state.activeClientId)
-  const clientEmploymentData = useApplicationStore(
-    (state) => state.employmentData[activeClientId]
-  )
-  
-  const employmentRecords: EmploymentRecord[] = useMemo(() => {
-    return clientEmploymentData?.records ?? EMPTY_RECORDS
-  }, [clientEmploymentData?.records])
+  // Use a single selector that returns both values to prevent double renders
+  const { activeClientId, employmentRecords } = useApplicationStore((state) => {
+    const clientId = state.activeClientId
+    const clientEmploymentData = state.employmentData[clientId]
+    return {
+      activeClientId: clientId,
+      employmentRecords: clientEmploymentData?.records ?? EMPTY_RECORDS
+    }
+  })
   
   return { activeClientId, employmentRecords }
 }

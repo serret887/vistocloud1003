@@ -26,7 +26,7 @@ interface EmploymentFormProps {
   autoFocus?: boolean
 }
 
-export const EmploymentForm: React.FC<EmploymentFormProps> = ({
+const EmploymentFormComponent: React.FC<EmploymentFormProps> = ({
   record,
   onFieldBlur,
   onDelete,
@@ -320,4 +320,11 @@ export const EmploymentForm: React.FC<EmploymentFormProps> = ({
   )
 }
 
+// Enable why-did-you-render tracking in development
+if (process.env.NODE_ENV === 'development') {
+  // @ts-ignore - why-did-you-render property
+  EmploymentFormComponent.whyDidYouRender = true
+}
+
+export const EmploymentForm = EmploymentFormComponent
 export default EmploymentForm
