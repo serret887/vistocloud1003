@@ -12,6 +12,7 @@ import { AlertCircle } from 'lucide-react'
 import ValidationSuccessAlert from '@/components/ui/ValidationSuccessAlert'
 import type { ClientAddressData, AddressRecord, AddressValidationResult } from '@/types/address'
 import { useApplicationStore } from '@/stores/applicationStore'
+import { generateFallbackId } from '@/lib/idGenerator'
 
 // Memoized component for former address items to prevent unnecessary re-renders
 const FormerAddressItem = memo(({
@@ -130,7 +131,7 @@ export default function AddressPresentCard() {
     updateFormer(addressId, { [field]: value });
   };
   const addFormer = () => {
-    const id = Math.random().toString(36).slice(2);
+    const id = generateFallbackId();
     
     // Auto-fill toDate with the fromDate of the previous address to avoid gaps
     let autoToDate = '';

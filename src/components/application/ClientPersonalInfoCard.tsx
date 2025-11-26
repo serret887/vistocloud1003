@@ -40,12 +40,17 @@ const DEFAULT_CLIENT_DATA: ClientData = {
 }
 
 export default function ClientPersonalInfoCard() {
-  // Optimize: Use a single selector to get both values at once
-  const { activeId, client, updateClientData } = useApplicationStore((state) => ({
-    activeId: state.activeClientId,
-    client: state.clients[state.activeClientId],
-    updateClientData: state.updateClientData,
-  }))
+  // Use separate selectors to avoid creating new object references on every render
+  // This prevents unnecessary re-renders caused by Zustand's useSyncExternalStore
+  const activeId = useApplicationStore((state) => state.activeClientId)
+  const clients = useApplicationStore((state) => state.clients)
+  
+  // Get the current client from the clients object
+  // This ensures we get a stable reference when the client data hasn't changed
+  const client = clients[activeId]
+  
+  // Access action directly from store (non-reactive, stable reference)
+  const updateClientData = useApplicationStore.getState().updateClientData
   
   // Memoize the currentData to ensure stable reference and ensure all string fields are always strings
   const currentData = useMemo(() => {
@@ -74,7 +79,7 @@ export default function ClientPersonalInfoCard() {
   
   const updateData = useCallback((updates: Partial<ClientData>) => {
     updateClientData(activeId, updates);
-  }, [activeId, updateClientData]);
+  }, [activeId]); // updateClientData is stable (from getState), doesn't need to be in deps
 
   const handleFieldBlur = (field: keyof ClientData, value: string | boolean) => {
     updateData({ [field]: value });
