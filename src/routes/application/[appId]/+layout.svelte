@@ -5,8 +5,9 @@
 	import { cn } from '$lib/utils';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { ChevronRight, Check, Circle, Home } from 'lucide-svelte';
+	import { ChevronRight, Check, Circle, Home, AlertCircle } from 'lucide-svelte';
 	import DebugPanel from '$lib/components/DebugPanel.svelte';
+	import { getStepStatus } from '$lib/stepValidation';
 	
 	let { children } = $props();
 	
@@ -53,15 +54,7 @@
 	});
 	
 	function getStepIcon(stepId: string) {
-		const idx = stepDefinitions.findIndex(s => s.id === stepId);
-		const currentIdx = stepDefinitions.findIndex(s => s.id === $currentStepId);
-		
-		if (idx < currentIdx) {
-			return 'completed';
-		} else if (idx === currentIdx) {
-			return 'current';
-		}
-		return 'pending';
+		return getStepStatus(stepId as any, $currentStepId);
 	}
 	
 	// Get current step from URL to highlight correctly
@@ -118,10 +111,14 @@
 									? 'bg-primary-foreground/20 text-primary-foreground'
 									: status === 'completed'
 										? 'bg-success/10 text-success'
-										: 'bg-muted text-muted-foreground'
+										: status === 'incomplete'
+											? 'bg-warning/10 text-warning'
+											: 'bg-muted text-muted-foreground'
 							)}>
 								{#if status === 'completed'}
 									<Check class="h-4 w-4" />
+								{:else if status === 'incomplete'}
+									<AlertCircle class="h-4 w-4" />
 								{:else}
 									{idx + 1}
 								{/if}
