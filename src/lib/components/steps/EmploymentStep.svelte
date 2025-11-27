@@ -3,6 +3,7 @@
 	import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui';
 	import { Input, Label, Switch, Checkbox, Button, Textarea } from '$lib/components/ui';
 	import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '$lib/components/ui';
+	import { ValidatedSelect } from '$lib/components/ui/validated-input';
 	import AddressAutocomplete from '$lib/components/ui/address-autocomplete.svelte';
 	import { Plus, Trash2, Building2, AlertTriangle } from 'lucide-svelte';
 	import ClientTabs from './ClientTabs.svelte';
@@ -148,27 +149,18 @@
 								placeholder="Software Engineer"
 							/>
 						</div>
-						<div class="space-y-2">
-							<Label>Income Type</Label>
-							<Select 
-								type="single" 
-								value={incomeTypeValue}
-								onValueChange={(value) => {
-									if (value !== undefined && value !== null) {
-										updateRecord(record.id, 'incomeType', value);
-									}
-								}}
-							>
-								<SelectTrigger class="w-full">
-									<SelectValue placeholder="Select type..." />
-								</SelectTrigger>
-								<SelectContent>
-									{#each incomeTypes as type}
-										<SelectItem value={type.value}>{type.label}</SelectItem>
-									{/each}
-								</SelectContent>
-							</Select>
-						</div>
+						<ValidatedSelect
+							label="Income Type"
+							value={incomeTypeValue}
+							onValueChange={(value) => {
+								if (value !== undefined && value !== null) {
+									updateRecord(record.id, 'incomeType', value);
+								}
+							}}
+							options={incomeTypes}
+							placeholder="Select type..."
+							showError={true}
+						/>
 					</div>
 					
 					<!-- Dates -->
