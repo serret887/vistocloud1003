@@ -3,6 +3,7 @@
 	import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui';
 	import { Input, Label, Switch, Button } from '$lib/components/ui';
 	import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '$lib/components/ui';
+	import { ValidatedSelect } from '$lib/components/ui/validated-input';
 	import AddressAutocomplete from '$lib/components/ui/address-autocomplete.svelte';
 	import { Plus, Trash2, Home, DollarSign, Building2 } from 'lucide-svelte';
 	import ClientTabs from './ClientTabs.svelte';
@@ -129,69 +130,45 @@
 					
 					<!-- Property Type & Status -->
 					<div class="grid md:grid-cols-3 gap-4">
-						<div class="space-y-2">
-							<Label>Property Type *</Label>
-							<Select 
-								type="single" 
-								value={propertyTypeValue}
-								onValueChange={(value) => {
-									if (value !== undefined && value !== null) {
-										updateProperty(property.id, 'propertyType', value);
-									}
-								}}
-							>
-								<SelectTrigger class="w-full">
-									<SelectValue placeholder="Select type..." />
-								</SelectTrigger>
-								<SelectContent>
-									{#each propertyTypes as type}
-										<SelectItem value={type.value}>{type.label}</SelectItem>
-									{/each}
-								</SelectContent>
-							</Select>
-						</div>
-						<div class="space-y-2">
-							<Label>Property Status *</Label>
-							<Select 
-								type="single" 
-								value={propertyStatusValue}
-								onValueChange={(value) => {
-									if (value !== undefined && value !== null) {
-										updateProperty(property.id, 'propertyStatus', value);
-									}
-								}}
-							>
-								<SelectTrigger class="w-full">
-									<SelectValue placeholder="Select status..." />
-								</SelectTrigger>
-								<SelectContent>
-									{#each propertyStatuses as status}
-										<SelectItem value={status.value}>{status.label}</SelectItem>
-									{/each}
-								</SelectContent>
-							</Select>
-						</div>
-						<div class="space-y-2">
-							<Label>Intended Occupancy *</Label>
-							<Select 
-								type="single" 
-								value={occupancyTypeValue}
-								onValueChange={(value) => {
-									if (value !== undefined && value !== null) {
-										updateProperty(property.id, 'occupancyType', value);
-									}
-								}}
-							>
-								<SelectTrigger class="w-full">
-									<SelectValue placeholder="Select occupancy..." />
-								</SelectTrigger>
-								<SelectContent>
-									{#each occupancyTypes as occ}
-										<SelectItem value={occ.value}>{occ.label}</SelectItem>
-									{/each}
-								</SelectContent>
-							</Select>
-						</div>
+						<ValidatedSelect
+							label="Property Type"
+							value={propertyTypeValue}
+							onValueChange={(value) => {
+								if (value !== undefined && value !== null) {
+									updateProperty(property.id, 'propertyType', value);
+								}
+							}}
+							options={propertyTypes}
+							placeholder="Select type..."
+							required
+							showError={true}
+						/>
+						<ValidatedSelect
+							label="Property Status"
+							value={propertyStatusValue}
+							onValueChange={(value) => {
+								if (value !== undefined && value !== null) {
+									updateProperty(property.id, 'propertyStatus', value);
+								}
+							}}
+							options={propertyStatuses}
+							placeholder="Select status..."
+							required
+							showError={true}
+						/>
+						<ValidatedSelect
+							label="Intended Occupancy"
+							value={occupancyTypeValue}
+							onValueChange={(value) => {
+								if (value !== undefined && value !== null) {
+									updateProperty(property.id, 'occupancyType', value);
+								}
+							}}
+							options={occupancyTypes}
+							placeholder="Select occupancy..."
+							required
+							showError={true}
+						/>
 					</div>
 					
 					<!-- Property Value -->

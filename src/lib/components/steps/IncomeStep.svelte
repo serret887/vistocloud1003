@@ -3,6 +3,7 @@
 	import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '$lib/components/ui';
 	import { Input, Label, Button, Textarea } from '$lib/components/ui';
 	import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '$lib/components/ui';
+	import { ValidatedSelect } from '$lib/components/ui/validated-input';
 	import { Plus, DollarSign, Briefcase, Trash2, TrendingUp } from 'lucide-svelte';
 	import ClientTabs from './ClientTabs.svelte';
 	import { PASSIVE_INCOME_TYPE_LABELS, type PassiveIncomeType } from '$lib/types/income';
@@ -199,27 +200,19 @@
 							</div>
 							
 							<div class="grid md:grid-cols-3 gap-4">
-								<div class="space-y-2">
-									<Label>Source Type *</Label>
-									<Select 
-										type="single" 
-										value={sourceTypeValue}
-										onValueChange={(value) => {
-											if (value !== undefined && value !== null) {
-												applicationStore.updatePassiveIncomeRecord($activeClientId, income.id, { sourceType: value as PassiveIncomeType });
-											}
-										}}
-									>
-										<SelectTrigger class="w-full">
-											<SelectValue placeholder="Select type..." />
-										</SelectTrigger>
-										<SelectContent>
-											{#each passiveIncomeTypes as type}
-												<SelectItem value={type.value}>{type.label}</SelectItem>
-											{/each}
-										</SelectContent>
-									</Select>
-								</div>
+								<ValidatedSelect
+									label="Source Type"
+									value={sourceTypeValue}
+									onValueChange={(value) => {
+										if (value !== undefined && value !== null) {
+											applicationStore.updatePassiveIncomeRecord($activeClientId, income.id, { sourceType: value as PassiveIncomeType });
+										}
+									}}
+									options={passiveIncomeTypes}
+									placeholder="Select type..."
+									required
+									showError={true}
+								/>
 								<div class="space-y-2">
 									<Label>Source Name</Label>
 									<Input 
