@@ -10,13 +10,19 @@
 	
 	let { children } = $props();
 	
-	// Get appId from URL params and initialize
+	import { getStepIdFromPath } from '$lib/applicationSteps';
+	
+	// Get appId and stepId from URL params and initialize
 	$effect(() => {
 		const appId = $page.params.appId;
 		if (appId) {
 			applicationStore.setApplicationId(appId);
-			// Set default step if not set
-			if (!$currentStepId) {
+			// Get step from URL path
+			const stepId = getStepIdFromPath($page.url.pathname);
+			if (stepId && stepId !== $currentStepId) {
+				applicationStore.setCurrentStep(stepId);
+			} else if (!$currentStepId) {
+				// Default to client-info if no step in URL
 				applicationStore.setCurrentStep('client-info');
 			}
 		}
@@ -34,10 +40,16 @@
 		return 'pending';
 	}
 	
+	// Get current step from URL to highlight correctly
+	const currentStepFromUrl = $derived(getStepIdFromPath($page.url.pathname));
+	
 	async function navigateToStep(stepId: string) {
 		const appId = $page.params.appId;
-		await applicationStore.setCurrentStep(stepId as any);
-		// For now, we stay on the same page but update the current step
+		if (appId) {
+			const stepPath = getStepPath(appId, stepId as any);
+			await goto(stepPath);
+			await applicationStore.setCurrentStep(stepId as any);
+		}
 	}
 </script>
 
@@ -71,14 +83,14 @@
 							onclick={() => navigateToStep(step.id)}
 							class={cn(
 								'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all',
-								step.id === $currentStepId
+								step.id === currentStepFromUrl
 									? 'bg-primary text-primary-foreground shadow-md'
 									: 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
 							)}
 						>
 							<div class={cn(
 								'h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium shrink-0',
-								step.id === $currentStepId
+								step.id === currentStepFromUrl
 									? 'bg-primary-foreground/20 text-primary-foreground'
 									: status === 'completed'
 										? 'bg-success/10 text-success'
@@ -94,7 +106,7 @@
 								<div class="font-medium truncate">{step.title}</div>
 								<div class={cn(
 									'text-xs truncate',
-									step.id === $currentStepId
+									step.id === currentStepFromUrl
 										? 'text-primary-foreground/70'
 										: 'text-muted-foreground'
 								)}>

@@ -3,10 +3,12 @@
 	import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui';
 	import { Input, Label, Checkbox, Switch, Button } from '$lib/components/ui';
 	import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '$lib/components/ui';
+	import { SSNInput, DateInput, ValidatedInput, ValidatedSelect, NameInput, EmailInput, PhoneInput } from '$lib/components/ui/validated-input';
 	import AddressAutocomplete from '$lib/components/ui/address-autocomplete.svelte';
 	import ClientTabs from './ClientTabs.svelte';
-	import { Plus, Trash2, Home, Mail } from 'lucide-svelte';
+	import { Plus, Trash2, Home, Mail, AlertCircle } from 'lucide-svelte';
 	import type { AddressType } from '$lib/types/address';
+	import { cn } from '$lib/utils';
 	
 	let useMailingAddress = $state(false);
 	
@@ -53,6 +55,25 @@
 		if (!value) return undefined;
 		return maritalStatusOptions.find(opt => opt.value === value)?.label;
 	}
+
+	// Calculate months at present address
+	const getMonthsAtAddress = $derived.by(() => {
+		const fromDate = $activeAddressData?.present?.fromDate;
+		if (!fromDate) return 0;
+		
+		const moveInDate = new Date(fromDate);
+		const today = new Date();
+		const diffTime = today.getTime() - moveInDate.getTime();
+		const diffMonths = diffTime / (30.44 * 24 * 60 * 60 * 1000); // Average days per month
+		
+		return Math.floor(diffMonths);
+	});
+
+	// Show former addresses only if less than 24 months (2 years) at present address
+	const shouldShowFormerAddresses = $derived.by(() => {
+		const months = getMonthsAtAddress;
+		return months > 0 && months < 24;
+	});
 </script>
 
 <div class="max-w-4xl mx-auto space-y-6">
@@ -67,122 +88,86 @@
 		<CardContent class="space-y-6">
 			<!-- Name -->
 			<div class="grid md:grid-cols-2 gap-4">
-				<div class="space-y-2">
-					<Label for="firstName">First Name</Label>
-					<Input
-						id="firstName"
-						value={$activeClientData?.firstName || ''}
-						oninput={(e) => updateField('firstName', e.currentTarget.value)}
-						placeholder="John"
-					/>
-				</div>
-				<div class="space-y-2">
-					<Label for="lastName">Last Name</Label>
-					<Input
-						id="lastName"
-						value={$activeClientData?.lastName || ''}
-						oninput={(e) => updateField('lastName', e.currentTarget.value)}
-						placeholder="Doe"
-					/>
-				</div>
+				<NameInput
+					label="First Name"
+					value={$activeClientData?.firstName || ''}
+					onValueChange={(val) => updateField('firstName', val)}
+					placeholder="John"
+					required
+					allowSpaces={false}
+				/>
+				<NameInput
+					label="Last Name"
+					value={$activeClientData?.lastName || ''}
+					onValueChange={(val) => updateField('lastName', val)}
+					placeholder="Doe"
+					required
+					allowSpaces={false}
+				/>
 			</div>
 			
 			<!-- Contact -->
 			<div class="grid md:grid-cols-2 gap-4">
-				<div class="space-y-2">
-					<Label for="email">Email Address</Label>
-					<Input
-						id="email"
-						type="email"
-						value={$activeClientData?.email || ''}
-						oninput={(e) => updateField('email', e.currentTarget.value)}
-						placeholder="john.doe@example.com"
-					/>
-				</div>
-				<div class="space-y-2">
-					<Label for="phone">Phone Number</Label>
-					<Input
-						id="phone"
-						type="tel"
-						value={$activeClientData?.phone || ''}
-						oninput={(e) => updateField('phone', e.currentTarget.value)}
-						placeholder="(555) 123-4567"
-					/>
-				</div>
+				<EmailInput
+					label="Email Address"
+					value={$activeClientData?.email || ''}
+					onValueChange={(val) => updateField('email', val)}
+					placeholder="john.doe@example.com"
+					required
+				/>
+				<PhoneInput
+					label="Phone Number"
+					value={$activeClientData?.phone || ''}
+					onValueChange={(val) => updateField('phone', val)}
+					required
+				/>
 			</div>
 			
 			<!-- Personal Details -->
 			<div class="grid md:grid-cols-2 gap-4">
-				<div class="space-y-2">
-					<Label for="ssn">Social Security Number</Label>
-					<Input
-						id="ssn"
-						value={$activeClientData?.ssn || ''}
-						oninput={(e) => updateField('ssn', e.currentTarget.value)}
-						placeholder="XXX-XX-XXXX"
-					/>
-				</div>
-				<div class="space-y-2">
-					<Label for="dob">Date of Birth</Label>
-					<Input
-						id="dob"
-						type="date"
-						value={$activeClientData?.dob || ''}
-						oninput={(e) => updateField('dob', e.currentTarget.value)}
-					/>
-				</div>
+				<SSNInput
+					label="Social Security Number"
+					value={$activeClientData?.ssn || ''}
+					onValueChange={(val) => updateField('ssn', val)}
+					required
+				/>
+				<DateInput
+					label="Date of Birth"
+					value={$activeClientData?.dob || ''}
+					onValueChange={(val) => updateField('dob', val)}
+					required
+					allowFuture={false}
+				/>
 			</div>
 			
 			<!-- Status -->
 			<div class="grid md:grid-cols-2 gap-4">
-				<div class="space-y-2">
-					<Label>Citizenship Status</Label>
-					<Select 
-						type="single" 
-						value={$activeClientData?.citizenship || undefined}
-						onValueChange={(value) => {
-							if (value !== undefined && value !== null) {
-								updateField('citizenship', value);
-							}
-						}}
-					>
-						<SelectTrigger class="w-full">
-							<SelectValue 
-								placeholder="Select status..." 
-								value={getCitizenshipLabel($activeClientData?.citizenship)} 
-							/>
-						</SelectTrigger>
-						<SelectContent>
-							{#each citizenshipOptions as option}
-								<SelectItem value={option.value}>{option.label}</SelectItem>
-							{/each}
-						</SelectContent>
-					</Select>
-				</div>
-				<div class="space-y-2">
-					<Label>Marital Status</Label>
-					<Select 
-						type="single" 
-						value={$activeClientData?.maritalStatus || undefined}
-						onValueChange={(value) => {
-							if (value !== undefined && value !== null) {
-								updateField('maritalStatus', value);
-							}
-						}}
-					>
-						<SelectTrigger class="w-full">
-							<SelectValue 
-								placeholder="Select status..." 
-								value={getMaritalStatusLabel($activeClientData?.maritalStatus)} 
-							/>
-						</SelectTrigger>
-						<SelectContent>
-							{#each maritalStatusOptions as option}
-								<SelectItem value={option.value}>{option.label}</SelectItem>
-							{/each}
-						</SelectContent>
-					</Select>
-				</div>
+				<ValidatedSelect
+					label="Citizenship Status"
+					value={$activeClientData?.citizenship || undefined}
+					onValueChange={(value) => {
+						if (value !== undefined && value !== null) {
+							updateField('citizenship', value);
+						}
+					}}
+					options={citizenshipOptions}
+					placeholder="Select status..."
+					required
+					showError={true}
+				/>
+				<ValidatedSelect
+					label="Marital Status"
+					value={$activeClientData?.maritalStatus || undefined}
+					onValueChange={(value) => {
+						if (value !== undefined && value !== null) {
+							updateField('maritalStatus', value);
+						}
+					}}
+					options={maritalStatusOptions}
+					placeholder="Select status..."
+					required
+					showError={true}
+				/>
 			</div>
 			
 			<!-- Military Service -->
@@ -223,25 +208,34 @@
 			</div>
 			
 			<div class="grid md:grid-cols-2 gap-4">
+				<DateInput
+					label="Move-in Date"
+					value={$activeAddressData?.present?.fromDate || ''}
+					onValueChange={(val) => updatePresentAddressDate('fromDate', val)}
+					required
+					allowFuture={false}
+				/>
 				<div class="space-y-2">
-					<Label for="presentFromDate">Move-in Date</Label>
-					<Input
-						id="presentFromDate"
-						type="date"
-						value={$activeAddressData?.present?.fromDate || ''}
-						oninput={(e) => updatePresentAddressDate('fromDate', e.currentTarget.value)}
-					/>
-				</div>
-				<div class="space-y-2">
-					<Label>Years at Address</Label>
-					<Input
-						type="text"
-						readonly
-						value={$activeAddressData?.present?.fromDate 
-							? `${Math.floor((Date.now() - new Date($activeAddressData.present.fromDate).getTime()) / (365.25 * 24 * 60 * 60 * 1000))} years`
-							: 'Enter move-in date'}
-						class="bg-muted"
-					/>
+					<Label>Months at Address</Label>
+					<div class={cn(
+						"px-3 py-2 text-sm rounded-md border bg-muted",
+						shouldShowFormerAddresses && "border-warning/50 text-warning-foreground"
+					)}>
+						{(() => {
+							const months = getMonthsAtAddress;
+							return months === 0 
+								? 'Enter move-in date'
+								: months < 24
+									? `${months} months (Former addresses required)`
+									: `${months} months`;
+						})()}
+					</div>
+					{#if shouldShowFormerAddresses}
+						<p class="text-sm text-warning flex items-center gap-1">
+							<AlertCircle class="h-3 w-3" />
+							You must provide former addresses (less than 24 months at current address)
+						</p>
+					{/if}
 				</div>
 			</div>
 			
@@ -260,22 +254,24 @@
 		</CardContent>
 	</Card>
 	<!-- Former Addresses -->
-	<Card>
-		<CardHeader class="flex flex-row items-center justify-between space-y-0">
-			<div>
-				<CardTitle>Former Addresses</CardTitle>
-				<CardDescription>Previous addresses (if less than 2 years at present address)</CardDescription>
-			</div>
-			<Button variant="outline" size="sm" onclick={addFormerAddress} class="gap-2">
-				<Plus class="h-4 w-4" />
-				Add Former Address
-			</Button>
-		</CardHeader>
-		<CardContent>
-			{#if $activeAddressData?.former?.length === 0}
-				<p class="text-muted-foreground text-center py-6">
-					No former addresses added. Add if you've lived at your current address for less than 2 years.
-				</p>
+	{#if shouldShowFormerAddresses}
+		<Card>
+			<CardHeader class="flex flex-row items-center justify-between space-y-0">
+				<div>
+					<CardTitle>Former Addresses</CardTitle>
+					<CardDescription>Previous addresses (required: less than 24 months at present address)</CardDescription>
+				</div>
+				<Button variant="outline" size="sm" onclick={addFormerAddress} class="gap-2">
+					<Plus class="h-4 w-4" />
+					Add Former Address
+				</Button>
+			</CardHeader>
+			<CardContent>
+				{#if $activeAddressData?.former?.length === 0}
+					<p class="text-warning text-center py-6 flex items-center justify-center gap-2">
+						<AlertCircle class="h-4 w-4" />
+						You must add at least one former address (less than 24 months at current address)
+					</p>
 			{:else}
 				<div class="space-y-4">
 					{#each $activeAddressData?.former || [] as addr, idx}
@@ -291,14 +287,25 @@
 								placeholder="Start typing former address..."
 							/>
 							<div class="grid md:grid-cols-2 gap-4">
-								<div class="space-y-2">
-									<Label>From Date</Label>
-									<Input type="date" value={addr.fromDate} />
-								</div>
-								<div class="space-y-2">
-									<Label>To Date</Label>
-									<Input type="date" value={addr.toDate} />
-								</div>
+								<DateInput
+									label="From Date"
+									value={addr.fromDate || ''}
+									onValueChange={(val) => {
+										applicationStore.updateFormerAddress($activeClientId, addr.id, { fromDate: val });
+									}}
+									required
+									allowFuture={false}
+								/>
+								<DateInput
+									label="To Date"
+									value={addr.toDate || ''}
+									onValueChange={(val) => {
+										applicationStore.updateFormerAddress($activeClientId, addr.id, { toDate: val });
+									}}
+									required
+									allowFuture={false}
+									maxDate={new Date().toISOString().split('T')[0]}
+								/>
 							</div>
 						</div>
 					{/each}
@@ -306,6 +313,7 @@
 			{/if}
 		</CardContent>
 	</Card>
+	{/if}
     
 	<!-- Mailing Address -->
 	<Card>

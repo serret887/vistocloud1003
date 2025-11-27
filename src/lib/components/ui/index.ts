@@ -48,5 +48,8 @@ export { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs';
 // Table
 export * from './table';
 
+// Validated Inputs
+export { ValidatedInput, ValidatedSelect, SSNInput, DateInput, NameInput, EmailInput, PhoneInput } from './validated-input';
+
 // Custom components
 export { default as AddressAutocomplete } from './address-autocomplete.svelte';

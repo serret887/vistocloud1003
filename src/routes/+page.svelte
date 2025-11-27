@@ -8,7 +8,7 @@
 	async function createNewApplication() {
 		// Create a new application in Firestore (Firestore will auto-generate the ID)
 		const appId = await applicationStore.createApplication();
-		goto(`/application/${appId}`);
+		goto(`/application/${appId}/client-info`);
 	}
 </script>
 

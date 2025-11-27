@@ -7,7 +7,7 @@ import type { ClientRealEstateData, RealEstateOwned } from '$lib/types/real-esta
 import type { ClientAddressData, AddressRecord } from '$lib/types/address';
 import type { ApplicationStepId } from '$lib/types/application';
 import { generateId } from '$lib/idGenerator';
-import { validateClientData, validateEmploymentRecord } from '$lib/dataValidator';
+// Validation is handled in UI components on blur, not in the store
 import { debug } from '$lib/debug';
 import { saveAllClientDataToFirebase, saveApplicationToFirebase, createApplicationInFirebase } from '$lib/firebase/save';
 
@@ -295,25 +295,18 @@ function createApplicationStore() {
     
     // Update client data with validation
     updateClientData: (clientId: string, data: Partial<ClientData>) => {
-      // Validate the data
-      const validation = validateClientData(data);
-      debug.validation('clientData', data, validation.isValid, validation.errors);
-      
-      if (!validation.isValid && validation.errors.length > 0) {
-        debug.warn('Client data validation failed:', validation.errors);
-        // Still update with valid fields only
-      }
-      
+      // Don't validate here - validation happens in UI components on blur
+      // Just store the data as-is
       update(state => {
         const updated = {
           ...state,
           clientData: {
             ...state.clientData,
-            [clientId]: { ...state.clientData[clientId], ...validation.data }
+            [clientId]: { ...state.clientData[clientId], ...data }
           }
         };
         
-        debug.storeUpdate('updateClientData', { clientId, data: validation.data });
+        debug.storeUpdate('updateClientData', { clientId, data });
         
         // Don't auto-save here - will save on step change
         return updated;
@@ -355,10 +348,8 @@ function createApplicationStore() {
     },
     
     updateEmploymentRecord: (clientId: string, recordId: string, updates: Partial<EmploymentRecord>) => {
-      // Validate the data
-      const validation = validateEmploymentRecord(updates);
-      debug.validation('employmentRecord', updates, validation.isValid, validation.errors);
-      
+      // Don't validate here - validation happens in UI components on blur
+      // Just store the data as-is
       update(state => {
         const updated = {
           ...state,
@@ -367,13 +358,13 @@ function createApplicationStore() {
             [clientId]: {
               ...state.employmentData[clientId],
               records: state.employmentData[clientId].records.map(r =>
-                r.id === recordId ? { ...r, ...validation.data, updatedAt: new Date().toISOString() } : r
+                r.id === recordId ? { ...r, ...updates, updatedAt: new Date().toISOString() } : r
               )
             }
           }
         };
         
-        debug.storeUpdate('updateEmploymentRecord', { clientId, recordId, updates: validation.data });
+        debug.storeUpdate('updateEmploymentRecord', { clientId, recordId, updates });
         
         // Don't auto-save here - will save on step change
         return updated;
@@ -541,6 +532,21 @@ function createApplicationStore() {
       }));
       
       return newAddress.id;
+    },
+    
+    updateFormerAddress: (clientId: string, addressId: string, updates: Partial<AddressRecord>) => {
+      update(state => ({
+        ...state,
+        addressData: {
+          ...state.addressData,
+          [clientId]: {
+            ...state.addressData[clientId],
+            former: state.addressData[clientId].former.map(addr =>
+              addr.id === addressId ? { ...addr, ...updates } : addr
+            )
+          }
+        }
+      }));
     },
     
     // Income actions
