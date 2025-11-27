@@ -21,3 +21,262 @@ Before we get started, keep in mind:
 
   * You are initializing within an existing Firebase project directory
 
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] 
+[debug] [2025-11-27T23:04:11.108Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-11-27T23:04:11.114Z] > authorizing via signed-in user (serret887@gmail.com)
+[debug] [2025-11-27T23:04:11.123Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:04:11.124Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:04:11.135Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/vistocloud [none]
+[debug] [2025-11-27T23:04:11.511Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/vistocloud 200
+[debug] [2025-11-27T23:04:11.513Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/vistocloud {"projectId":"vistocloud","projectNumber":"390001891387","displayName":"vistocloud","name":"projects/vistocloud","resources":{"hostingSite":"vistocloud"},"state":"ACTIVE","etag":"1_1f5f2dea-231d-4214-bf33-2e1e9deb9336"}
+[info] i  Using project vistocloud (vistocloud) . 
+[info] 
+=== Firestore Setup
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[debug] [2025-11-27T23:04:11.554Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:04:11.554Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:04:11.554Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/vistocloud/services/firestore.googleapis.com [none]
+[debug] [2025-11-27T23:04:11.554Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/vistocloud/services/firestore.googleapis.com x-goog-quota-user=projects/vistocloud
+[debug] [2025-11-27T23:04:11.942Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/vistocloud/services/firestore.googleapis.com 200
+[debug] [2025-11-27T23:04:11.942Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/vistocloud/services/firestore.googleapis.com [omitted]
+[info] ✔  firestore: required API firestore.googleapis.com is enabled 
+[debug] [2025-11-27T23:04:11.958Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:04:11.958Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:04:11.958Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/vistocloud/databases [none]
+[debug] [2025-11-27T23:04:12.550Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/vistocloud/databases 200
+[debug] [2025-11-27T23:04:12.550Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/vistocloud/databases {}
+[debug] [2025-11-27T23:04:12.550Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:04:12.550Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:04:12.551Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/vistocloud/locations [none]
+[debug] [2025-11-27T23:04:12.661Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/vistocloud/locations 200
+[debug] [2025-11-27T23:04:12.661Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/vistocloud/locations {"locations":[{"name":"projects/vistocloud/locations/eur3","labels":{"appengine.googleapis.com/geo":"europe-west","cloud.googleapis.com/location":"eur3","cloud.googleapis.com/geo":"eur3"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"eur3","displayName":"Europe"},{"name":"projects/vistocloud/locations/nam5","labels":{"appengine.googleapis.com/geo":"us-central","cloud.googleapis.com/location":"nam5","cloud.googleapis.com/geo":"nam5"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"nam5","displayName":"United States"},{"name":"projects/vistocloud/locations/nam7","labels":{"cloud.googleapis.com/location":"nam7","cloud.googleapis.com/geo":"nam7"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"nam7","displayName":"United States"},{"name":"projects/vistocloud/locations/africa-south1","labels":{"cloud.googleapis.com/location":"africa-south1","cloud.googleapis.com/region":"africa-south1"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"africa-south1","displayName":"Johannesburg"},{"name":"projects/vistocloud/locations/asia-east1","labels":{"appengine.googleapis.com/region":"asia-east1","cloud.googleapis.com/location":"asia-east1","cloud.googleapis.com/region":"asia-east1"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"asia-east1","displayName":"Taiwan"},{"name":"projects/vistocloud/locations/asia-east2","labels":{"appengine.googleapis.com/region":"asia-east2","cloud.googleapis.com/location":"asia-east2","cloud.googleapis.com/region":"asia-east2"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"asia-east2","displayName":"Hong Kong"},{"name":"projects/vistocloud/locations/asia-northeast1","labels":{"appengine.googleapis.com/region":"asia-northeast1","cloud.googleapis.com/location":"asia-northeast1","cloud.googleapis.com/region":"asia-northeast1"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"asia-northeast1","displayName":"Tokyo"},{"name":"projects/vistocloud/locations/asia-northeast2","labels":{"appengine.googleapis.com/region":"asia-northeast2","cloud.googleapis.com/location":"asia-northeast2","cloud.googleapis.com/region":"asia-northeast2"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"asia-northeast2","displayName":"Osaka"},{"name":"projects/vistocloud/locations/asia-northeast3","labels":{"appengine.googleapis.com/region":"asia-northeast3","cloud.googleapis.com/location":"asia-northeast3","cloud.googleapis.com/region":"asia-northeast3"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"asia-northeast3","displayName":"Seoul"},{"name":"projects/vistocloud/locations/asia-south1","labels":{"appengine.googleapis.com/region":"asia-south1","cloud.googleapis.com/location":"asia-south1","cloud.googleapis.com/region":"asia-south1"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"asia-south1","displayName":"Mumbai"},{"name":"projects/vistocloud/locations/asia-south2","labels":{"cloud.googleapis.com/location":"asia-south2","cloud.googleapis.com/region":"asia-south2"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"asia-south2","displayName":"Delhi"},{"name":"projects/vistocloud/locations/asia-southeast1","labels":{"appengine.googleapis.com/region":"asia-southeast1","cloud.googleapis.com/location":"asia-southeast1","cloud.googleapis.com/region":"asia-southeast1"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"asia-southeast1","displayName":"Singapore"},{"name":"projects/vistocloud/locations/asia-southeast2","labels":{"appengine.googleapis.com/region":"asia-southeast2","cloud.googleapis.com/location":"asia-southeast2","cloud.googleapis.com/region":"asia-southeast2"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"asia-southeast2","displayName":"Jakarta"},{"name":"projects/vistocloud/locations/australia-southeast1","labels":{"appengine.googleapis.com/region":"australia-southeast1","cloud.googleapis.com/location":"australia-southeast1","cloud.googleapis.com/region":"australia-southeast1"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"australia-southeast1","displayName":"Sydney"},{"name":"projects/vistocloud/locations/australia-southeast2","labels":{"cloud.googleapis.com/location":"australia-southeast2","cloud.googleapis.com/region":"australia-southeast2"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"australia-southeast2","displayName":"Melbourne"},{"name":"projects/vistocloud/locations/europe-central2","labels":{"appengine.googleapis.com/region":"europe-central2","cloud.googleapis.com/location":"europe-central2","cloud.googleapis.com/region":"europe-central2"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"europe-central2","displayName":"Warsaw"},{"name":"projects/vistocloud/locations/europe-north1","labels":{"cloud.googleapis.com/location":"europe-north1","cloud.googleapis.com/region":"europe-north1"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"europe-north1","displayName":"Finland"},{"name":"projects/vistocloud/locations/europe-north2","labels":{"cloud.googleapis.com/location":"europe-north2","cloud.googleapis.com/region":"europe-north2"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"europe-north2","displayName":"Stockholm"},{"name":"projects/vistocloud/locations/europe-southwest1","labels":{"cloud.googleapis.com/location":"europe-southwest1","cloud.googleapis.com/region":"europe-southwest1"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"europe-southwest1","displayName":"Madrid"},{"name":"projects/vistocloud/locations/europe-west1","labels":{"cloud.googleapis.com/location":"europe-west1","cloud.googleapis.com/region":"europe-west1"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"europe-west1","displayName":"Belgium"},{"name":"projects/vistocloud/locations/europe-west10","labels":{"cloud.googleapis.com/location":"europe-west10","cloud.googleapis.com/region":"europe-west10"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"europe-west10","displayName":"Berlin"},{"name":"projects/vistocloud/locations/europe-west12","labels":{"cloud.googleapis.com/location":"europe-west12","cloud.googleapis.com/region":"europe-west12"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"europe-west12","displayName":"Turin"},{"name":"projects/vistocloud/locations/europe-west2","labels":{"appengine.googleapis.com/region":"europe-west2","cloud.googleapis.com/location":"europe-west2","cloud.googleapis.com/region":"europe-west2"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"europe-west2","displayName":"London"},{"name":"projects/vistocloud/locations/europe-west3","labels":{"appengine.googleapis.com/region":"europe-west3","cloud.googleapis.com/location":"europe-west3","cloud.googleapis.com/region":"europe-west3"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"europe-west3","displayName":"Frankfurt"},{"name":"projects/vistocloud/locations/europe-west4","labels":{"cloud.googleapis.com/location":"europe-west4","cloud.googleapis.com/region":"europe-west4"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"europe-west4","displayName":"Netherlands"},{"name":"projects/vistocloud/locations/europe-west6","labels":{"appengine.googleapis.com/region":"europe-west6","cloud.googleapis.com/location":"europe-west6","cloud.googleapis.com/region":"europe-west6"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"europe-west6","displayName":"Zurich"},{"name":"projects/vistocloud/locations/europe-west8","labels":{"cloud.googleapis.com/location":"europe-west8","cloud.googleapis.com/region":"europe-west8"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"europe-west8","displayName":"Milan"},{"name":"projects/vistocloud/locations/europe-west9","labels":{"cloud.googleapis.com/location":"europe-west9","cloud.googleapis.com/region":"europe-west9"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"europe-west9","displayName":"Paris"},{"name":"projects/vistocloud/locations/me-central1","labels":{"cloud.googleapis.com/location":"me-central1","cloud.googleapis.com/region":"me-central1"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"me-central1","displayName":"Doha"},{"name":"projects/vistocloud/locations/me-central2","labels":{"cloud.googleapis.com/location":"me-central2","cloud.googleapis.com/region":"me-central2"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"me-central2","displayName":"Dammam"},{"name":"projects/vistocloud/locations/me-west1","labels":{"cloud.googleapis.com/location":"me-west1","cloud.googleapis.com/region":"me-west1"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"me-west1","displayName":"Tel Aviv"},{"name":"projects/vistocloud/locations/northamerica-northeast1","labels":{"appengine.googleapis.com/region":"northamerica-northeast1","cloud.googleapis.com/location":"northamerica-northeast1","cloud.googleapis.com/region":"northamerica-northeast1"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"northamerica-northeast1","displayName":"Montréal"},{"name":"projects/vistocloud/locations/northamerica-northeast2","labels":{"cloud.googleapis.com/location":"northamerica-northeast2","cloud.googleapis.com/region":"northamerica-northeast2"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"northamerica-northeast2","displayName":"Toronto"},{"name":"projects/vistocloud/locations/northamerica-south1","labels":{"cloud.googleapis.com/location":"northamerica-south1","cloud.googleapis.com/region":"northamerica-south1"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"northamerica-south1","displayName":"Mexico"},{"name":"projects/vistocloud/locations/southamerica-east1","labels":{"appengine.googleapis.com/region":"southamerica-east1","cloud.googleapis.com/location":"southamerica-east1","cloud.googleapis.com/region":"southamerica-east1"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"southamerica-east1","displayName":"São Paulo"},{"name":"projects/vistocloud/locations/southamerica-west1","labels":{"cloud.googleapis.com/location":"southamerica-west1","cloud.googleapis.com/region":"southamerica-west1"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"southamerica-west1","displayName":"Santiago"},{"name":"projects/vistocloud/locations/us-central1","labels":{"cloud.googleapis.com/location":"us-central1","cloud.googleapis.com/region":"us-central1"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"us-central1","displayName":"Iowa"},{"name":"projects/vistocloud/locations/us-east1","labels":{"appengine.googleapis.com/region":"us-east1","cloud.googleapis.com/location":"us-east1","cloud.googleapis.com/region":"us-east1"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"us-east1","displayName":"South Carolina"},{"name":"projects/vistocloud/locations/us-east4","labels":{"appengine.googleapis.com/region":"us-east4","cloud.googleapis.com/location":"us-east4","cloud.googleapis.com/region":"us-east4"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"us-east4","displayName":"Northern Virginia"},{"name":"projects/vistocloud/locations/us-east5","labels":{"cloud.googleapis.com/location":"us-east5","cloud.googleapis.com/region":"us-east5"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"us-east5","displayName":"Columbus"},{"name":"projects/vistocloud/locations/us-south1","labels":{"cloud.googleapis.com/location":"us-south1","cloud.googleapis.com/region":"us-south1"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"us-south1","displayName":"Dallas"},{"name":"projects/vistocloud/locations/us-west1","labels":{"appengine.googleapis.com/region":"us-west1","cloud.googleapis.com/location":"us-west1","cloud.googleapis.com/region":"us-west1"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"us-west1","displayName":"Oregon"},{"name":"projects/vistocloud/locations/us-west2","labels":{"appengine.googleapis.com/region":"us-west2","cloud.googleapis.com/location":"us-west2","cloud.googleapis.com/region":"us-west2"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"us-west2","displayName":"Los Angeles"},{"name":"projects/vistocloud/locations/us-west3","labels":{"appengine.googleapis.com/region":"us-west3","cloud.googleapis.com/location":"us-west3","cloud.googleapis.com/region":"us-west3"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"us-west3","displayName":"Salt Lake City"},{"name":"projects/vistocloud/locations/us-west4","labels":{"appengine.googleapis.com/region":"us-west4","cloud.googleapis.com/location":"us-west4","cloud.googleapis.com/region":"us-west4"},"metadata":{"@type":"type.googleapis.com/google.firestore.admin.v1.LocationMetadata"},"locationId":"us-west4","displayName":"Las Vegas"}]}
+[info] 
+[info] Firestore Security Rules allow you to define how and when to allow
+[info] requests. You can keep these rules in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[debug] [2025-11-27T23:04:27.641Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:04:27.641Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:04:27.643Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/vistocloud/releases pageSize=10&pageToken=
+[debug] [2025-11-27T23:04:27.933Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/vistocloud/releases 200
+[debug] [2025-11-27T23:04:27.933Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/vistocloud/releases {}
+[info] i  Skipping write of firestore.rules 
+[info] 
+[info] Firestore indexes allow you to perform complex queries while
+[info] maintaining performance that scales with the size of the result
+[info] set. You can keep index definitions in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[debug] [2025-11-27T23:04:31.917Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:04:31.917Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:04:31.917Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:04:31.917Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:04:31.918Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/vistocloud/databases/(default)/collectionGroups/-/indexes [none]
+[debug] [2025-11-27T23:04:31.923Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/vistocloud/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* [none]
+[debug] [2025-11-27T23:04:32.117Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/vistocloud/databases/(default)/collectionGroups/-/indexes 404
+[debug] [2025-11-27T23:04:32.117Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/vistocloud/databases/(default)/collectionGroups/-/indexes {"error":{"code":404,"message":"Project 'vistocloud' or database '(default)' does not exist.","status":"NOT_FOUND"}}
+[debug] [2025-11-27T23:04:32.126Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/vistocloud/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* 404
+[debug] [2025-11-27T23:04:32.127Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/vistocloud/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* {"error":{"code":404,"message":"Project 'vistocloud' or database '(default)' does not exist.","status":"NOT_FOUND"}}
+[info] i  Skipping write of firestore.indexes.json 
+[info] ✔  Wrote firestore.indexes.json 
+[info] 
+=== Genkit Setup
+[debug] [2025-11-27T23:04:49.230Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-11-27T23:04:49.230Z] > authorizing via signed-in user (serret887@gmail.com)
+[debug] [2025-11-27T23:04:49.230Z] [iam] checking project vistocloud for permissions ["firebase.projects.get"]
+[debug] [2025-11-27T23:04:49.231Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:04:49.231Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:04:49.231Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/vistocloud:testIamPermissions [none]
+[debug] [2025-11-27T23:04:49.231Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/vistocloud:testIamPermissions x-goog-quota-user=projects/vistocloud
+[debug] [2025-11-27T23:04:49.231Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/vistocloud:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2025-11-27T23:04:49.443Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/vistocloud:testIamPermissions 200
+[debug] [2025-11-27T23:04:49.443Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/vistocloud:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2025-11-27T23:04:49.443Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:04:49.443Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:04:49.444Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:04:49.444Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:04:49.444Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/vistocloud/services/cloudfunctions.googleapis.com [none]
+[debug] [2025-11-27T23:04:49.444Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/vistocloud/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/vistocloud
+[debug] [2025-11-27T23:04:49.446Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/vistocloud/services/runtimeconfig.googleapis.com [none]
+[debug] [2025-11-27T23:04:49.447Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/vistocloud/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/vistocloud
+[debug] [2025-11-27T23:04:49.828Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/vistocloud/services/runtimeconfig.googleapis.com 200
+[debug] [2025-11-27T23:04:49.828Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/vistocloud/services/runtimeconfig.googleapis.com [omitted]
+[debug] [2025-11-27T23:04:49.862Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/vistocloud/services/cloudfunctions.googleapis.com 200
+[debug] [2025-11-27T23:04:49.862Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/vistocloud/services/cloudfunctions.googleapis.com [omitted]
+[info] 
+Detected existing codebase(s): default
+
+[info] 
+Overwriting codebase default...
+
+[info] i  functions/package.json is unchanged 
+[info] i  functions/.eslintrc.js is unchanged 
+[info] i  functions/tsconfig.dev.json is unchanged 
+[info] i  functions/tsconfig.json is unchanged 
+[info] i  functions/src/index.ts is unchanged 
+[info] i  functions/.gitignore is unchanged 
+[info] 
+[info] i  genkit: Installing Genkit CLI version 1.24.0
+ 
+[info] i  aiplatform: ensuring required API aiplatform.googleapis.com is enabled... 
+[debug] [2025-11-27T23:06:50.247Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:06:50.248Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:06:50.249Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/vistocloud/services/aiplatform.googleapis.com [none]
+[debug] [2025-11-27T23:06:50.249Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/vistocloud/services/aiplatform.googleapis.com x-goog-quota-user=projects/vistocloud
+[debug] [2025-11-27T23:06:50.976Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/vistocloud/services/aiplatform.googleapis.com 200
+[debug] [2025-11-27T23:06:50.977Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/vistocloud/services/aiplatform.googleapis.com [omitted]
+[warn] ⚠  aiplatform: missing required API aiplatform.googleapis.com. Enabling now... 
+[debug] [2025-11-27T23:06:50.979Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:06:50.979Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:06:50.979Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1/projects/vistocloud/services/aiplatform.googleapis.com:enable [none]
+[debug] [2025-11-27T23:06:50.979Z] >>> [apiv2][(partial)header] POST https://serviceusage.googleapis.com/v1/projects/vistocloud/services/aiplatform.googleapis.com:enable x-goog-quota-user=projects/vistocloud
+[debug] [2025-11-27T23:06:51.885Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1/projects/vistocloud/services/aiplatform.googleapis.com:enable 200
+[debug] [2025-11-27T23:06:51.886Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1/projects/vistocloud/services/aiplatform.googleapis.com:enable [omitted]
+[info] i  genkit: Installing NPM packages for genkit 
+[info] ✔  genkit: Successfully installed NPM packages 
+[info] i  genkit: Updating tsconfig.json 
+[info] ✔  genkit: Successfully updated tsconfig.json 
+[info] i  genkit: Updating package.json 
+[info] ✔  genkit: Successfully updated package.json 
+[info] Telemetry data can be used to monitor and gain insights into your AI features. There may be a cost associated with using this feature. See https://firebase.google.com/docs/genkit/observability/telemetry-collection.
+[info] i  genkit: Generating sample file 
+[info] ✔  genkit: Successfully generated sample file (src/genkit-sample.ts) 
+[info] 
+[info] 
+Login to Google Cloud using:
+[info]     gcloud auth application-default login --project vistocloud
+
+[info] Then start the Genkit developer experience by running:
+[info]     cd functions && npm run genkit:start
+[info] 
+=== Functions Setup
+[debug] [2025-11-27T23:08:47.339Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-11-27T23:08:47.340Z] > authorizing via signed-in user (serret887@gmail.com)
+[debug] [2025-11-27T23:08:47.342Z] [iam] checking project vistocloud for permissions ["firebase.projects.get"]
+[debug] [2025-11-27T23:08:47.342Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:08:47.343Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:08:47.343Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/vistocloud:testIamPermissions [none]
+[debug] [2025-11-27T23:08:47.343Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/vistocloud:testIamPermissions x-goog-quota-user=projects/vistocloud
+[debug] [2025-11-27T23:08:47.343Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/vistocloud:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2025-11-27T23:08:47.505Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/vistocloud:testIamPermissions 200
+[debug] [2025-11-27T23:08:47.506Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/vistocloud:testIamPermissions {"permissions":["firebase.projects.get"]}
+[info] 
+Detected existing codebase(s): default
+
+[info] Let's create a new codebase for your functions.
+[info] A directory corresponding to the codebase will be created in your project
+[info] with sample code pre-configured.
+
+[info] See https://firebase.google.com/docs/functions/organize-functions for
+[info] more information on organizing your functions using codebases.
+
+[info] Functions can be deployed with firebase deploy.
+
+[error] Invalid codebase name. Codebase must be less than 64 characters and can contain only lowercase letters, numeric characters, underscores, and dashes.
+[info] ✔  Wrote gen/package.json 
+[info] ✔  Wrote gen/.eslintrc.js 
+[info] ✔  Wrote gen/tsconfig.dev.json 
+[info] ✔  Wrote gen/tsconfig.json 
+[info] ✔  Wrote gen/src/index.ts 
+[info] ✔  Wrote gen/.gitignore 
+[info] 
+=== Storage Setup
+[info] 
+[info] Firebase Storage Security Rules allow you to define how and when to allow
+[info] uploads and downloads. You can keep these rules in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[info] ✔  Wrote storage.rules 
+[info] 
+=== Emulators Setup
+[info] i  Port for firestore already configured: 8080 
+[info] i  Emulator UI already enabled with port: 4000 
+[info] i  pubsub: downloading pubsub-emulator-0.8.17.zip... {"metadata":{"emulator":{"name":"pubsub"},"message":"downloading pubsub-emulator-0.8.17.zip..."}}
+[debug] [2025-11-27T23:09:57.472Z] >>> [apiv2][query] GET https://storage.googleapis.com/firebase-preview-drop/emulator/pubsub-emulator-0.8.17.zip 
+[debug] [2025-11-27T23:09:57.659Z] <<< [apiv2][status] GET https://storage.googleapis.com/firebase-preview-drop/emulator/pubsub-emulator-0.8.17.zip 200
+[debug] [2025-11-27T23:09:57.659Z] <<< [apiv2][body] GET https://storage.googleapis.com/firebase-preview-drop/emulator/pubsub-emulator-0.8.17.zip [stream]
+[debug] [2025-11-27T23:09:59.692Z] Data is 65162324
+[debug] [2025-11-27T23:09:59.693Z] [unzip] Entry: pubsub-emulator/ (compressed_size=0 bytes, uncompressed_size=0 bytes)
+[debug] [2025-11-27T23:09:59.693Z] [unzip] Processing entry: pubsub-emulator/
+[debug] [2025-11-27T23:09:59.693Z] [unzip] mkdir: /Users/ale/.cache/firebase/emulators/pubsub-emulator-0.8.17/pubsub-emulator/
+[debug] [2025-11-27T23:09:59.693Z] [unzip] Entry: pubsub-emulator/bin/ (compressed_size=0 bytes, uncompressed_size=0 bytes)
+[debug] [2025-11-27T23:09:59.693Z] [unzip] Processing entry: pubsub-emulator/bin/
+[debug] [2025-11-27T23:09:59.693Z] [unzip] mkdir: /Users/ale/.cache/firebase/emulators/pubsub-emulator-0.8.17/pubsub-emulator/bin/
+[debug] [2025-11-27T23:09:59.694Z] [unzip] Entry: pubsub-emulator/bin/cloud-pubsub-emulator (compressed_size=2284 bytes, uncompressed_size=5728 bytes)
+[debug] [2025-11-27T23:09:59.694Z] [unzip] Processing entry: pubsub-emulator/bin/cloud-pubsub-emulator
+[debug] [2025-11-27T23:09:59.694Z] [unzip] else mkdir: /Users/ale/.cache/firebase/emulators/pubsub-emulator-0.8.17/pubsub-emulator/bin
+[debug] [2025-11-27T23:09:59.694Z] [unzip] deflating: /Users/ale/.cache/firebase/emulators/pubsub-emulator-0.8.17/pubsub-emulator/bin/cloud-pubsub-emulator
+[debug] [2025-11-27T23:09:59.699Z] [unzip] Entry: pubsub-emulator/bin/cloud-pubsub-emulator.bat (compressed_size=889 bytes, uncompressed_size=2276 bytes)
+[debug] [2025-11-27T23:09:59.699Z] [unzip] Processing entry: pubsub-emulator/bin/cloud-pubsub-emulator.bat
+[debug] [2025-11-27T23:09:59.699Z] [unzip] else mkdir: /Users/ale/.cache/firebase/emulators/pubsub-emulator-0.8.17/pubsub-emulator/bin
+[debug] [2025-11-27T23:09:59.699Z] [unzip] deflating: /Users/ale/.cache/firebase/emulators/pubsub-emulator-0.8.17/pubsub-emulator/bin/cloud-pubsub-emulator.bat
+[debug] [2025-11-27T23:09:59.700Z] [unzip] Entry: pubsub-emulator/lib/ (compressed_size=0 bytes, uncompressed_size=0 bytes)
+[debug] [2025-11-27T23:09:59.700Z] [unzip] Processing entry: pubsub-emulator/lib/
+[debug] [2025-11-27T23:09:59.700Z] [unzip] mkdir: /Users/ale/.cache/firebase/emulators/pubsub-emulator-0.8.17/pubsub-emulator/lib/
+[debug] [2025-11-27T23:09:59.700Z] [unzip] Entry: pubsub-emulator/lib/cloud-pubsub-emulator-0.8.17-all.jar (compressed_size=65157965 bytes, uncompressed_size=70080695 bytes)
+[debug] [2025-11-27T23:09:59.700Z] [unzip] Processing entry: pubsub-emulator/lib/cloud-pubsub-emulator-0.8.17-all.jar
+[debug] [2025-11-27T23:09:59.700Z] [unzip] else mkdir: /Users/ale/.cache/firebase/emulators/pubsub-emulator-0.8.17/pubsub-emulator/lib
+[debug] [2025-11-27T23:09:59.700Z] [unzip] deflating: /Users/ale/.cache/firebase/emulators/pubsub-emulator-0.8.17/pubsub-emulator/lib/cloud-pubsub-emulator-0.8.17-all.jar
+[info] 
+=== Ailogic Setup
+[debug] [2025-11-27T23:10:00.098Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:10:00.098Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:10:00.099Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/vistocloud:searchApps pageSize=100
+[debug] [2025-11-27T23:10:00.317Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/vistocloud:searchApps 200
+[debug] [2025-11-27T23:10:00.317Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/vistocloud:searchApps {"apps":[{"name":"projects/vistocloud/webApps/1:390001891387:web:0f1c9f67ba7db87a99e41e","displayName":"vistocloudweb","platform":"WEB","appId":"1:390001891387:web:0f1c9f67ba7db87a99e41e","namespace":"MjM2MTU2NTQtNGNkNy00ZmJjLWIyZTAtMDNlZDgzODQ0ZGY0","apiKeyId":"344a7221-79cb-41f4-94d7-53a31fbd4652","state":"ACTIVE","expireTime":"1970-01-01T00:00:00Z"}]}
+[debug] [2025-11-27T23:10:04.610Z] [provision] Starting Firebase app provisioning...
+[debug] [2025-11-27T23:10:04.610Z] [provision] Request: {
+  "appNamespace": "1:390001891387:web:0f1c9f67ba7db87a99e41e",
+  "displayName": "vistocloudweb",
+  "parent": "projects/vistocloud",
+  "firebaseAiLogicInput": {},
+  "webInput": {}
+}
+[debug] [2025-11-27T23:10:04.610Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:10:04.610Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:10:04.610Z] >>> [apiv2][query] POST https://firebase.googleapis.com/v1alpha/firebase:provisionFirebaseApp [none]
+[debug] [2025-11-27T23:10:04.610Z] >>> [apiv2][body] POST https://firebase.googleapis.com/v1alpha/firebase:provisionFirebaseApp {"appNamespace":"1:390001891387:web:0f1c9f67ba7db87a99e41e","displayName":"vistocloudweb","parent":"projects/vistocloud","firebaseAiLogicInput":{},"webInput":{}}
+[debug] [2025-11-27T23:10:04.975Z] <<< [apiv2][status] POST https://firebase.googleapis.com/v1alpha/firebase:provisionFirebaseApp 200
+[debug] [2025-11-27T23:10:04.975Z] <<< [apiv2][body] POST https://firebase.googleapis.com/v1alpha/firebase:provisionFirebaseApp {"name":"operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy"}
+[debug] [2025-11-27T23:10:04.975Z] [provision] Operation started: operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy
+[debug] [2025-11-27T23:10:04.975Z] [provision] Polling for operation completion...
+[debug] [2025-11-27T23:10:04.977Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:10:04.977Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:10:04.977Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy [none]
+[debug] [2025-11-27T23:10:05.092Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy 200
+[debug] [2025-11-27T23:10:05.092Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy {"name":"operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy"}
+[debug] [2025-11-27T23:10:05.292Z] [Provision Firebase App Poller] Retrying task index 0
+[debug] [2025-11-27T23:10:05.293Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:10:05.293Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:10:05.293Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy [none]
+[debug] [2025-11-27T23:10:05.431Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy 200
+[debug] [2025-11-27T23:10:05.431Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy {"name":"operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy"}
+[debug] [2025-11-27T23:10:05.832Z] [Provision Firebase App Poller] Retrying task index 0
+[debug] [2025-11-27T23:10:05.833Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:10:05.833Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:10:05.833Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy [none]
+[debug] [2025-11-27T23:10:05.981Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy 200
+[debug] [2025-11-27T23:10:05.981Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy {"name":"operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy"}
+[debug] [2025-11-27T23:10:06.783Z] [Provision Firebase App Poller] Retrying task index 0
+[debug] [2025-11-27T23:10:06.783Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:10:06.783Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:10:06.783Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy [none]
+[debug] [2025-11-27T23:10:06.984Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy 200
+[debug] [2025-11-27T23:10:06.985Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy {"name":"operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy"}
+[debug] [2025-11-27T23:10:08.585Z] [Provision Firebase App Poller] Retrying task index 0
+[debug] [2025-11-27T23:10:08.586Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:10:08.586Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:10:08.586Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy [none]
+[debug] [2025-11-27T23:10:08.786Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy 200
+[debug] [2025-11-27T23:10:08.786Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy {"name":"operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy"}
+[debug] [2025-11-27T23:10:11.985Z] [Provision Firebase App Poller] Retrying task index 0
+[debug] [2025-11-27T23:10:11.986Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:10:11.986Z] Checked if tokens are valid: true, expires at: 1764287992109
+[debug] [2025-11-27T23:10:11.986Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy [none]
+[debug] [2025-11-27T23:10:12.181Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy 200
+[debug] [2025-11-27T23:10:12.181Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy {"name":"operations/workflows/NzhjZmUwYWMtMDI4NC00MmEyLTlhYzctZWJjMGY2MDUwNjIy"}
