@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# VistoCloud - Mortgage Application Platform
+
+A modern mortgage application processing platform built with **SvelteKit** and **Firebase**.
+
+## Tech Stack
+
+- **Frontend**: SvelteKit 2 with Svelte 5
+- **Styling**: Tailwind CSS 4 with shadcn-svelte style components
+- **Backend**: Firebase (Firestore)
+- **Language**: TypeScript
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+
+### Installation
 
 ```bash
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Firebase Emulator (Optional)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+For local development with Firebase emulators:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# Start emulators
+npm run emulators:start
 
-## Learn More
+# Or run dev server with emulators
+npm run dev:emulator
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+├── lib/
+│   ├── components/       # Svelte components
+│   │   ├── steps/        # Application step components
+│   │   └── ui/           # UI primitives (shadcn-svelte style)
+│   ├── stores/           # Svelte stores
+│   ├── types/            # TypeScript type definitions
+│   ├── conditions/       # Loan condition generators
+│   ├── llm/              # LLM processing utilities
+│   └── firebase.ts       # Firebase configuration
+├── routes/               # SvelteKit routes
+│   ├── +page.svelte      # Home page
+│   └── application/      # Application form routes
+└── app.css               # Global styles
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Features
 
-## Deploy on Vercel
+- **Multi-step Application Form**: Client info, employment, income, assets, real estate, documents
+- **Multi-Client Support**: Handle primary borrowers and co-borrowers
+- **Svelte Stores**: Reactive state management
+- **Firebase Integration**: Real-time data persistence
+- **Voice Assistant**: AI-powered voice dictation (coming soon)
+- **Document Upload**: Secure document management (coming soon)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Environment Variables
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Create a `.env` file for custom configuration:
+
+```env
+PUBLIC_FIREBASE_API_KEY=your_api_key
+PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
+PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+PUBLIC_FIREBASE_APP_ID=your_app_id
+PUBLIC_USE_FIREBASE_EMULATOR=true
+PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_key
+```
+
+## Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run check` - Type check the project
+- `npm run emulators` - Start Firebase emulators
+
+## License
+
+Private - All rights reserved

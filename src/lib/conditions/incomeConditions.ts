@@ -1,5 +1,5 @@
 import type { AddConditionFn, ConditionGeneratorInput } from './types';
-import type { EmploymentRecord } from '@/types/employment';
+import type { EmploymentRecord } from '$lib/types/employment';
 
 /**
  * Generate income-related conditions (W-2s, Pay Stubs, Tax Returns, etc.)

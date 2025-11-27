@@ -1,4 +1,4 @@
-import type { Condition, ConditionStatus } from '@/types/conditions';
+import type { Condition, ConditionStatus } from '$lib/types/conditions';
 
 export const VALIDATION_RULES = {
   required: ['title', 'description'],

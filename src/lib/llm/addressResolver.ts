@@ -1,5 +1,5 @@
-import { resolveAddress } from '@/lib/addressResolver'
-import type { LLMAction } from '@/types/voice-assistant'
+import { resolveAddress } from '$lib/addressResolver'
+import type { LLMAction } from '$lib/types/voice-assistant'
 
 /**
  * Resolve addresses in LLM actions using Google Places API

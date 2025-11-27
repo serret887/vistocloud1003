@@ -1,0 +1,126 @@
+/* Import Google Fonts - must be at the top */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  /* Color palette - modern, professional mortgage application theme */
+  --color-background: oklch(0.99 0.002 240);
+  --color-foreground: oklch(0.15 0.02 240);
+  
+  --color-card: oklch(0.99 0.002 240);
+  --color-card-foreground: oklch(0.15 0.02 240);
+  
+  --color-popover: oklch(0.99 0.002 240);
+  --color-popover-foreground: oklch(0.15 0.02 240);
+  
+  --color-primary: oklch(0.45 0.14 250);
+  --color-primary-foreground: oklch(0.98 0.01 240);
+  
+  --color-secondary: oklch(0.95 0.015 240);
+  --color-secondary-foreground: oklch(0.25 0.03 240);
+  
+  --color-muted: oklch(0.95 0.015 240);
+  --color-muted-foreground: oklch(0.5 0.03 240);
+  
+  --color-accent: oklch(0.95 0.015 240);
+  --color-accent-foreground: oklch(0.25 0.03 240);
+  
+  --color-destructive: oklch(0.55 0.2 25);
+  --color-destructive-foreground: oklch(0.98 0.01 25);
+  
+  --color-success: oklch(0.55 0.18 145);
+  --color-success-foreground: oklch(0.98 0.01 145);
+  
+  --color-warning: oklch(0.75 0.15 70);
+  --color-warning-foreground: oklch(0.2 0.03 70);
+  
+  --color-border: oklch(0.88 0.01 240);
+  --color-input: oklch(0.88 0.01 240);
+  --color-ring: oklch(0.45 0.14 250);
+  
+  --color-sidebar: oklch(0.12 0.03 250);
+  --color-sidebar-foreground: oklch(0.92 0.01 240);
+  --color-sidebar-primary: oklch(0.7 0.12 250);
+  --color-sidebar-primary-foreground: oklch(0.98 0.01 240);
+  --color-sidebar-accent: oklch(0.2 0.04 250);
+  --color-sidebar-accent-foreground: oklch(0.92 0.01 240);
+  --color-sidebar-border: oklch(0.25 0.04 250);
+  --color-sidebar-ring: oklch(0.45 0.14 250);
+  
+  /* Border radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  
+  /* Font family - distinctive, professional */
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 oklch(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px oklch(0 0 0 / 0.1), 0 2px 4px -2px oklch(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px oklch(0 0 0 / 0.1), 0 4px 6px -4px oklch(0 0 0 / 0.1);
+}
+
+/* Dark mode theme */
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-background: oklch(0.12 0.02 250);
+    --color-foreground: oklch(0.95 0.01 240);
+    
+    --color-card: oklch(0.15 0.025 250);
+    --color-card-foreground: oklch(0.95 0.01 240);
+    
+    --color-popover: oklch(0.15 0.025 250);
+    --color-popover-foreground: oklch(0.95 0.01 240);
+    
+    --color-primary: oklch(0.65 0.14 250);
+    --color-primary-foreground: oklch(0.12 0.02 250);
+    
+    --color-secondary: oklch(0.22 0.03 250);
+    --color-secondary-foreground: oklch(0.92 0.01 240);
+    
+    --color-muted: oklch(0.22 0.03 250);
+    --color-muted-foreground: oklch(0.6 0.02 240);
+    
+    --color-accent: oklch(0.22 0.03 250);
+    --color-accent-foreground: oklch(0.92 0.01 240);
+    
+    --color-destructive: oklch(0.6 0.2 25);
+    --color-destructive-foreground: oklch(0.98 0.01 25);
+    
+    --color-success: oklch(0.6 0.18 145);
+    --color-success-foreground: oklch(0.12 0.02 145);
+    
+    --color-warning: oklch(0.7 0.15 70);
+    --color-warning-foreground: oklch(0.15 0.03 70);
+    
+    --color-border: oklch(0.28 0.03 250);
+    --color-input: oklch(0.28 0.03 250);
+    --color-ring: oklch(0.65 0.14 250);
+    
+    --color-sidebar: oklch(0.1 0.025 250);
+    --color-sidebar-foreground: oklch(0.92 0.01 240);
+    --color-sidebar-primary: oklch(0.65 0.14 250);
+    --color-sidebar-primary-foreground: oklch(0.12 0.02 250);
+    --color-sidebar-accent: oklch(0.18 0.03 250);
+    --color-sidebar-accent-foreground: oklch(0.92 0.01 240);
+    --color-sidebar-border: oklch(0.22 0.03 250);
+    --color-sidebar-ring: oklch(0.65 0.14 250);
+  }
+}
+
+/* Base styles */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+

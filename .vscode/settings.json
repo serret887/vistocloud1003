@@ -1,0 +1,17 @@
+{
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"typescript.enablePromptUseWorkspaceTsdk": true,
+	"svelte.enable-ts-plugin": true,
+	"debug.javascript.usePreview": true,
+	"debug.javascript.breakOnConditionalError": true,
+	"debug.javascript.autoAttachFilter": "smart",
+	"files.exclude": {
+		"**/.svelte-kit": true
+	},
+	"search.exclude": {
+		"**/node_modules": true,
+		"**/.svelte-kit": true,
+		"**/build": true
+	}
+}
+

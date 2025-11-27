@@ -1,7 +1,7 @@
-import type { Condition, ConditionCategory } from '@/types/conditions';
-import type { EmploymentRecord } from '@/types/employment';
-import type { ClientData } from '@/types/client-data';
-import type { AssetRecord } from '@/types/assets';
+import type { Condition, ConditionCategory } from '$lib/types/conditions';
+import type { EmploymentRecord } from '$lib/types/employment';
+import type { ClientData } from '$lib/types/client-data';
+import type { AssetRecord } from '$lib/types/assets';
 
 /**
  * Input data for condition generation

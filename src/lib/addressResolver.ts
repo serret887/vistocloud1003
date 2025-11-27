@@ -21,8 +21,17 @@ export interface AddressType {
  * @param addressString - The address string from voice input (e.g., "4027 Pierce Street, Hollywood")
  * @returns Complete address data with all fields populated
  */
-const getGoogleMapsApiKey = () =>
-  process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? process.env.GOOGLE_MAPS_API_KEY ?? ''
+const getGoogleMapsApiKey = () => {
+  // SvelteKit uses PUBLIC_ prefix for client-side env variables
+  // Check multiple possible names for flexibility
+  if (typeof import.meta.env !== 'undefined') {
+    return import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY || 
+           import.meta.env.VITE_GOOGLE_MAPS_API_KEY ||
+           import.meta.env.PUBLIC_GOOGLE_API_KEY ||
+           '';
+  }
+  return '';
+}
 
 export async function resolveAddress(addressString: string): Promise<AddressType | null> {
   const apiKey = getGoogleMapsApiKey();
@@ -37,7 +46,7 @@ export async function resolveAddress(addressString: string): Promise<AddressType
   
   // Fallback: If no API key, parse the address string manually
   if (!apiKey) {
-    console.warn('GOOGLE_MAPS_API_KEY not set; using basic address parsing');
+    console.warn('NEXT_GOOGLE_MAPS_API_KEY not set; using basic address parsing');
     return parseAddressManually(input);
   }
   

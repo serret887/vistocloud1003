@@ -1,4 +1,4 @@
-import type { LLMAction } from '@/types/voice-assistant'
+import type { LLMAction } from '$lib/types/voice-assistant'
 
 /**
  * Filter out duplicate actions to prevent creating duplicate records

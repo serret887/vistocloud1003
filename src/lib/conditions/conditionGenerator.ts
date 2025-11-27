@@ -5,7 +5,7 @@
  * ID, Income, Assets, Property, and Credit
  */
 
-import type { Condition } from '@/types/conditions';
+import type { Condition } from '$lib/types/conditions';
 import type { ConditionGeneratorInput } from './types';
 import {
   generateIdConditions,
@@ -14,7 +14,7 @@ import {
   generatePropertyConditions,
   generateCreditConditions
 } from './index';
-import { generateConditionId, generateFallbackId } from '@/lib/idGenerator';
+import { generateFallbackId } from '$lib/idGenerator';
 
 export type { ConditionGeneratorInput } from './types';
 
@@ -45,10 +45,8 @@ export function generateConditions(input: ConditionGeneratorInput, applicationId
     priority: 'high' | 'medium' | 'low',
     daysUntilDue: number = 14
   ): Condition => {
-    // Use Firestore ID if applicationId is provided, otherwise use fallback
-    const id = applicationId
-      ? generateConditionId(applicationId)
-      : generateFallbackId('condition');
+    // Use fallback ID generator (synchronous, no Firebase dependency)
+    const id = generateFallbackId('condition');
     
     const condition: Condition = {
       id,

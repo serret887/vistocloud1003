@@ -1,4 +1,4 @@
-import type { VoiceUpdate, LLMAction, LLMResponse } from '@/types/voice-assistant'
+import type { VoiceUpdate, LLMAction, LLMResponse } from '$lib/types/voice-assistant'
 
 /**
  * Current application state for LLM context

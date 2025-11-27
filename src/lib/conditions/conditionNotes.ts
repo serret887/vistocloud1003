@@ -1,4 +1,4 @@
-import type { Condition, ConditionNote } from '@/types/conditions';
+import type { Condition, ConditionNote } from '$lib/types/conditions';
 
 export function addConditionNote(
   condition: Condition,

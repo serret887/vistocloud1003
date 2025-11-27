@@ -1,5 +1,5 @@
 import type { AddConditionFn, ConditionGeneratorInput } from './types';
-import type { AssetRecord } from '@/types/assets';
+import type { AssetRecord } from '$lib/types/assets';
 
 /**
  * Generate asset-related conditions (Bank Statements, Investment Statements, etc.)

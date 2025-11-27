@@ -1,9 +1,9 @@
-import type { LLMAction, LLMResponse } from '@/types/voice-assistant'
+import type { LLMAction, LLMResponse } from '$lib/types/voice-assistant'
 import type { LLMApplicationState } from './types'
 import { buildSystemPrompt } from './promptBuilder'
 import { generateDefaultNextSteps } from './nextStepsGenerator'
 import { DEFAULT_LLM_CONFIG } from './config'
-import { logUsage } from '@/lib/usage'
+import { logUsage } from '$lib/usage'
 
 /**
  * Process transcription with OpenAI GPT-4

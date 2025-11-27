@@ -1,5 +1,4 @@
 // Main LLM processing module
-export { useLLMProcessor } from './useLLMProcessor'
 
 // Core processing functions
 export { processWithOpenAI } from './openaiProcessor'

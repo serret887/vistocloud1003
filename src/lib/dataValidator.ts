@@ -3,9 +3,9 @@
  * All data must pass through this validator before entering the application store
  */
 
-import { validateUSPhone, formatUSPhone, validateEmail } from '@/lib/validators'
-import type { ClientData } from '@/types/client-data'
-import type { EmploymentRecord } from '@/types/employment'
+import { validateUSPhone, formatUSPhone, validateEmail } from '$lib/validators'
+import type { ClientData } from '$lib/types/client-data'
+import type { EmploymentRecord } from '$lib/types/employment'
 
 export interface ValidationResult<T> {
   isValid: boolean

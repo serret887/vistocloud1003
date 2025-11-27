@@ -1,7 +1,6 @@
-import type { LLMAction, VoiceUpdate } from '@/types/voice-assistant'
+import type { LLMAction, VoiceUpdate } from '$lib/types/voice-assistant'
 import type { DynamicIdMap } from './types'
-import { useApplicationStore } from '@/stores/applicationStore'
-import { validateClientData } from '@/lib/dataValidator'
+import { validateClientData } from '$lib/dataValidator'
 
 /**
  * Execute store actions and return update information

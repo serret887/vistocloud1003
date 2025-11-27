@@ -1,7 +1,7 @@
 import type {
   ApplicationStepDefinition,
   ApplicationStepId,
-} from "@/app/models/application"
+} from "$lib/types/application"
 
 export const stepDefinitions: ApplicationStepDefinition[] = [
   { id: "client-info", title: "Client Information", description: "Personal details", estimatedTime: "2 min", fields: [] },
