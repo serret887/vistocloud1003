@@ -41,6 +41,18 @@
 		{ value: 'Unmarried', label: 'Unmarried' },
 		{ value: 'Separated', label: 'Separated' }
 	];
+	
+	// Helper function to get label for citizenship
+	function getCitizenshipLabel(value: string | undefined): string | undefined {
+		if (!value) return undefined;
+		return citizenshipOptions.find(opt => opt.value === value)?.label;
+	}
+	
+	// Helper function to get label for marital status
+	function getMaritalStatusLabel(value: string | undefined): string | undefined {
+		if (!value) return undefined;
+		return maritalStatusOptions.find(opt => opt.value === value)?.label;
+	}
 </script>
 
 <div class="max-w-4xl mx-auto space-y-6">
@@ -135,7 +147,10 @@
 						}}
 					>
 						<SelectTrigger class="w-full">
-							<SelectValue placeholder="Select status..." />
+							<SelectValue 
+								placeholder="Select status..." 
+								value={getCitizenshipLabel($activeClientData?.citizenship)} 
+							/>
 						</SelectTrigger>
 						<SelectContent>
 							{#each citizenshipOptions as option}
@@ -156,7 +171,10 @@
 						}}
 					>
 						<SelectTrigger class="w-full">
-							<SelectValue placeholder="Select status..." />
+							<SelectValue 
+								placeholder="Select status..." 
+								value={getMaritalStatusLabel($activeClientData?.maritalStatus)} 
+							/>
 						</SelectTrigger>
 						<SelectContent>
 							{#each maritalStatusOptions as option}

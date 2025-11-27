@@ -27,11 +27,11 @@ This starts both Firebase Emulator and Next.js in one command.
 ## Environment Variables
 
 Check `.env.local` - it should have:
-- NEXT_PUBLIC_USE_FIREBASE_EMULATOR=true
+- NEXT_VITE_USE_FIREBASE_EMULATOR=true
 
 ## To use Production Firebase
 
-Set `NEXT_PUBLIC_USE_FIREBASE_EMULATOR=false` in `.env.local`
+Set `NEXT_VITE_USE_FIREBASE_EMULATOR=false` in `.env.local`
 
 See FIREBASE_EMULATOR_SETUP.md for detailed instructions.
 

@@ -1,15 +1,13 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { generateId } from '$lib/idGenerator';
 	import { applicationStore } from '$lib/stores/application';
 	import { Button } from '$lib/components/ui';
 	import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui';
 	import { Plus, FileText, TrendingUp, Users } from 'lucide-svelte';
 	
 	async function createNewApplication() {
-		const appId = generateId('app');
-		// Set the application ID which will create the initial document
-		await applicationStore.setApplicationId(appId);
+		// Create a new application in Firestore (Firestore will auto-generate the ID)
+		const appId = await applicationStore.createApplication();
 		goto(`/application/${appId}`);
 	}
 </script>

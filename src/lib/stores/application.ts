@@ -9,7 +9,7 @@ import type { ApplicationStepId } from '$lib/types/application';
 import { generateId } from '$lib/idGenerator';
 import { validateClientData, validateEmploymentRecord } from '$lib/dataValidator';
 import { debug } from '$lib/debug';
-import { saveAllClientDataToFirebase, saveApplicationToFirebase } from '$lib/firebase/save';
+import { saveAllClientDataToFirebase, saveApplicationToFirebase, createApplicationInFirebase } from '$lib/firebase/save';
 
 // Default empty address
 const createEmptyAddress = () => ({
@@ -155,22 +155,34 @@ function createApplicationStore() {
     // Reset store
     reset: () => set(createInitialState()),
     
-    // Set application ID and create initial application document
-    setApplicationId: async (appId: string) => {
+    // Create a new application in Firestore and set the returned ID
+    createApplication: async () => {
+      const state = get(applicationStore);
+      
+      try {
+        // Create application in Firestore (Firestore will auto-generate the ID)
+        const appId = await createApplicationInFirebase(state);
+        
+        // Update store with the Firestore-generated ID
+        update(s => {
+          debug.log('Application created with Firestore ID:', appId);
+          return { ...s, currentApplicationId: appId };
+        });
+        
+        debug.log('✅ Application created in Firestore with ID:', appId);
+        return appId;
+      } catch (error) {
+        debug.error('Failed to create application in Firestore:', error);
+        throw error;
+      }
+    },
+    
+    // Set application ID (for loading existing applications)
+    setApplicationId: (appId: string) => {
       update(state => {
         debug.log('Setting application ID:', appId);
         return { ...state, currentApplicationId: appId };
       });
-      
-      // Create/save initial application document to Firestore
-      const state = get(applicationStore);
-      try {
-        await saveApplicationToFirebase(appId, state);
-        debug.log('✅ Initial application document created in Firestore');
-      } catch (error) {
-        debug.error('Failed to create initial application document:', error);
-        // Don't throw - allow app to continue
-      }
     },
     
     // Save entire application to Firebase

@@ -18,7 +18,7 @@ export type PassiveIncomeType =
   | 'notes_receivable'
   | 'pension'
   | 'permanent_disability'
-  | 'public_assistance'
+  | 'VITE_assistance'
   | 'royalty_payment'
   | 'social_security'
   | 'temporary_disability'
@@ -184,7 +184,7 @@ export const PASSIVE_INCOME_TYPE_LABELS: Record<PassiveIncomeType, string> = {
   'notes_receivable': 'Notes Receivable',
   'pension': 'Pension',
   'permanent_disability': 'Permanent Disability',
-  'public_assistance': 'Public Assistance',
+  'VITE_assistance': 'Public Assistance',
   'royalty_payment': 'Royalty Payment',
   'social_security': 'Social Security',
   'temporary_disability': 'Temporary Disability',

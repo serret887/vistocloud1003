@@ -1,20 +1,19 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import { cn } from "$lib/utils.js";
 	
 	interface Props {
 		placeholder?: string;
 		class?: string;
-		children?: Snippet;
+		value?: string;
 	}
 	
-	let { placeholder = 'Select...', class: className, children }: Props = $props();
+	let { placeholder = "Select...", class: className, value }: Props = $props();
 </script>
 
-<span data-slot="select-value" class={className}>
-	{#if children}
-		{@render children()}
+<span data-slot="select-value" class={cn("line-clamp-1", className)}>
+	{#if value}
+		{value}
 	{:else}
-		{placeholder}
+		<span class="text-muted-foreground">{placeholder}</span>
 	{/if}
 </span>
-

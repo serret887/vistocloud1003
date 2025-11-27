@@ -72,7 +72,7 @@ npm run test:headed
 
 ### Data not saving to emulator
 
-1. Check `.env` has `PUBLIC_USE_FIREBASE_EMULATOR=true`
+1. Check `.env` has `VITE_USE_FIREBASE_EMULATOR=true`
 2. Verify emulator is running: `firebase emulators:start`
 3. Check browser console for connection message
 4. Verify emulator UI shows data at http://localhost:4000

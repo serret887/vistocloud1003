@@ -22,12 +22,12 @@ export interface AddressType {
  * @returns Complete address data with all fields populated
  */
 const getGoogleMapsApiKey = () => {
-  // SvelteKit uses PUBLIC_ prefix for client-side env variables
+  // SvelteKit uses VITE_ prefix for client-side env variables
   // Check multiple possible names for flexibility
   if (typeof import.meta.env !== 'undefined') {
-    return import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY || 
+    return import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 
            import.meta.env.VITE_GOOGLE_MAPS_API_KEY ||
-           import.meta.env.PUBLIC_GOOGLE_API_KEY ||
+           import.meta.env.VITE_GOOGLE_API_KEY ||
            '';
   }
   return '';

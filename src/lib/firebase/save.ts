@@ -3,12 +3,53 @@
  */
 
 import { db } from '$lib/firebase';
-import { collection, doc, setDoc, updateDoc, getDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, updateDoc, getDoc, addDoc } from 'firebase/firestore';
 import type { ApplicationState } from '$lib/stores/application';
 import { debug } from '$lib/debug';
 
 /**
- * Save entire application state to Firestore
+ * Create a new application in Firestore and return the auto-generated ID
+ */
+export async function createApplicationInFirebase(
+  state: ApplicationState
+): Promise<string> {
+  try {
+    debug.firebase.save('applications', 'NEW', state);
+    
+    // Prepare data for Firestore (remove functions, convert to plain object)
+    const firestoreData = {
+      activeClientId: state.activeClientId,
+      clientIds: state.clientIds,
+      currentStepId: state.currentStepId,
+      clientData: state.clientData,
+      addressData: state.addressData,
+      employmentData: state.employmentData,
+      incomeData: state.incomeData,
+      assetsData: state.assetsData,
+      realEstateData: state.realEstateData,
+      isLoading: state.isLoading,
+      isSaving: state.isSaving,
+      lastSaved: state.lastSaved,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    const appsRef = collection(db, 'applications');
+    const docRef = await addDoc(appsRef, firestoreData);
+    
+    debug.log('✅ Application created in Firestore with ID:', docRef.id);
+    console.log('✅ Application created in Firestore emulator with ID:', docRef.id);
+    
+    return docRef.id;
+  } catch (error) {
+    debug.firebase.error('createApplication', error);
+    console.error('❌ Failed to create application in Firestore:', error);
+    throw error;
+  }
+}
+
+/**
+ * Save entire application state to Firestore (update existing)
  */
 export async function saveApplicationToFirebase(
   applicationId: string,

@@ -2,7 +2,7 @@
  * Debug utilities for development
  */
 
-const DEBUG_MODE = import.meta.env.DEV || import.meta.env.PUBLIC_DEBUG === 'true';
+const DEBUG_MODE = import.meta.env.DEV || import.meta.env.VITE_DEBUG === 'true';
 
 export const debug = {
   enabled: DEBUG_MODE,

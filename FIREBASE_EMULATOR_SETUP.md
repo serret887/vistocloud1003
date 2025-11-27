@@ -22,14 +22,14 @@ The project uses environment variables to control Firebase emulator connection. 
 
 ```bash
 # Enable Firebase Emulator
-NEXT_PUBLIC_USE_FIREBASE_EMULATOR=true
-NEXT_PUBLIC_FIREBASE_EMULATOR_HOST=localhost
-NEXT_PUBLIC_FIREBASE_EMULATOR_PORT=8080
+NEXT_VITE_USE_FIREBASE_EMULATOR=true
+NEXT_VITE_FIREBASE_EMULATOR_HOST=localhost
+NEXT_VITE_FIREBASE_EMULATOR_PORT=8080
 ```
 
 ### To Use Production Firebase
 
-Set `NEXT_PUBLIC_USE_FIREBASE_EMULATOR=false` in `.env.local` or remove the variable.
+Set `NEXT_VITE_USE_FIREBASE_EMULATOR=false` in `.env.local` or remove the variable.
 
 ## Running the Application with Emulator
 
@@ -95,7 +95,7 @@ This imports from `./emulator-data/` and exports on exit.
    ```
 
 2. **Verify environment variables:**
-   - Check `.env.local` has `NEXT_PUBLIC_USE_FIREBASE_EMULATOR=true`
+   - Check `.env.local` has `NEXT_VITE_USE_FIREBASE_EMULATOR=true`
    - Restart Next.js dev server after changing env vars
 
 3. **Check ports:**
@@ -121,7 +121,7 @@ If port 8080 or 4000 is already in use:
 
 2. Update `.env.local`:
    ```bash
-   NEXT_PUBLIC_FIREBASE_EMULATOR_PORT=8081
+   NEXT_VITE_FIREBASE_EMULATOR_PORT=8081
    ```
 
 ### Production Build
