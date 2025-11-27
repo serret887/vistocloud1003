@@ -10,6 +10,8 @@ import { generateId } from '$lib/idGenerator';
 // Validation is handled in UI components on blur, not in the store
 import { debug } from '$lib/debug';
 import { saveAllClientDataToFirebase, saveApplicationToFirebase, createApplicationInFirebase } from '$lib/firebase/save';
+import { loadApplicationFromFirebase } from '$lib/firebase/load';
+import { resetLastSavedHash } from '$lib/auto-save';
 
 // Default empty address
 const createEmptyAddress = () => ({
@@ -185,6 +187,43 @@ function createApplicationStore() {
       });
     },
     
+    // Load application from Firestore and hydrate the store
+    loadApplication: async (applicationId: string) => {
+      update(s => ({ ...s, isLoading: true }));
+      
+      try {
+        debug.group(`Loading application ${applicationId} from Firestore`);
+        console.log('📥 [STORE] Loading application:', applicationId);
+        
+        const loadedState = await loadApplicationFromFirebase(applicationId);
+        
+        if (!loadedState) {
+          debug.warn(`Application ${applicationId} not found`);
+          console.warn('⚠️ [STORE] Application not found:', applicationId);
+          update(s => ({ ...s, isLoading: false }));
+          throw new Error(`Application ${applicationId} not found`);
+        }
+        
+        // Update store with loaded state
+        set(loadedState);
+        
+        // Reset auto-save hash to match loaded state
+        resetLastSavedHash();
+        
+        debug.log('✅ Application loaded and store hydrated');
+        console.log('✅ [STORE] Application loaded successfully');
+        debug.groupEnd();
+        
+        update(s => ({ ...s, isLoading: false }));
+      } catch (error) {
+        debug.error('❌ Failed to load application:', error);
+        console.error('❌ [STORE] Failed to load application:', error);
+        update(s => ({ ...s, isLoading: false }));
+        debug.groupEnd();
+        throw error;
+      }
+    },
+    
     // Save entire application to Firebase
     saveToFirebase: async () => {
       const state = get(applicationStore);
@@ -196,26 +235,36 @@ function createApplicationStore() {
       
       debug.group('Saving application to Firebase');
       debug.log('Application ID:', state.currentApplicationId);
+      console.log('💾 [STORE] Starting saveToFirebase...');
+      console.log('💾 [STORE] Application ID:', state.currentApplicationId);
+      console.log('💾 [STORE] Client IDs:', state.clientIds);
+      console.log('💾 [STORE] Has client data:', Object.keys(state.clientData).length > 0);
       
       update(s => ({ ...s, isSaving: true }));
       
       try {
+        console.log('💾 [STORE] Creating save promises for', state.clientIds.length, 'clients');
+        
         // Save all client data
-        const savePromises = state.clientIds.map(clientId => 
-          saveAllClientDataToFirebase(state.currentApplicationId!, clientId, {
+        const savePromises = state.clientIds.map(clientId => {
+          console.log('💾 [STORE] Saving data for client:', clientId);
+          return saveAllClientDataToFirebase(state.currentApplicationId!, clientId, {
             clientData: state.clientData[clientId],
             addressData: state.addressData[clientId],
             employmentData: state.employmentData[clientId],
             incomeData: state.incomeData[clientId],
             assetsData: state.assetsData[clientId],
             realEstateData: state.realEstateData[clientId]
-          })
-        );
+          });
+        });
         
         // Also save the main application document
+        console.log('💾 [STORE] Adding main application document save');
         savePromises.push(saveApplicationToFirebase(state.currentApplicationId, state));
         
+        console.log('💾 [STORE] Executing', savePromises.length, 'save operations...');
         await Promise.all(savePromises);
+        console.log('✅ [STORE] All save operations completed');
         
         debug.log('✅ Application saved successfully');
         update(s => ({ 
@@ -223,6 +272,10 @@ function createApplicationStore() {
           isSaving: false, 
           lastSaved: new Date().toISOString() 
         }));
+        
+        // Reset auto-save hash after successful save
+        resetLastSavedHash();
+        
         debug.groupEnd();
       } catch (error) {
         debug.error('❌ Failed to save application:', error);
@@ -248,11 +301,14 @@ function createApplicationStore() {
       // Auto-save to Firebase when changing steps (if application ID exists)
       if (state.currentApplicationId && previousStepId !== stepId) {
         debug.log(`Step changed from ${previousStepId} to ${stepId} - auto-saving...`);
+        console.log(`💾 [STORE] Step changed from ${previousStepId} to ${stepId} - saving...`);
         try {
           await applicationStore.saveToFirebase();
           debug.log('✅ Auto-saved on step change');
+          console.log('✅ [STORE] Auto-saved on step change');
         } catch (error) {
           debug.error('Failed to auto-save on step change:', error);
+          console.error('❌ [STORE] Failed to auto-save on step change:', error);
           // Don't throw - allow step change even if save fails
         }
       }

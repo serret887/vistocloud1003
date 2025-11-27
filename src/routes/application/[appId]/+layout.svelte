@@ -12,18 +12,42 @@
 	
 	import { getStepIdFromPath } from '$lib/applicationSteps';
 	
+	// Track if we've loaded the application to avoid reloading
+	let hasLoadedApplication = $state(false);
+	let lastAppId = $state<string | null>(null);
+	
 	// Get appId and stepId from URL params and initialize
 	$effect(() => {
 		const appId = $page.params.appId;
-		if (appId) {
-			applicationStore.setApplicationId(appId);
-			// Get step from URL path
+		
+		// If appId changed or we haven't loaded yet, load the application
+		if (appId && (appId !== lastAppId || !hasLoadedApplication)) {
+			lastAppId = appId;
+			hasLoadedApplication = false;
+			
+			// Load application from Firestore
+			applicationStore.loadApplication(appId).then(() => {
+				hasLoadedApplication = true;
+				
+				// Get step from URL path after loading
+				const stepId = getStepIdFromPath($page.url.pathname);
+				if (stepId && stepId !== $currentStepId) {
+					applicationStore.setCurrentStep(stepId);
+				} else if (!$currentStepId) {
+					// Default to client-info if no step in URL
+					applicationStore.setCurrentStep('client-info');
+				}
+			}).catch((error) => {
+				console.error('Failed to load application:', error);
+				// Still set the ID even if load fails (for new applications)
+				applicationStore.setApplicationId(appId);
+				hasLoadedApplication = true;
+			});
+		} else if (appId && hasLoadedApplication) {
+			// Just update step if appId is the same but step might have changed
 			const stepId = getStepIdFromPath($page.url.pathname);
 			if (stepId && stepId !== $currentStepId) {
 				applicationStore.setCurrentStep(stepId);
-			} else if (!$currentStepId) {
-				// Default to client-info if no step in URL
-				applicationStore.setCurrentStep('client-info');
 			}
 		}
 	});

@@ -78,13 +78,22 @@ export async function saveApplicationToFirebase(
       updatedAt: new Date().toISOString()
     };
     
+    console.log('💾 [FIREBASE] Attempting to save application:', applicationId);
+    console.log('💾 [FIREBASE] Data to save:', JSON.stringify(firestoreData, null, 2).slice(0, 500) + '...');
+    
     await setDoc(appRef, firestoreData, { merge: true });
     
     debug.log('✅ Application saved to Firebase:', applicationId);
-    console.log('✅ Application saved to Firestore emulator:', applicationId);
+    console.log('✅ [FIREBASE] Application saved successfully to Firestore:', applicationId);
   } catch (error) {
     debug.firebase.error('saveApplication', error);
-    console.error('❌ Failed to save application to Firestore:', error);
+    console.error('❌ [FIREBASE] Failed to save application to Firestore:', error);
+    console.error('❌ [FIREBASE] Error details:', {
+      message: (error as Error).message,
+      stack: (error as Error).stack,
+      applicationId,
+      db: db ? 'connected' : 'not connected'
+    });
     throw error;
   }
 }

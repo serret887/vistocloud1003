@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { applicationStore } from '$lib/stores/application';
 	import { isDebugMode, debug } from '$lib/debug';
+	import { triggerAutoSave } from '$lib/auto-save';
 	import { Button } from '$lib/components/ui';
 	import { Card, CardHeader, CardTitle, CardContent } from '$lib/components/ui';
-	import { X, Save, RefreshCw } from 'lucide-svelte';
+	import { X, Save, RefreshCw, Clock } from 'lucide-svelte';
 	
 	let isOpen = $state(false);
 	let isSaving = $derived($applicationStore.isSaving);
@@ -22,6 +23,16 @@
 			await applicationStore.saveToFirebase();
 		} catch (error) {
 			console.error('Save failed:', error);
+		}
+	}
+	
+	async function handleAutoSave() {
+		try {
+			console.log('🔄 [DEBUG] Manually triggering auto-save...');
+			await triggerAutoSave();
+			console.log('✅ [DEBUG] Auto-save triggered successfully');
+		} catch (error) {
+			console.error('❌ [DEBUG] Auto-save trigger failed:', error);
 		}
 	}
 	
@@ -80,6 +91,10 @@
 						<Button onclick={handleSave} disabled={isSaving} class="w-full" size="sm">
 							<Save class="h-4 w-4 mr-2" />
 							Save to Firebase
+						</Button>
+						<Button onclick={handleAutoSave} disabled={isSaving} variant="outline" class="w-full" size="sm">
+							<Clock class="h-4 w-4 mr-2" />
+							Trigger Auto-Save
 						</Button>
 					</div>
 					

@@ -11,7 +11,7 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"emulators": "firebase emulators:start",
-		"emulators:start": "firebase emulators:start --only firestore,ui",
+		"emulators:start": "firebase emulators:start --only firestore,ui,auth",
 		"emulators:export": "firebase emulators:export ./emulator-data",
 		"emulators:import": "firebase emulators:start --import=./emulator-data --export-on-exit --only firestore,ui",
 		"dev:emulator": "concurrently \"npm run emulators:start\" \"npm run dev\"",

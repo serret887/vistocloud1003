@@ -1,16 +1,27 @@
 <script lang="ts">
 	import '../app.css';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import { initFirebaseEmulator } from '$lib/firebase';
+	import { initAutoSave, clearAutoSaveTimer } from '$lib/auto-save';
 	
 	let { children } = $props();
 	
-	// Initialize Firebase emulator in development
+	let unsubscribeAutoSave: (() => void) | undefined;
+	
+	// Initialize Firebase emulator and auto-save in development
 	onMount(() => {
 		if (browser) {
 			initFirebaseEmulator();
+			unsubscribeAutoSave = initAutoSave();
 		}
+	});
+	
+	onDestroy(() => {
+		if (unsubscribeAutoSave) {
+			unsubscribeAutoSave();
+		}
+		clearAutoSaveTimer();
 	});
 </script>
 
