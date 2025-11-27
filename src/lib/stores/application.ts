@@ -247,9 +247,21 @@ function createApplicationStore() {
         
         // Save all client data
         const savePromises = state.clientIds.map(clientId => {
+          const clientData = state.clientData[clientId];
           console.log('💾 [STORE] Saving data for client:', clientId);
+          console.log('💾 [STORE] Client data being saved:', {
+            citizenship: clientData?.citizenship,
+            maritalStatus: clientData?.maritalStatus,
+            firstName: clientData?.firstName,
+            lastName: clientData?.lastName,
+            email: clientData?.email,
+            phone: clientData?.phone,
+            ssn: clientData?.ssn,
+            dob: clientData?.dob,
+            hasMilitaryService: clientData?.hasMilitaryService
+          });
           return saveAllClientDataToFirebase(state.currentApplicationId!, clientId, {
-            clientData: state.clientData[clientId],
+            clientData: clientData,
             addressData: state.addressData[clientId],
             employmentData: state.employmentData[clientId],
             incomeData: state.incomeData[clientId],
@@ -354,15 +366,29 @@ function createApplicationStore() {
       // Don't validate here - validation happens in UI components on blur
       // Just store the data as-is
       update(state => {
+        const currentClientData = state.clientData[clientId] || {};
+        const updatedClientData = { ...currentClientData, ...data };
+        
         const updated = {
           ...state,
           clientData: {
             ...state.clientData,
-            [clientId]: { ...state.clientData[clientId], ...data }
+            [clientId]: updatedClientData
           }
         };
         
         debug.storeUpdate('updateClientData', { clientId, data });
+        console.log('📝 [STORE] updateClientData called:', {
+          clientId,
+          field: Object.keys(data)[0],
+          value: Object.values(data)[0],
+          updatedClientData: {
+            citizenship: updatedClientData.citizenship,
+            maritalStatus: updatedClientData.maritalStatus,
+            firstName: updatedClientData.firstName,
+            lastName: updatedClientData.lastName
+          }
+        });
         
         // Don't auto-save here - will save on step change
         return updated;

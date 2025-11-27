@@ -146,8 +146,13 @@
 					label="Citizenship Status"
 					value={$activeClientData?.citizenship || undefined}
 					onValueChange={(value) => {
+						console.log('📝 [CLIENT-INFO] Citizenship onValueChange called with:', value);
 						if (value !== undefined && value !== null) {
+							console.log('📝 [CLIENT-INFO] Calling updateField for citizenship:', value);
 							updateField('citizenship', value);
+							console.log('📝 [CLIENT-INFO] After updateField, store value:', $activeClientData?.citizenship);
+						} else {
+							console.warn('⚠️ [CLIENT-INFO] Citizenship value is undefined or null');
 						}
 					}}
 					options={citizenshipOptions}
@@ -159,8 +164,13 @@
 					label="Marital Status"
 					value={$activeClientData?.maritalStatus || undefined}
 					onValueChange={(value) => {
+						console.log('📝 [CLIENT-INFO] Marital Status onValueChange called with:', value);
 						if (value !== undefined && value !== null) {
+							console.log('📝 [CLIENT-INFO] Calling updateField for maritalStatus:', value);
 							updateField('maritalStatus', value);
+							console.log('📝 [CLIENT-INFO] After updateField, store value:', $activeClientData?.maritalStatus);
+						} else {
+							console.warn('⚠️ [CLIENT-INFO] Marital Status value is undefined or null');
 						}
 					}}
 					options={maritalStatusOptions}

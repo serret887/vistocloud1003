@@ -52,8 +52,10 @@
 	const showErrorMessage = $derived(hasBlurred && showError && error !== null);
 
 	function handleValueChange(newValue: string | undefined) {
+		console.log(`📝 [VALIDATED-SELECT] Value changed for "${label}":`, newValue);
 		internalValue = newValue;
 		onValueChange?.(newValue);
+		console.log(`📝 [VALIDATED-SELECT] onValueChange called for "${label}" with:`, newValue);
 		
 		// Clear error on value change if it was shown
 		if (internalError) {
