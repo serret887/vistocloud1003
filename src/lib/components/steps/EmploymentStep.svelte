@@ -3,7 +3,7 @@
 	import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui';
 	import { Input, Label, Switch, Checkbox, Button, Textarea } from '$lib/components/ui';
 	import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '$lib/components/ui';
-	import { ValidatedSelect } from '$lib/components/ui/validated-input';
+	import { ValidatedSelect, DateInput, PhoneInput } from '$lib/components/ui/validated-input';
 	import AddressAutocomplete from '$lib/components/ui/address-autocomplete.svelte';
 	import { Plus, Trash2, Building2, AlertTriangle } from 'lucide-svelte';
 	import ClientTabs from './ClientTabs.svelte';
@@ -115,15 +115,11 @@
 								placeholder="Company Name"
 							/>
 						</div>
-						<div class="space-y-2">
-							<Label>Employer Phone</Label>
-							<Input
-								type="tel"
-								value={record.phoneNumber}
-								oninput={(e) => updateRecord(record.id, 'phoneNumber', e.currentTarget.value)}
-								placeholder="(555) 123-4567"
-							/>
-						</div>
+						<PhoneInput
+							label="Employer Phone"
+							value={record.phoneNumber || ''}
+							onValueChange={(val) => updateRecord(record.id, 'phoneNumber', val)}
+						/>
 					</div>
 					
 					<!-- Employer Address -->
@@ -165,38 +161,37 @@
 					
 					<!-- Dates -->
 					<div class="grid md:grid-cols-2 gap-4">
-						<div class="space-y-2">
-							<Label>Start Date *</Label>
-							<Input
-								type="date"
-								value={record.startDate}
-								oninput={(e) => updateRecord(record.id, 'startDate', e.currentTarget.value)}
-							/>
-						</div>
-						<div class="space-y-2">
-							<Label>End Date</Label>
-							<Input
-								type="date"
+						<DateInput
+							label="Start Date"
+							value={record.startDate || ''}
+							onValueChange={(val) => updateRecord(record.id, 'startDate', val)}
+							required
+							allowFuture={false}
+						/>
+						{#if !record.currentlyEmployed && !record.hasOfferLetter}
+							<DateInput
+								label="End Date"
 								value={record.endDate || ''}
-								oninput={(e) => updateRecord(record.id, 'endDate', e.currentTarget.value)}
-								disabled={record.currentlyEmployed}
-								placeholder={record.currentlyEmployed ? 'Present' : ''}
+								onValueChange={(val) => updateRecord(record.id, 'endDate', val)}
+								allowFuture={false}
 							/>
-						</div>
+						{/if}
 					</div>
 					
 					<!-- Toggles Row 1 -->
 					<div class="grid md:grid-cols-2 gap-4">
-						<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-							<div>
-								<Label>Currently Employed Here</Label>
-								<p class="text-xs text-muted-foreground">Is this your current job?</p>
+						{#if !record.hasOfferLetter}
+							<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+								<div>
+									<Label>Currently Employed Here</Label>
+									<p class="text-xs text-muted-foreground">Is this your current job?</p>
+								</div>
+								<Switch
+									checked={record.currentlyEmployed}
+									onCheckedChange={(checked) => updateRecord(record.id, 'currentlyEmployed', checked)}
+								/>
 							</div>
-							<Switch
-								checked={record.currentlyEmployed}
-								onCheckedChange={(checked) => updateRecord(record.id, 'currentlyEmployed', checked)}
-							/>
-						</div>
+						{/if}
 						<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
 							<div>
 								<Label>Self Employed</Label>
@@ -211,16 +206,18 @@
 					
 					<!-- Toggles Row 2 -->
 					<div class="grid md:grid-cols-2 gap-4">
-						<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-							<div>
-								<Label>25% or More Ownership</Label>
-								<p class="text-xs text-muted-foreground">Own 25%+ of the business</p>
+						{#if record.selfEmployed}
+							<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+								<div>
+									<Label>25% or More Ownership</Label>
+									<p class="text-xs text-muted-foreground">Own 25%+ of the business</p>
+								</div>
+								<Switch
+									checked={record.ownershipPercentage}
+									onCheckedChange={(checked) => updateRecord(record.id, 'ownershipPercentage', checked)}
+								/>
 							</div>
-							<Switch
-								checked={record.ownershipPercentage}
-								onCheckedChange={(checked) => updateRecord(record.id, 'ownershipPercentage', checked)}
-							/>
-						</div>
+						{/if}
 						<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
 							<div>
 								<Label>Related Party</Label>
@@ -233,17 +230,19 @@
 						</div>
 					</div>
 					
-					<!-- Offer Letter -->
-					<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-						<div>
-							<Label>Has Offer Letter</Label>
-							<p class="text-xs text-muted-foreground">For future employment starting within 90 days</p>
+					<!-- Offer Letter (only show if not currently employed) -->
+					{#if !record.currentlyEmployed}
+						<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+							<div>
+								<Label>Has Offer Letter</Label>
+								<p class="text-xs text-muted-foreground">For future employment starting within 90 days</p>
+							</div>
+							<Switch
+								checked={record.hasOfferLetter}
+								onCheckedChange={(checked) => updateRecord(record.id, 'hasOfferLetter', checked)}
+							/>
 						</div>
-						<Switch
-							checked={record.hasOfferLetter}
-							onCheckedChange={(checked) => updateRecord(record.id, 'hasOfferLetter', checked)}
-						/>
-					</div>
+					{/if}
 				</CardContent>
 			</Card>
 		{/each}
