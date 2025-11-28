@@ -8,6 +8,34 @@ import type { ApplicationState } from '$lib/stores/application';
 import { debug } from '$lib/debug';
 
 /**
+ * Recursively removes undefined values from an object (Firebase doesn't accept undefined)
+ * Converts undefined to null for Firebase compatibility
+ */
+function sanitizeForFirebase<T>(obj: T): T {
+  if (obj === null || obj === undefined) {
+    return null as T;
+  }
+  
+  if (Array.isArray(obj)) {
+    return obj.map(item => sanitizeForFirebase(item)) as T;
+  }
+  
+  if (typeof obj === 'object' && obj !== null) {
+    const sanitized: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value === undefined) {
+        sanitized[key] = null; // Convert undefined to null
+      } else {
+        sanitized[key] = sanitizeForFirebase(value);
+      }
+    }
+    return sanitized as T;
+  }
+  
+  return obj;
+}
+
+/**
  * Create a new application in Firestore and return the auto-generated ID
  */
 export async function createApplicationInFirebase(
@@ -16,8 +44,8 @@ export async function createApplicationInFirebase(
   try {
     debug.firebase.save('applications', 'NEW', state);
     
-    // Prepare data for Firestore (remove functions, convert to plain object)
-    const firestoreData = {
+    // Prepare data for Firestore (remove functions, convert to plain object, sanitize undefined)
+    const firestoreData = sanitizeForFirebase({
       activeClientId: state.activeClientId,
       clientIds: state.clientIds,
       currentStepId: state.currentStepId,
@@ -32,7 +60,7 @@ export async function createApplicationInFirebase(
       lastSaved: state.lastSaved,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    };
+    });
     
     const appsRef = collection(db, 'applications');
     const docRef = await addDoc(appsRef, firestoreData);
@@ -60,8 +88,8 @@ export async function saveApplicationToFirebase(
     
     const appRef = doc(db, 'applications', applicationId);
     
-    // Prepare data for Firestore (remove functions, convert to plain object)
-    const firestoreData = {
+    // Prepare data for Firestore (remove functions, convert to plain object, sanitize undefined)
+    const firestoreData = sanitizeForFirebase({
       currentApplicationId: state.currentApplicationId,
       activeClientId: state.activeClientId,
       clientIds: state.clientIds,
@@ -76,7 +104,7 @@ export async function saveApplicationToFirebase(
       isSaving: state.isSaving,
       lastSaved: state.lastSaved,
       updatedAt: new Date().toISOString()
-    };
+    });
     
     console.log('💾 [FIREBASE] Attempting to save application:', applicationId);
     console.log('💾 [FIREBASE] Data to save:', JSON.stringify(firestoreData, null, 2).slice(0, 500) + '...');
@@ -176,10 +204,10 @@ export async function saveAddressDataToFirebase(
     debug.firebase.save(`applications/${applicationId}/addresses`, clientId, addressData);
     
     const addressRef = doc(db, 'applications', applicationId, 'addresses', clientId);
-    await setDoc(addressRef, {
+    await setDoc(addressRef, sanitizeForFirebase({
       ...addressData,
       updatedAt: new Date().toISOString()
-    }, { merge: true });
+    }), { merge: true });
     
     debug.log(`✅ Address data for ${clientId} saved to Firebase`);
   } catch (error) {
@@ -200,10 +228,10 @@ export async function saveEmploymentDataToFirebase(
     debug.firebase.save(`applications/${applicationId}/employment`, clientId, employmentData);
     
     const employmentRef = doc(db, 'applications', applicationId, 'employment', clientId);
-    await setDoc(employmentRef, {
+    await setDoc(employmentRef, sanitizeForFirebase({
       ...employmentData,
       updatedAt: new Date().toISOString()
-    }, { merge: true });
+    }), { merge: true });
     
     debug.log(`✅ Employment data for ${clientId} saved to Firebase`);
   } catch (error) {
@@ -224,10 +252,10 @@ export async function saveIncomeDataToFirebase(
     debug.firebase.save(`applications/${applicationId}/income`, clientId, incomeData);
     
     const incomeRef = doc(db, 'applications', applicationId, 'income', clientId);
-    await setDoc(incomeRef, {
+    await setDoc(incomeRef, sanitizeForFirebase({
       ...incomeData,
       updatedAt: new Date().toISOString()
-    }, { merge: true });
+    }), { merge: true });
     
     debug.log(`✅ Income data for ${clientId} saved to Firebase`);
   } catch (error) {
@@ -248,10 +276,10 @@ export async function saveAssetsDataToFirebase(
     debug.firebase.save(`applications/${applicationId}/assets`, clientId, assetsData);
     
     const assetsRef = doc(db, 'applications', applicationId, 'assets', clientId);
-    await setDoc(assetsRef, {
+    await setDoc(assetsRef, sanitizeForFirebase({
       ...assetsData,
       updatedAt: new Date().toISOString()
-    }, { merge: true });
+    }), { merge: true });
     
     debug.log(`✅ Assets data for ${clientId} saved to Firebase`);
   } catch (error) {
@@ -272,10 +300,10 @@ export async function saveRealEstateDataToFirebase(
     debug.firebase.save(`applications/${applicationId}/realEstate`, clientId, realEstateData);
     
     const realEstateRef = doc(db, 'applications', applicationId, 'realEstate', clientId);
-    await setDoc(realEstateRef, {
+    await setDoc(realEstateRef, sanitizeForFirebase({
       ...realEstateData,
       updatedAt: new Date().toISOString()
-    }, { merge: true });
+    }), { merge: true });
     
     debug.log(`✅ Real estate data for ${clientId} saved to Firebase`);
   } catch (error) {

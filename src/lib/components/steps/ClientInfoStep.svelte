@@ -94,7 +94,7 @@
 					onValueChange={(val) => updateField('firstName', val)}
 					placeholder="John"
 					required
-					allowSpaces={false}
+					allowSpaces={true}
 				/>
 				<NameInput
 					label="Last Name"
@@ -102,7 +102,7 @@
 					onValueChange={(val) => updateField('lastName', val)}
 					placeholder="Doe"
 					required
-					allowSpaces={false}
+					allowSpaces={true}
 				/>
 			</div>
 			

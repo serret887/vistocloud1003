@@ -119,7 +119,7 @@
 							label="Employer Phone"
 							value={record.phoneNumber || ''}
 							onValueChange={(val) => updateRecord(record.id, 'phoneNumber', val)}
-						/>
+							/>
 					</div>
 					
 					<!-- Employer Address -->
@@ -181,16 +181,16 @@
 					<!-- Toggles Row 1 -->
 					<div class="grid md:grid-cols-2 gap-4">
 						{#if !record.hasOfferLetter}
-							<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-								<div>
-									<Label>Currently Employed Here</Label>
-									<p class="text-xs text-muted-foreground">Is this your current job?</p>
-								</div>
-								<Switch
-									checked={record.currentlyEmployed}
-									onCheckedChange={(checked) => updateRecord(record.id, 'currentlyEmployed', checked)}
-								/>
+						<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+							<div>
+								<Label>Currently Employed Here</Label>
+								<p class="text-xs text-muted-foreground">Is this your current job?</p>
 							</div>
+							<Switch
+								checked={record.currentlyEmployed}
+								onCheckedChange={(checked) => updateRecord(record.id, 'currentlyEmployed', checked)}
+							/>
+						</div>
 						{/if}
 						<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
 							<div>
@@ -207,16 +207,16 @@
 					<!-- Toggles Row 2 -->
 					<div class="grid md:grid-cols-2 gap-4">
 						{#if record.selfEmployed}
-							<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-								<div>
-									<Label>25% or More Ownership</Label>
-									<p class="text-xs text-muted-foreground">Own 25%+ of the business</p>
-								</div>
-								<Switch
-									checked={record.ownershipPercentage}
-									onCheckedChange={(checked) => updateRecord(record.id, 'ownershipPercentage', checked)}
-								/>
+						<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+							<div>
+								<Label>25% or More Ownership</Label>
+								<p class="text-xs text-muted-foreground">Own 25%+ of the business</p>
 							</div>
+							<Switch
+								checked={record.ownershipPercentage}
+								onCheckedChange={(checked) => updateRecord(record.id, 'ownershipPercentage', checked)}
+							/>
+						</div>
 						{/if}
 						<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
 							<div>
@@ -232,16 +232,16 @@
 					
 					<!-- Offer Letter (only show if not currently employed) -->
 					{#if !record.currentlyEmployed}
-						<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-							<div>
-								<Label>Has Offer Letter</Label>
-								<p class="text-xs text-muted-foreground">For future employment starting within 90 days</p>
-							</div>
-							<Switch
-								checked={record.hasOfferLetter}
-								onCheckedChange={(checked) => updateRecord(record.id, 'hasOfferLetter', checked)}
-							/>
+					<div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+						<div>
+							<Label>Has Offer Letter</Label>
+							<p class="text-xs text-muted-foreground">For future employment starting within 90 days</p>
 						</div>
+						<Switch
+							checked={record.hasOfferLetter}
+							onCheckedChange={(checked) => updateRecord(record.id, 'hasOfferLetter', checked)}
+						/>
+					</div>
 					{/if}
 				</CardContent>
 			</Card>

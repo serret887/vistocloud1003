@@ -50,7 +50,13 @@ const createDefaultAddressData = (clientId: string): ClientAddressData => ({
     isPresent: true
   },
   former: [],
-  mailing: undefined // Mailing address defaults to same as present (undefined means same)
+  mailing: {
+    id: generateId('addr'),
+    fromDate: '',
+    toDate: '',
+    addr: createEmptyAddress(),
+    isPresent: false
+  }
 });
 
 // Default employment data
@@ -408,7 +414,7 @@ function createApplicationStore() {
         selfEmployed: false,
         ownershipPercentage: false,
         relatedParty: false,
-        currentlyEmployed: true,
+        currentlyEmployed: false,
         startDate: '',
         endDate: null,
         hasOfferLetter: false,
