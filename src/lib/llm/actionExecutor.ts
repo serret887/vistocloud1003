@@ -1,6 +1,8 @@
 import type { LLMAction, VoiceUpdate } from '$lib/types/voice-assistant'
 import type { DynamicIdMap } from './types'
+import type { ApplicationState } from '$lib/stores/application'
 import { validateClientData } from '$lib/dataValidator'
+import { get } from 'svelte/store'
 
 /**
  * Execute store actions and return update information
@@ -46,7 +48,8 @@ export function executeStoreAction(action: LLMAction, store: any, dynamicIdMap: 
         store.updateClientData(clientId, action.params.updates)
         
         // Get the updated client data from the store after the update
-        const clientData = store.clients[clientId]
+        const state = get(store) as ApplicationState
+        const clientData = state.clientData[clientId]
         const clientName = clientData?.firstName && clientData?.lastName
           ? `${clientData.firstName} ${clientData.lastName}`
           : clientData?.firstName || clientData?.lastName || 'Client'

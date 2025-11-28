@@ -1,10 +1,10 @@
 import type { LLMConfig } from './types'
 
 /**
- * Default LLM configuration
+ * Default LLM configuration (using Google Gemini)
  */
 export const DEFAULT_LLM_CONFIG: LLMConfig = {
-  model: 'gpt-4o-mini',
+  model: 'gemini-1.5-flash', // Fast and efficient for real-time processing
   temperature: 0.3,
   maxTokens: 4000
 }

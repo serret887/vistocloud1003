@@ -34,6 +34,7 @@
 		"vite": "^7.2.2"
 	},
 	"dependencies": {
+		"@google/generative-ai": "^0.24.1",
 		"bits-ui": "^1.5.1",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",

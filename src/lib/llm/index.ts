@@ -2,6 +2,7 @@
 
 // Core processing functions
 export { processWithOpenAI } from './openaiProcessor'
+export { processWithGemini } from './geminiProcessor'
 export { resolveAddressesInActions } from './addressResolver'
 
 // Utility functions
@@ -13,3 +14,6 @@ export { executeStoreAction } from './actionExecutor'
 // Configuration and types
 export { DEFAULT_LLM_CONFIG, getCurrentDateContext, calculateRelativeDate } from './config'
 export type { LLMApplicationState, LLMConfig, DynamicIdMap, StoreActionResult } from './types'
+
+// Store adapter
+export { convertToLLMState, getCurrentLLMState } from './storeAdapter'
