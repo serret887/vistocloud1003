@@ -7,12 +7,11 @@
 	} from 'lucide-svelte';
 	import ClientTabs from './ClientTabs.svelte';
 	import { applicationStore, activeClientId } from '$lib/stores/application';
-	import { processWithGemini } from '$lib/llm/geminiProcessor';
 	import { executeStoreAction } from '$lib/llm/actionExecutor';
 	import { resolveAddressesInActions } from '$lib/llm/addressResolver';
 	import { filterDuplicateActions } from '$lib/llm/duplicateFilter';
 	import { getCurrentLLMState } from '$lib/llm/storeAdapter';
-	import { transcribeAudio } from '$lib/services/speech-to-text';
+	import { transcribeAudio, processConversation } from '$lib/services/aiFunctions';
 	import type { LLMAction, VoiceUpdate, ChatMessage } from '$lib/types/voice-assistant';
 	import type { DynamicIdMap } from '$lib/llm/types';
 	import { onMount, onDestroy, tick } from 'svelte';
@@ -30,6 +29,10 @@
 	let textInput = $state('');
 	let chatMessages = $state<ChatMessage[]>([]);
 	let chatContainerRef: HTMLDivElement | null = null;
+	
+	// Transcription state (for two-step flow)
+	let pendingTranscription = $state<string | null>(null);
+	let isTranscribing = $state(false);
 	
 	// File drop state
 	let isDragging = $state(false);
@@ -134,23 +137,24 @@ Try something like: "John Smith lives at 123 Main St, New York. He works at Tech
 		}
 	}
 
-	// Process audio (from recording or file)
+	// Process audio (from recording or file) - Step 1: Transcribe only
 	async function processAudioBlob(audioBlob: Blob, source: 'voice' | 'file') {
-		isProcessing = true;
+		isTranscribing = true;
 		error = null;
+		pendingTranscription = null;
 
 		// Add user message showing audio processing
 		const userMessage: ChatMessage = {
 			id: crypto.randomUUID(),
 			role: 'user',
-			content: source === 'voice' ? '🎤 Voice recording...' : '📁 Processing audio file...',
+			content: source === 'voice' ? '🎤 Transcribing voice recording...' : '📁 Transcribing audio file...',
 			timestamp: new Date()
 		};
 		chatMessages = [...chatMessages, userMessage];
 		await scrollToBottom();
 
 		try {
-			// Transcribe audio
+			// Transcribe audio using Firebase Function
 			const transcription = await transcribeAudio(audioBlob);
 
 			if (!transcription || transcription.trim().length === 0) {
@@ -160,18 +164,57 @@ Try something like: "John Smith lives at 123 Main St, New York. He works at Tech
 					: '📁 (No speech detected in file)';
 				chatMessages = [...chatMessages];
 				error = 'No speech detected. Please try again.';
-				isProcessing = false;
+				isTranscribing = false;
 				return;
 			}
 
-			// Update user message with actual transcription
+			// Store transcription for user to review/edit
+			pendingTranscription = transcription;
+			
+			// Update user message with transcription (editable)
 			userMessage.content = transcription;
 			chatMessages = [...chatMessages];
-
-			// Process with AI
-			await processWithAI(transcription);
+			
+			// Scroll to show the transcription
+			await scrollToBottom();
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to process audio';
+			error = err instanceof Error ? err.message : 'Failed to transcribe audio';
+			
+			const errorMessage: ChatMessage = {
+				id: crypto.randomUUID(),
+				role: 'assistant',
+				content: `❌ Error: ${error}`,
+				timestamp: new Date()
+			};
+			chatMessages = [...chatMessages, errorMessage];
+		} finally {
+			isTranscribing = false;
+			droppedFile = null;
+		}
+	}
+
+	// Send transcription to AI for processing - Step 2: Process conversation
+	async function sendTranscriptionToAI(transcriptionText: string) {
+		if (!transcriptionText.trim() || isProcessing) return;
+
+		// Update the user message with the final transcription
+		const lastUserMessage = chatMessages[chatMessages.length - 1];
+		if (lastUserMessage && lastUserMessage.role === 'user') {
+			lastUserMessage.content = transcriptionText;
+			chatMessages = [...chatMessages];
+		}
+
+		// Clear pending transcription
+		pendingTranscription = null;
+
+		// Process with AI
+		isProcessing = true;
+		error = null;
+
+		try {
+			await processWithAI(transcriptionText);
+		} catch (err) {
+			error = err instanceof Error ? err.message : 'Failed to process message';
 			
 			const errorMessage: ChatMessage = {
 				id: crypto.randomUUID(),
@@ -182,15 +225,15 @@ Try something like: "John Smith lives at 123 Main St, New York. He works at Tech
 			chatMessages = [...chatMessages, errorMessage];
 		} finally {
 			isProcessing = false;
-			droppedFile = null;
 		}
 	}
 
-	// Process text or transcription with AI
+	// Process text or transcription with AI using Firebase Function
 	async function processWithAI(text: string) {
 		try {
 			const currentState = getCurrentLLMState();
-			const response = await processWithGemini(text, currentState, conversationHistory);
+			// Call Firebase Function instead of direct API
+			const response = await processConversation(text, currentState, conversationHistory);
 
 			// Execute actions
 			const dynamicIdMap: DynamicIdMap = new Map();
@@ -414,16 +457,48 @@ Try something like: "John Smith lives at 123 Main St, New York. He works at Tech
 			{/if}
 
 			<!-- Messages -->
-			{#each chatMessages as message}
+			{#each chatMessages as message, index}
 				<div class="flex {message.role === 'user' ? 'justify-end' : 'justify-start'}">
 					<div class="max-w-[85%] group">
-						<div class={cn(
-							"rounded-2xl px-4 py-3",
-							message.role === 'user' 
-								? "bg-primary text-primary-foreground rounded-br-md" 
-								: "bg-muted rounded-bl-md"
-						)}>
-							<p class="text-sm whitespace-pre-wrap">{message.content}</p>
+						{#if message.role === 'user' && pendingTranscription && index === chatMessages.length - 1}
+							<!-- Editable transcription with send button -->
+							<div class="rounded-2xl border-2 border-primary/50 bg-primary/5 p-4 space-y-3">
+								<label class="text-xs font-medium text-muted-foreground">Review and edit transcription:</label>
+								<textarea
+									bind:value={pendingTranscription}
+									rows={4}
+									class="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+									placeholder="Edit the transcription if needed..."
+								></textarea>
+								<div class="flex items-center justify-end gap-2">
+									<Button
+										variant="ghost"
+										size="sm"
+										onclick={() => {
+											pendingTranscription = null;
+											chatMessages = chatMessages.filter(m => m.id !== message.id);
+										}}
+									>
+										Cancel
+									</Button>
+									<Button
+										size="sm"
+										onclick={() => sendTranscriptionToAI(pendingTranscription || '')}
+										disabled={!pendingTranscription?.trim() || isProcessing}
+									>
+										<Send class="h-4 w-4 mr-2" />
+										Send to AI
+									</Button>
+								</div>
+							</div>
+						{:else}
+							<div class={cn(
+								"rounded-2xl px-4 py-3",
+								message.role === 'user' 
+									? "bg-primary text-primary-foreground rounded-br-md" 
+									: "bg-muted rounded-bl-md"
+							)}>
+								<p class="text-sm whitespace-pre-wrap">{message.content}</p>
 							
 							{#if message.updates && message.updates.length > 0}
 								<div class="mt-3 pt-3 border-t border-current/10 space-y-1">
@@ -436,7 +511,8 @@ Try something like: "John Smith lives at 123 Main St, New York. He works at Tech
 									{/each}
 								</div>
 							{/if}
-						</div>
+							</div>
+						{/if}
 
 						<!-- Message Actions (shadcn.io/ai style) -->
 						{#if message.role === 'assistant' && !message.content.startsWith('👋') && !message.content.startsWith('💬')}
@@ -477,13 +553,25 @@ Try something like: "John Smith lives at 123 Main St, New York. He works at Tech
 				</div>
 			{/each}
 			
+			<!-- Transcribing indicator -->
+			{#if isTranscribing}
+				<div class="flex justify-end">
+					<div class="bg-primary/10 text-primary rounded-2xl rounded-br-md px-4 py-3">
+						<div class="flex items-center gap-2 text-sm">
+							<Loader2 class="h-4 w-4 animate-spin" />
+							<span>Transcribing audio...</span>
+						</div>
+					</div>
+				</div>
+			{/if}
+
 			<!-- Processing indicator -->
 			{#if isProcessing}
 				<div class="flex justify-start">
 					<div class="bg-muted rounded-2xl rounded-bl-md px-4 py-3">
 						<div class="flex items-center gap-2 text-sm text-muted-foreground">
 							<Loader2 class="h-4 w-4 animate-spin" />
-							<span>Processing...</span>
+							<span>Processing with AI...</span>
 						</div>
 					</div>
 				</div>

@@ -1,12 +1,20 @@
-import type { LLMApplicationState } from './types'
-import { getCurrentDateContext } from './config'
+/**
+ * Build system prompt for conversation processing
+ * Moved from client-side to server-side for security
+ */
+
+import type { LLMApplicationState } from './types';
+import { getCurrentDateContext } from './dateUtils';
 
 /**
  * Build the system prompt for LLM processing
  */
-export function buildSystemPrompt(currentState: LLMApplicationState, conversationHistory: any[] = []): string {
-  const { todayFormatted, todayReadable } = getCurrentDateContext()
-  
+export function buildSystemPrompt(
+  currentState: LLMApplicationState,
+  conversationHistory: any[] = []
+): string {
+  const { todayFormatted, todayReadable } = getCurrentDateContext();
+
   return `You are a professional mortgage loan officer helping to fill out applications through conversation. 
 Your goal is to extract structured data from spoken input, update the application via JSON actions, and guide the conversation by asking for clarifications or missing info in nextSteps. Be patient, confirm details, and handle erratic or jumping conversations gracefully—like a real loan officer would.
 
@@ -151,5 +159,6 @@ Return format:
   ],
   "summary": "Brief description of what was extracted",
   "nextSteps": "Specific guidance on what information is still needed (e.g., 'Need employer names and employment dates', 'Need property details if they own real estate')"
-}`
+}`;
 }
+

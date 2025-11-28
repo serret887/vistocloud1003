@@ -1,7 +1,11 @@
-import type { VoiceUpdate, LLMAction, LLMResponse } from '$lib/types/voice-assistant'
+/**
+ * Type definitions for LLM processing
+ * These types are used for communication between client and server
+ */
 
 /**
- * Current application state for LLM context
+ * Current application state format for LLM context
+ * This is sent to the server for processing
  */
 export interface LLMApplicationState {
   clients: Record<string, any>
@@ -18,17 +22,8 @@ export interface LLMApplicationState {
 }
 
 /**
- * Configuration for LLM processing
- */
-export interface LLMConfig {
-  apiKey?: string
-  model: string
-  temperature: number
-  maxTokens?: number
-}
-
-/**
  * Dynamic ID mapping for reference resolution
+ * Used to map temporary IDs (like "$c2") to actual store IDs
  */
 export type DynamicIdMap = Map<string, string>
 
@@ -37,6 +32,11 @@ export type DynamicIdMap = Map<string, string>
  */
 export interface StoreActionResult {
   success: boolean
-  update?: VoiceUpdate
+  update?: import('$lib/types/voice-assistant').VoiceUpdate
   error?: string
 }
+
+/**
+ * LLM Response type (re-exported for convenience)
+ */
+export type { LLMResponse } from '$lib/types/voice-assistant'

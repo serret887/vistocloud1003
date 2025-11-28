@@ -1,19 +1,21 @@
-// Main LLM processing module
+/**
+ * LLM Processing Module
+ * 
+ * This module handles the client-side processing of AI responses:
+ * - Converting store state to LLM format
+ * - Executing actions returned from the server
+ * - Resolving addresses and filtering duplicates
+ * 
+ * Note: Actual AI processing happens server-side via Firebase Functions
+ */
 
-// Core processing functions
-export { processWithOpenAI } from './openaiProcessor'
-export { processWithGemini } from './geminiProcessor'
-export { resolveAddressesInActions } from './addressResolver'
-
-// Utility functions
-export { buildSystemPrompt } from './promptBuilder'
-export { generateDefaultNextSteps } from './nextStepsGenerator'
-export { filterDuplicateActions } from './duplicateFilter'
+// Action execution and processing
 export { executeStoreAction } from './actionExecutor'
+export { resolveAddressesInActions } from './addressResolver'
+export { filterDuplicateActions } from './duplicateFilter'
 
-// Configuration and types
-export { DEFAULT_LLM_CONFIG, getCurrentDateContext, calculateRelativeDate } from './config'
-export type { LLMApplicationState, LLMConfig, DynamicIdMap, StoreActionResult } from './types'
-
-// Store adapter
+// Store adapter - converts store state to LLM format
 export { convertToLLMState, getCurrentLLMState } from './storeAdapter'
+
+// Types
+export type { LLMApplicationState, DynamicIdMap, StoreActionResult, LLMResponse } from './types'
