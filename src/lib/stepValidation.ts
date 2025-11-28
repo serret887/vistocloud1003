@@ -362,12 +362,14 @@ function isDocumentsComplete(state: ApplicationState, clientId: string): boolean
     return false; // No conditions means incomplete data
   }
   
-  // Check if all required conditions have uploaded documents
-  const uploadedConditionIds = documents
-    .filter(doc => doc.status === 'uploaded' || doc.status === 'verified')
-    .map(doc => doc.id);
+  // Check if all required conditions have uploaded documents (at least one per condition)
+  const uploadedConditionIds = new Set(
+    documents
+      .filter(doc => doc.status === 'uploaded' || doc.status === 'verified')
+      .map(doc => doc.conditionId || doc.id) // Support both old and new structure
+  );
   
-  return requiredConditions.every(condition => uploadedConditionIds.includes(condition.id));
+  return requiredConditions.every(condition => uploadedConditionIds.has(condition.id));
 }
 
 /**
@@ -396,12 +398,14 @@ export function validateDocuments(state: ApplicationState, clientId: string): St
     return { isValid: false, errors: [{ field: 'documents', message: 'No documents required yet. Complete previous steps first.' }] };
   }
   
-  // Check which documents are missing
-  const uploadedConditionIds = documents
-    .filter(doc => doc.status === 'uploaded' || doc.status === 'verified')
-    .map(doc => doc.id);
+  // Check which documents are missing (need at least one document per condition)
+  const uploadedConditionIds = new Set(
+    documents
+      .filter(doc => doc.status === 'uploaded' || doc.status === 'verified')
+      .map(doc => doc.conditionId || doc.id) // Support both old and new structure
+  );
   
-  const missingDocuments = requiredConditions.filter(condition => !uploadedConditionIds.includes(condition.id));
+  const missingDocuments = requiredConditions.filter(condition => !uploadedConditionIds.has(condition.id));
   
   missingDocuments.forEach(condition => {
     errors.push({ field: `document.${condition.id}`, message: condition.title });

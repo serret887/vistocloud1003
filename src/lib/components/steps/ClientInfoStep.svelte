@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { applicationStore, activeClientId, activeClientData, activeAddressData, currentStepValidationErrors } from '$lib/stores/application';
 	import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui';
-	import { Input, Label, Checkbox, Switch, Button } from '$lib/components/ui';
+	import { Input, Label, Checkbox, Switch, Button, Textarea } from '$lib/components/ui';
 	import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '$lib/components/ui';
 	import { SSNInput, DateInput, ValidatedInput, ValidatedSelect, NameInput, EmailInput, PhoneInput } from '$lib/components/ui/validated-input';
 	import AddressAutocomplete from '$lib/components/ui/address-autocomplete.svelte';
@@ -198,6 +198,20 @@
 					checked={$activeClientData?.hasMilitaryService || false}
 					onCheckedChange={(checked) => updateField('hasMilitaryService', checked)}
 				/>
+			</div>
+			
+			<!-- General Notes -->
+			<div class="space-y-2">
+				<Label>General Notes</Label>
+				<Textarea
+					placeholder="Add any notes about this client that may help with processing (not part of the application form)..."
+					value={$activeClientData?.generalNotes || ''}
+					oninput={(e) => updateField('generalNotes', e.currentTarget.value)}
+					class="min-h-[100px]"
+				/>
+				<p class="text-xs text-muted-foreground">
+					These notes are for internal use only and will not be included in the application.
+				</p>
 			</div>
 		</CardContent>
 	</Card>

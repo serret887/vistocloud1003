@@ -39,7 +39,8 @@ const createDefaultClientData = (): ClientData => ({
   citizenship: '',
   maritalStatus: '',
   hasMilitaryService: false,
-  militaryNote: null
+  militaryNote: null,
+  generalNotes: ''
 });
 
 // Default address data
@@ -104,25 +105,44 @@ const createDefaultRealEstateData = (clientId: string): ClientRealEstateData => 
 // Document types
 export interface DocumentRecord {
   id: string;
+  conditionId: string; // Links to condition ID
   type: 'id' | 'income' | 'bank' | 'employment';
   filename: string;
   sizeBytes: number;
   mimeType: string;
   status: 'pending' | 'uploaded' | 'verified' | 'rejected';
   uploadedAt: string | null;
+  uploadedBy?: string; // Who uploaded it
   verifiedAt: string | null;
+  verifiedBy?: string; // Who verified it
   notes?: string;
+  version?: number; // Track multiple uploads of same document
+}
+
+// Document history entry
+export interface DocumentHistoryEntry {
+  id: string;
+  documentId: string;
+  action: 'uploaded' | 'removed' | 'verified' | 'rejected' | 'note_added';
+  timestamp: string;
+  user: string;
+  note?: string;
+  filename?: string;
 }
 
 export interface ClientDocumentsData {
   clientId: string;
   documents: DocumentRecord[];
+  history: DocumentHistoryEntry[]; // History of all document actions
+  conditionNotes: Record<string, string[]>; // Notes per condition ID
 }
 
 // Default documents data
 const createDefaultDocumentsData = (clientId: string): ClientDocumentsData => ({
   clientId,
-  documents: []
+  documents: [],
+  history: [],
+  conditionNotes: {}
 });
 
 // Application state interface
@@ -659,22 +679,40 @@ function createApplicationStore() {
     },
     
     // Documents actions
-    uploadDocument: (clientId: string, type: DocumentRecord['type'], file: File) => {
+    uploadDocument: (clientId: string, conditionId: string, type: DocumentRecord['type'], file: File, uploadedBy?: string) => {
       const newDocument: DocumentRecord = {
         id: generateId('doc'),
+        conditionId,
         type,
         filename: file.name,
         sizeBytes: file.size,
         mimeType: file.type,
         status: 'uploaded',
         uploadedAt: new Date().toISOString(),
-        verifiedAt: null
+        uploadedBy: uploadedBy || 'user',
+        verifiedAt: null,
+        version: 1
       };
       
       update(state => {
         const currentDocs = state.documentsData[clientId] || createDefaultDocumentsData(clientId);
-        // Remove existing document of same type if any
-        const filteredDocs = currentDocs.documents.filter(d => d.type !== type);
+        
+        // Find existing documents for this condition to determine version
+        const existingDocs = currentDocs.documents.filter(d => d.conditionId === conditionId);
+        if (existingDocs.length > 0) {
+          const maxVersion = Math.max(...existingDocs.map(d => d.version || 1));
+          newDocument.version = maxVersion + 1;
+        }
+        
+        // Add history entry
+        const historyEntry: DocumentHistoryEntry = {
+          id: generateId('hist'),
+          documentId: newDocument.id,
+          action: 'uploaded',
+          timestamp: new Date().toISOString(),
+          user: uploadedBy || 'user',
+          filename: file.name
+        };
         
         return {
           ...state,
@@ -682,7 +720,8 @@ function createApplicationStore() {
             ...state.documentsData,
             [clientId]: {
               ...currentDocs,
-              documents: [...filteredDocs, newDocument]
+              documents: [...currentDocs.documents, newDocument],
+              history: [...currentDocs.history, historyEntry]
             }
           }
         };
@@ -691,17 +730,66 @@ function createApplicationStore() {
       return newDocument.id;
     },
     
-    removeDocument: (clientId: string, documentId: string) => {
-      update(state => ({
-        ...state,
-        documentsData: {
-          ...state.documentsData,
-          [clientId]: {
-            ...state.documentsData[clientId],
-            documents: state.documentsData[clientId].documents.filter(d => d.id !== documentId)
+    // Add note to a condition
+    addConditionNote: (clientId: string, conditionId: string, note: string, user?: string) => {
+      update(state => {
+        const currentDocs = state.documentsData[clientId] || createDefaultDocumentsData(clientId);
+        const notes = currentDocs.conditionNotes[conditionId] || [];
+        
+        // Add history entry
+        const historyEntry: DocumentHistoryEntry = {
+          id: generateId('hist'),
+          documentId: conditionId,
+          action: 'note_added',
+          timestamp: new Date().toISOString(),
+          user: user || 'user',
+          note
+        };
+        
+        return {
+          ...state,
+          documentsData: {
+            ...state.documentsData,
+            [clientId]: {
+              ...currentDocs,
+              conditionNotes: {
+                ...currentDocs.conditionNotes,
+                [conditionId]: [...notes, note]
+              },
+              history: [...currentDocs.history, historyEntry]
+            }
           }
-        }
-      }));
+        };
+      });
+    },
+    
+    removeDocument: (clientId: string, documentId: string, user?: string) => {
+      update(state => {
+        const currentDocs = state.documentsData[clientId] || createDefaultDocumentsData(clientId);
+        const document = currentDocs.documents.find(d => d.id === documentId);
+        
+        // Add history entry
+        const historyEntry: DocumentHistoryEntry = {
+          id: generateId('hist'),
+          documentId,
+          action: 'removed',
+          timestamp: new Date().toISOString(),
+          user: user || 'user',
+          filename: document?.filename
+        };
+        
+        return {
+          ...state,
+          documentsData: {
+            ...state.documentsData,
+            [clientId]: {
+              ...currentDocs,
+              documents: currentDocs.documents.filter(d => d.id !== documentId),
+              history: [...currentDocs.history, historyEntry]
+            }
+          }
+        };
+      });
     },
     
     // Address actions

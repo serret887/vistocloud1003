@@ -9,4 +9,5 @@ export type ClientData = {
     maritalStatus: string;
     hasMilitaryService: boolean;
     militaryNote: string | null;
+    generalNotes?: string; // General notes about the client for processor reference
   };

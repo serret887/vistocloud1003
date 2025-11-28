@@ -8,7 +8,17 @@ export function generateAssetConditions(
   input: ConditionGeneratorInput,
   addCondition: AddConditionFn
 ): void {
-  const { assets } = input;
+  const { assets, client } = input;
+  const clientName = `${client.firstName || ''} ${client.lastName || ''}`.trim() || 'Client';
+
+  // Always generate bank statements condition (last 2 months) - required for all applications
+  addCondition(
+    'Assets',
+    `Bank Statements - Last 2 Months`,
+    `Please provide the most recent 2 months of bank statements for all accounts (checking, savings, money market)`,
+    'high',
+    7
+  );
 
   if (!assets || assets.length === 0) {
     return;

@@ -129,10 +129,10 @@
 					</div>
 					
 					<!-- Employer Address -->
-					<div class="space-y-2">
-						
+					<div class="space-y-2">					
 						<Label>Employer Address</Label>
 						<AddressAutocomplete
+							
 							value={record.employerAddress}
 							placeholder="Start typing employer address..."
 							onchange={(addr) => updateRecord(record.id, 'employerAddress', addr)}
