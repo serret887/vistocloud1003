@@ -8,6 +8,7 @@
 	import { ChevronRight, Check, Circle, Home, AlertCircle } from 'lucide-svelte';
 	import DebugPanel from '$lib/components/DebugPanel.svelte';
 	import { getStepStatus } from '$lib/stepValidation';
+	import { get } from 'svelte/store';
 	
 	let { children } = $props();
 	
@@ -54,7 +55,9 @@
 	});
 	
 	function getStepIcon(stepId: string) {
-		return getStepStatus(stepId as any, $currentStepId);
+		// Get state from store for validation
+		const state = get(applicationStore);
+		return getStepStatus(stepId as any, $currentStepId, state);
 	}
 	
 	// Get current step from URL to highlight correctly

@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { applicationStore, activeClientId, activeIncomeData, activeEmploymentData } from '$lib/stores/application';
+	import { applicationStore, activeClientId, activeIncomeData, activeEmploymentData, currentStepValidationErrors } from '$lib/stores/application';
 	import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '$lib/components/ui';
 	import { Input, Label, Button, Textarea } from '$lib/components/ui';
 	import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '$lib/components/ui';
 	import { ValidatedSelect } from '$lib/components/ui/validated-input';
+	import ValidationErrors from '../ValidationErrors.svelte';
 	import { Plus, DollarSign, Briefcase, Trash2, TrendingUp } from 'lucide-svelte';
 	import ClientTabs from './ClientTabs.svelte';
 	import { PASSIVE_INCOME_TYPE_LABELS, type PassiveIncomeType } from '$lib/types/income';
@@ -38,6 +39,11 @@
 
 <div class="max-w-4xl mx-auto space-y-6">
 	<ClientTabs />
+	
+	<!-- Validation Errors -->
+	{#if $currentStepValidationErrors.length > 0}
+		<ValidationErrors errors={$currentStepValidationErrors} />
+	{/if}
 	
 	<!-- Income Summary Card -->
 	<Card class="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">

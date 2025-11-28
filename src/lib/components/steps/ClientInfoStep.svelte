@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { applicationStore, activeClientId, activeClientData, activeAddressData } from '$lib/stores/application';
+	import { applicationStore, activeClientId, activeClientData, activeAddressData, currentStepValidationErrors } from '$lib/stores/application';
 	import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui';
 	import { Input, Label, Checkbox, Switch, Button } from '$lib/components/ui';
 	import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '$lib/components/ui';
 	import { SSNInput, DateInput, ValidatedInput, ValidatedSelect, NameInput, EmailInput, PhoneInput } from '$lib/components/ui/validated-input';
 	import AddressAutocomplete from '$lib/components/ui/address-autocomplete.svelte';
 	import ClientTabs from './ClientTabs.svelte';
+	import ValidationErrors from '../ValidationErrors.svelte';
 	import { Plus, Trash2, Home, Mail, AlertCircle } from 'lucide-svelte';
 	import type { AddressType } from '$lib/types/address';
 	import { cn } from '$lib/utils';
@@ -78,6 +79,11 @@
 
 <div class="max-w-4xl mx-auto space-y-6">
 	<ClientTabs />
+	
+	<!-- Validation Errors -->
+	{#if $currentStepValidationErrors.length > 0}
+		<ValidationErrors errors={$currentStepValidationErrors} />
+	{/if}
 	
 	<!-- Personal Information -->
 	<Card>

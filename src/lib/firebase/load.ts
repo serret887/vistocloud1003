@@ -40,6 +40,7 @@ export async function loadApplicationFromFirebase(
     const incomeData: Record<string, any> = {};
     const assetsData: Record<string, any> = {};
     const realEstateData: Record<string, any> = {};
+    const documentsData: Record<string, any> = {};
     
     // Load data for each client
     for (const clientId of clientIds) {
@@ -110,6 +111,17 @@ export async function loadApplicationFromFirebase(
       } catch (error) {
         console.warn(`⚠️ [FIREBASE] Failed to load real estate data for ${clientId}:`, error);
       }
+      
+      // Load documents data
+      try {
+        const documentsRef = doc(db, 'applications', applicationId, 'documents', clientId);
+        const documentsSnap = await getDoc(documentsRef);
+        if (documentsSnap.exists()) {
+          documentsData[clientId] = documentsSnap.data();
+        }
+      } catch (error) {
+        console.warn(`⚠️ [FIREBASE] Failed to load documents data for ${clientId}:`, error);
+      }
     }
     
     // Construct the application state
@@ -124,9 +136,11 @@ export async function loadApplicationFromFirebase(
       incomeData: appData.incomeData || incomeData,
       assetsData: appData.assetsData || assetsData,
       realEstateData: appData.realEstateData || realEstateData,
+      documentsData: appData.documentsData || documentsData,
       isLoading: false,
       isSaving: false,
-      lastSaved: appData.lastSaved || appData.updatedAt || null
+      lastSaved: appData.lastSaved || appData.updatedAt || null,
+      validationErrors: appData.validationErrors || {} as Record<string, any[]>
     };
     
     // Merge subcollection data with main document data (subcollections take precedence)
@@ -148,6 +162,9 @@ export async function loadApplicationFromFirebase(
       }
       if (realEstateData[clientId]) {
         loadedState.realEstateData[clientId] = realEstateData[clientId];
+      }
+      if (documentsData[clientId]) {
+        loadedState.documentsData[clientId] = documentsData[clientId];
       }
     }
     

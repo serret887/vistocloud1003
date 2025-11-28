@@ -21,12 +21,22 @@ export function generateIdConditions(
     7
   );
 
-  // Work Visa documentation for non-US citizens
-  if (client.citizenship !== 'US Citizen') {
+  // Work authorization documentation for non-US citizens
+  if (client.citizenship === 'Permanent Resident Alien') {
+    // Green Card holder
     addCondition(
       'ID',
-      `Visa Documentation for ${clientName}`,
-      `Please provide a copy of ${clientName}'s work visa and employment authorization documents`,
+      `Green Card (Permanent Resident Card) for ${clientName}`,
+      `Please provide a copy of ${clientName}'s Green Card (Permanent Resident Card)`,
+      'high',
+      7
+    );
+  } else if (client.citizenship === 'Non-Permanent Resident Alien') {
+    // EAD required
+    addCondition(
+      'ID',
+      `Employment Authorization Document (EAD) for ${clientName}`,
+      `Please provide a copy of ${clientName}'s Employment Authorization Document (EAD) and work visa`,
       'high',
       7
     );

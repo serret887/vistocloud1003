@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { applicationStore, activeClientId, activeEmploymentData } from '$lib/stores/application';
+	import { applicationStore, activeClientId, activeEmploymentData, currentStepValidationErrors } from '$lib/stores/application';
 	import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui';
 	import { Input, Label, Switch, Checkbox, Button, Textarea } from '$lib/components/ui';
 	import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '$lib/components/ui';
 	import { ValidatedSelect, DateInput, PhoneInput } from '$lib/components/ui/validated-input';
 	import AddressAutocomplete from '$lib/components/ui/address-autocomplete.svelte';
+	import ValidationErrors from '../ValidationErrors.svelte';
 	import { Plus, Trash2, Building2, AlertTriangle } from 'lucide-svelte';
 	import ClientTabs from './ClientTabs.svelte';
 	import type { AddressType } from '$lib/types/address';
@@ -52,6 +53,11 @@
 
 <div class="max-w-4xl mx-auto space-y-6">
 	<ClientTabs />
+	
+	<!-- Validation Errors -->
+	{#if $currentStepValidationErrors.length > 0}
+		<ValidationErrors errors={$currentStepValidationErrors} />
+	{/if}
 	
 	<!-- Employment Coverage Warning -->
 	{#if needsMoreHistory && ($activeEmploymentData?.records?.length || 0) > 0}
@@ -124,6 +130,7 @@
 					
 					<!-- Employer Address -->
 					<div class="space-y-2">
+						
 						<Label>Employer Address</Label>
 						<AddressAutocomplete
 							value={record.employerAddress}
@@ -154,6 +161,7 @@
 								}
 							}}
 							options={incomeTypes}
+							required
 							placeholder="Select type..."
 							showError={true}
 						/>

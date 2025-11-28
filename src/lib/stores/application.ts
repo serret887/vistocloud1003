@@ -6,6 +6,8 @@ import type { ClientAssetsData, AssetRecord } from '$lib/types/assets';
 import type { ClientRealEstateData, RealEstateOwned } from '$lib/types/real-estate';
 import type { ClientAddressData, AddressRecord } from '$lib/types/address';
 import type { ApplicationStepId } from '$lib/types/application';
+import type { ValidationError } from '$lib/stepValidation';
+import { validateStep } from '$lib/stepValidation';
 import { generateId } from '$lib/idGenerator';
 // Validation is handled in UI components on blur, not in the store
 import { debug } from '$lib/debug';
@@ -99,6 +101,30 @@ const createDefaultRealEstateData = (clientId: string): ClientRealEstateData => 
   isComplete: false
 });
 
+// Document types
+export interface DocumentRecord {
+  id: string;
+  type: 'id' | 'income' | 'bank' | 'employment';
+  filename: string;
+  sizeBytes: number;
+  mimeType: string;
+  status: 'pending' | 'uploaded' | 'verified' | 'rejected';
+  uploadedAt: string | null;
+  verifiedAt: string | null;
+  notes?: string;
+}
+
+export interface ClientDocumentsData {
+  clientId: string;
+  documents: DocumentRecord[];
+}
+
+// Default documents data
+const createDefaultDocumentsData = (clientId: string): ClientDocumentsData => ({
+  clientId,
+  documents: []
+});
+
 // Application state interface
 export interface ApplicationState {
   currentApplicationId: string | null;
@@ -113,11 +139,15 @@ export interface ApplicationState {
   incomeData: Record<string, ClientIncomeData>;
   assetsData: Record<string, ClientAssetsData>;
   realEstateData: Record<string, ClientRealEstateData>;
+  documentsData: Record<string, ClientDocumentsData>;
   
   // UI State
   isLoading: boolean;
   isSaving: boolean;
   lastSaved: string | null;
+  
+  // Validation errors by step
+  validationErrors: Record<ApplicationStepId, ValidationError[]>;
 }
 
 // Initial state
@@ -147,10 +177,14 @@ const createInitialState = (): ApplicationState => {
     realEstateData: {
       [primaryClientId]: createDefaultRealEstateData(primaryClientId)
     },
+    documentsData: {
+      [primaryClientId]: createDefaultDocumentsData(primaryClientId)
+    },
     
     isLoading: false,
     isSaving: false,
-    lastSaved: null
+    lastSaved: null,
+    validationErrors: {} as Record<ApplicationStepId, ValidationError[]>
   };
 };
 
@@ -309,12 +343,37 @@ function createApplicationStore() {
       update(state => ({ ...state, activeClientId: clientId }));
     },
     
-    // Set current step (with auto-save)
+    // Set current step (with validation and auto-save)
     setCurrentStep: async (stepId: ApplicationStepId) => {
       const state = get(applicationStore);
       const previousStepId = state.currentStepId;
       
-      // Update step first
+      // Validate previous step before leaving (if we're moving to a different step)
+      // Only validate if we have a valid previous step and it's not the initial load
+      if (previousStepId !== stepId && previousStepId && state.currentApplicationId) {
+        try {
+          const validation = validateStep(previousStepId, state);
+          
+          // Store validation errors for the previous step
+          update(s => ({
+            ...s,
+            validationErrors: {
+              ...s.validationErrors,
+              [previousStepId]: validation.errors
+            }
+          }));
+          
+          // Log validation results
+          if (!validation.isValid) {
+            console.warn(`⚠️ [VALIDATION] Step ${previousStepId} has ${validation.errors.length} error(s):`, validation.errors);
+          }
+        } catch (error) {
+          // Don't block navigation if validation fails
+          console.error('Validation error:', error);
+        }
+      }
+      
+      // Update step
       update(s => ({ ...s, currentStepId: stepId }));
       
       // Auto-save to Firebase when changing steps (if application ID exists)
@@ -331,6 +390,15 @@ function createApplicationStore() {
           // Don't throw - allow step change even if save fails
         }
       }
+    },
+    
+    // Clear validation errors for a step
+    clearValidationErrors: (stepId: ApplicationStepId) => {
+      update(s => {
+        const errors = { ...s.validationErrors };
+        delete errors[stepId];
+        return { ...s, validationErrors: errors };
+      });
     },
     
     // Add a new client (co-borrower)
@@ -363,6 +431,10 @@ function createApplicationStore() {
           realEstateData: {
             ...state.realEstateData,
             [newClientId]: createDefaultRealEstateData(newClientId)
+          },
+          documentsData: {
+            ...state.documentsData,
+            [newClientId]: createDefaultDocumentsData(newClientId)
           }
         };
       });
@@ -586,6 +658,52 @@ function createApplicationStore() {
       }));
     },
     
+    // Documents actions
+    uploadDocument: (clientId: string, type: DocumentRecord['type'], file: File) => {
+      const newDocument: DocumentRecord = {
+        id: generateId('doc'),
+        type,
+        filename: file.name,
+        sizeBytes: file.size,
+        mimeType: file.type,
+        status: 'uploaded',
+        uploadedAt: new Date().toISOString(),
+        verifiedAt: null
+      };
+      
+      update(state => {
+        const currentDocs = state.documentsData[clientId] || createDefaultDocumentsData(clientId);
+        // Remove existing document of same type if any
+        const filteredDocs = currentDocs.documents.filter(d => d.type !== type);
+        
+        return {
+          ...state,
+          documentsData: {
+            ...state.documentsData,
+            [clientId]: {
+              ...currentDocs,
+              documents: [...filteredDocs, newDocument]
+            }
+          }
+        };
+      });
+      
+      return newDocument.id;
+    },
+    
+    removeDocument: (clientId: string, documentId: string) => {
+      update(state => ({
+        ...state,
+        documentsData: {
+          ...state.documentsData,
+          [clientId]: {
+            ...state.documentsData[clientId],
+            documents: state.documentsData[clientId].documents.filter(d => d.id !== documentId)
+          }
+        }
+      }));
+    },
+    
     // Address actions
     updatePresentAddress: (clientId: string, address: Partial<AddressRecord>) => {
       update(state => ({
@@ -776,5 +894,11 @@ export const activeAddressData = derived(applicationStore, $state =>
 
 export const activeIncomeData = derived(applicationStore, $state =>
   $state.incomeData[$state.activeClientId]
+);
+
+// Validation errors for current step
+export const currentStepValidationErrors = derived(
+  [applicationStore, currentStepId],
+  ([$store, $stepId]) => $store.validationErrors[$stepId] || []
 );
 
