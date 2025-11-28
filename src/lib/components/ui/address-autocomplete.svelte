@@ -21,6 +21,19 @@
 	let sessionToken = $state(Math.random().toString(36).slice(2));
 	let debounceTimer: ReturnType<typeof setTimeout>;
 	
+	// Sync inputValue with value prop when it changes (e.g., when data loads from Firebase)
+	$effect(() => {
+		if (value) {
+			const newValue = value.formattedAddress || value.address1 || '';
+			if (newValue && newValue !== inputValue) {
+				inputValue = newValue;
+			}
+		} else if (!value && inputValue) {
+			// Clear input if value becomes null/undefined
+			inputValue = '';
+		}
+	});
+	
 	async function handleInput(e: Event) {
 		const target = e.target as HTMLInputElement;
 		inputValue = target.value;

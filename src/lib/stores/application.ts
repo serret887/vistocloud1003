@@ -49,7 +49,8 @@ const createDefaultAddressData = (clientId: string): ClientAddressData => ({
     addr: createEmptyAddress(),
     isPresent: true
   },
-  former: []
+  former: [],
+  mailing: undefined // Mailing address defaults to same as present (undefined means same)
 });
 
 // Default employment data
@@ -591,6 +592,31 @@ function createApplicationStore() {
           }
         }
       }));
+    },
+    
+    // Update mailing address
+    updateMailingAddress: (clientId: string, address: Partial<AddressRecord>) => {
+      update(state => {
+        const currentAddressData = state.addressData[clientId] || createDefaultAddressData(clientId);
+        const currentMailing = currentAddressData.mailing || {
+          id: generateId(),
+          fromDate: '',
+          toDate: '',
+          addr: createEmptyAddress(),
+          isPresent: false
+        };
+        
+        return {
+          ...state,
+          addressData: {
+            ...state.addressData,
+            [clientId]: {
+              ...currentAddressData,
+              mailing: { ...currentMailing, ...address }
+            }
+          }
+        };
+      });
     },
     
     addFormerAddress: (clientId: string) => {

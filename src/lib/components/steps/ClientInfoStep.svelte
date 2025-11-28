@@ -295,6 +295,9 @@
 							<AddressAutocomplete
 								value={addr.addr}
 								placeholder="Start typing former address..."
+								onchange={(address) => {
+									applicationStore.updateFormerAddress($activeClientId, addr.id, { addr: address });
+								}}
 							/>
 							<div class="grid md:grid-cols-2 gap-4">
 								<DateInput
@@ -350,7 +353,9 @@
 				<div class="space-y-2">
 					<Label>Mailing Address</Label>
 					<AddressAutocomplete
+						value={$activeAddressData?.mailing?.addr}
 						placeholder="Start typing mailing address..."
+						onchange={(address) => applicationStore.updateMailingAddress($activeClientId, { addr: address })}
 					/>
 				</div>
 			</CardContent>

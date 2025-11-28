@@ -21,6 +21,7 @@ export interface AddressRecord {
 export interface ClientAddressData {
   present: AddressRecord;
   former: AddressRecord[];
+  mailing?: AddressRecord; // Optional mailing address (if different from present)
 }
 
 export interface AddressValidationResult {
