@@ -9,6 +9,7 @@
 	import { Plus, Trash2, Building2, AlertTriangle } from 'lucide-svelte';
 	import ClientTabs from './ClientTabs.svelte';
 	import type { AddressType } from '$lib/types/address';
+	import { cn } from '$lib/utils';
 	
 	const incomeTypes = [
 		{ value: 'salary', label: 'Salary' },
@@ -24,6 +25,8 @@
 	
 	function updateRecord(recordId: string, field: string, value: string | boolean | number | AddressType) {
 		applicationStore.updateEmploymentRecord($activeClientId, recordId, { [field]: value });
+		// Re-validate step after updating
+		setTimeout(() => applicationStore.revalidateCurrentStep(), 100);
 	}
 	
 	function removeRecord(recordId: string) {
@@ -49,6 +52,17 @@
 	
 	let coverageMonths = $derived(calculateCoverageMonths());
 	let needsMoreHistory = $derived(coverageMonths < 24);
+	
+	// Helper to check if a field has validation error
+	function hasFieldError(fieldPath: string): boolean {
+		return $currentStepValidationErrors.some(err => err.field === fieldPath);
+	}
+	
+	// Helper to get error message for a field
+	function getFieldError(fieldPath: string): string | null {
+		const error = $currentStepValidationErrors.find(err => err.field === fieldPath);
+		return error?.message || null;
+	}
 </script>
 
 <div class="max-w-4xl mx-auto space-y-6">
@@ -114,44 +128,63 @@
 					<!-- Employer Info -->
 					<div class="grid md:grid-cols-2 gap-4">
 						<div class="space-y-2">
-							<Label>Employer Name *</Label>
+							<Label class="after:content-['*'] after:ml-0.5 after:text-destructive">Employer Name</Label>
 							<Input
 								value={record.employerName}
 								oninput={(e) => updateRecord(record.id, 'employerName', e.currentTarget.value)}
 								placeholder="Company Name"
+								class={hasFieldError(`employment.${idx}.employerName`) ? 'border-destructive focus-visible:border-destructive' : ''}
 							/>
+							{#if hasFieldError(`employment.${idx}.employerName`)}
+								<p class="text-sm text-destructive">{getFieldError(`employment.${idx}.employerName`)}</p>
+							{/if}
 						</div>
-						<PhoneInput
-							label="Employer Phone"
-							value={record.phoneNumber || ''}
-							onValueChange={(val) => updateRecord(record.id, 'phoneNumber', val)}
+						<div class="space-y-2">
+							<PhoneInput
+								label="Employer Phone"
+								value={record.phoneNumber || ''}
+								onValueChange={(val) => updateRecord(record.id, 'phoneNumber', val)}
+								required
 							/>
+							{#if hasFieldError(`employment.${idx}.phoneNumber`)}
+								<p class="text-sm text-destructive">{getFieldError(`employment.${idx}.phoneNumber`)}</p>
+							{/if}
+						</div>
 					</div>
 					
 					<!-- Employer Address -->
 					<div class="space-y-2">					
-						<Label>Employer Address</Label>
-						<AddressAutocomplete
-							
-							value={record.employerAddress}
-							placeholder="Start typing employer address..."
-							onchange={(addr) => updateRecord(record.id, 'employerAddress', addr)}
-						/>
+						<Label class="after:content-['*'] after:ml-0.5 after:text-destructive">Employer Address</Label>
+						<div class={hasFieldError(`employment.${idx}.employerAddress`) ? 'border border-destructive rounded-md p-1' : ''}>
+							<AddressAutocomplete
+								value={record.employerAddress}
+								placeholder="Start typing employer address..."
+								onchange={(addr) => updateRecord(record.id, 'employerAddress', addr)}
+							/>
+						</div>
 						{#if record.employerAddress?.formattedAddress}
 							<p class="text-sm text-muted-foreground">{record.employerAddress.formattedAddress}</p>
+						{/if}
+						{#if hasFieldError(`employment.${idx}.employerAddress`)}
+							<p class="text-sm text-destructive">{getFieldError(`employment.${idx}.employerAddress`)}</p>
 						{/if}
 					</div>
 					
 					<!-- Job Info -->
 					<div class="grid md:grid-cols-2 gap-4">
 						<div class="space-y-2">
-							<Label>Job Title / Position *</Label>
+							<Label class="after:content-['*'] after:ml-0.5 after:text-destructive">Job Title / Position</Label>
 							<Input
 								value={record.jobTitle}
 								oninput={(e) => updateRecord(record.id, 'jobTitle', e.currentTarget.value)}
 								placeholder="Software Engineer"
+								class={hasFieldError(`employment.${idx}.jobTitle`) ? 'border-destructive focus-visible:border-destructive' : ''}
 							/>
+							{#if hasFieldError(`employment.${idx}.jobTitle`)}
+								<p class="text-sm text-destructive">{getFieldError(`employment.${idx}.jobTitle`)}</p>
+							{/if}
 						</div>
+						<div class="space-y-2">
 						<ValidatedSelect
 							label="Income Type"
 							value={incomeTypeValue}
@@ -164,25 +197,38 @@
 							required
 							placeholder="Select type..."
 							showError={true}
+							error={hasFieldError(`employment.${idx}.incomeType`) ? getFieldError(`employment.${idx}.incomeType`) : undefined}
 						/>
+						</div>
 					</div>
 					
 					<!-- Dates -->
 					<div class="grid md:grid-cols-2 gap-4">
-						<DateInput
-							label="Start Date"
-							value={record.startDate || ''}
-							onValueChange={(val) => updateRecord(record.id, 'startDate', val)}
-							required
-							allowFuture={false}
-						/>
-						{#if !record.currentlyEmployed && !record.hasOfferLetter}
+						<div class="space-y-2">
 							<DateInput
-								label="End Date"
-								value={record.endDate || ''}
-								onValueChange={(val) => updateRecord(record.id, 'endDate', val)}
+								label="Start Date"
+								value={record.startDate || ''}
+								onValueChange={(val) => updateRecord(record.id, 'startDate', val)}
+								required
 								allowFuture={false}
 							/>
+							{#if hasFieldError(`employment.${idx}.startDate`)}
+								<p class="text-sm text-destructive">{getFieldError(`employment.${idx}.startDate`)}</p>
+							{/if}
+						</div>
+						{#if !record.currentlyEmployed && !record.hasOfferLetter}
+							<div class="space-y-2">
+								<DateInput
+									label="End Date"
+									value={record.endDate || ''}
+									onValueChange={(val) => updateRecord(record.id, 'endDate', val)}
+									required
+									allowFuture={false}
+								/>
+								{#if hasFieldError(`employment.${idx}.endDate`)}
+									<p class="text-sm text-destructive">{getFieldError(`employment.${idx}.endDate`)}</p>
+								{/if}
+							</div>
 						{/if}
 					</div>
 					
@@ -274,8 +320,18 @@
 				<Textarea
 					placeholder="Explain any gaps in employment history (e.g., student, stay-at-home parent, medical leave)..."
 					value={$activeEmploymentData?.employmentNote || ''}
-					class="min-h-[100px]"
+					oninput={(e) => {
+						applicationStore.updateEmploymentData($activeClientId, { employmentNote: e.currentTarget.value });
+						setTimeout(() => applicationStore.revalidateCurrentStep(), 100);
+					}}
+					class={cn(
+						"min-h-[100px]",
+						hasFieldError('employmentNote') ? 'border-destructive focus-visible:border-destructive' : ''
+					)}
 				/>
+				{#if hasFieldError('employmentNote')}
+					<p class="text-sm text-destructive mt-2">{getFieldError('employmentNote')}</p>
+				{/if}
 			</CardContent>
 		</Card>
 	{/if}

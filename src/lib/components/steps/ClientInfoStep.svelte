@@ -15,16 +15,22 @@
 	
 	function updateField(field: string, value: string | boolean) {
 		applicationStore.updateClientData($activeClientId, { [field]: value });
+		// Re-validate step after updating
+		setTimeout(() => applicationStore.revalidateCurrentStep(), 100);
 	}
 	
 	function updatePresentAddress(address: AddressType) {
 		applicationStore.updatePresentAddress($activeClientId, { 
 			addr: address 
 		});
+		// Re-validate step after updating
+		setTimeout(() => applicationStore.revalidateCurrentStep(), 100);
 	}
 	
 	function updatePresentAddressDate(field: 'fromDate' | 'toDate', value: string) {
 		applicationStore.updatePresentAddress($activeClientId, { [field]: value });
+		// Re-validate step after updating
+		setTimeout(() => applicationStore.revalidateCurrentStep(), 100);
 	}
 	
 	function addFormerAddress() {
@@ -317,6 +323,7 @@
 								placeholder="Start typing former address..."
 								onchange={(address) => {
 									applicationStore.updateFormerAddress($activeClientId, addr.id, { addr: address });
+									setTimeout(() => applicationStore.revalidateCurrentStep(), 100);
 								}}
 							/>
 							<div class="grid md:grid-cols-2 gap-4">
@@ -325,6 +332,7 @@
 									value={addr.fromDate || ''}
 									onValueChange={(val) => {
 										applicationStore.updateFormerAddress($activeClientId, addr.id, { fromDate: val });
+										setTimeout(() => applicationStore.revalidateCurrentStep(), 100);
 									}}
 									required
 									allowFuture={false}
@@ -334,6 +342,7 @@
 									value={addr.toDate || ''}
 									onValueChange={(val) => {
 										applicationStore.updateFormerAddress($activeClientId, addr.id, { toDate: val });
+										setTimeout(() => applicationStore.revalidateCurrentStep(), 100);
 									}}
 									required
 									allowFuture={false}

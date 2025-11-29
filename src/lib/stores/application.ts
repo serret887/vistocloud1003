@@ -421,6 +421,29 @@ function createApplicationStore() {
       });
     },
     
+    // Re-validate current step (called when fields change)
+    revalidateCurrentStep: () => {
+      const state = get(applicationStore);
+      const currentStepId = state.currentStepId;
+      
+      if (!currentStepId) return;
+      
+      try {
+        const validation = validateStep(currentStepId, state);
+        
+        // Update validation errors for current step
+        update(s => ({
+          ...s,
+          validationErrors: {
+            ...s.validationErrors,
+            [currentStepId]: validation.errors
+          }
+        }));
+      } catch (error) {
+        console.error('Re-validation error:', error);
+      }
+    },
+    
     // Add a new client (co-borrower)
     addClient: () => {
       update(state => {
@@ -919,6 +942,21 @@ function createApplicationStore() {
       }));
       
       return newRecord.id;
+    },
+    
+    updateActiveIncomeRecord: (clientId: string, recordId: string, updates: Partial<ActiveIncomeRecord>) => {
+      update(state => ({
+        ...state,
+        incomeData: {
+          ...state.incomeData,
+          [clientId]: {
+            ...state.incomeData[clientId],
+            activeIncomeRecords: state.incomeData[clientId].activeIncomeRecords.map(r =>
+              r.id === recordId ? { ...r, ...updates, updatedAt: new Date().toISOString() } : r
+            )
+          }
+        }
+      }));
     },
     
     updatePassiveIncomeRecord: (clientId: string, recordId: string, updates: Partial<PassiveIncomeRecord>) => {

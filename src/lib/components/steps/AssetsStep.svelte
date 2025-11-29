@@ -151,7 +151,7 @@
 				<CardContent class="space-y-4">
 					<div class="grid md:grid-cols-2 gap-4">
 						<div class="space-y-2">
-							<Label>Institution Name *</Label>
+							<Label class="after:content-['*'] after:ml-0.5 after:text-destructive">Institution Name</Label>
 							<Input
 								value={asset.institutionName || ''}
 								oninput={(e) => updateAsset(asset.id, 'institutionName', e.currentTarget.value)}
@@ -192,7 +192,7 @@
 							/>
 						</div>
 						<div class="space-y-2">
-							<Label>Current Value *</Label>
+							<Label class="after:content-['*'] after:ml-0.5 after:text-destructive">Current Value</Label>
 							<div class="relative">
 								<DollarSign class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 								<Input
@@ -209,7 +209,7 @@
 					<!-- Gift Source (only for Gift category) -->
 					{#if asset.category === 'Gift'}
 						<div class="space-y-2">
-							<Label>Gift Source *</Label>
+							<Label class="after:content-['*'] after:ml-0.5 after:text-destructive">Gift Source</Label>
 							<Input
 								value={asset.source || ''}
 								oninput={(e) => updateAsset(asset.id, 'source', e.currentTarget.value)}

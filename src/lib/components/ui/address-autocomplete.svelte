@@ -21,14 +21,17 @@
 	let sessionToken = $state(Math.random().toString(36).slice(2));
 	let debounceTimer: ReturnType<typeof setTimeout>;
 	
+	let isUserTyping = $state(false);
+	
 	// Sync inputValue with value prop when it changes (e.g., when data loads from Firebase)
+	// But only if user is not actively typing
 	$effect(() => {
-		if (value) {
+		if (!isUserTyping && value) {
 			const newValue = value.formattedAddress || value.address1 || '';
 			if (newValue && newValue !== inputValue) {
 				inputValue = newValue;
 			}
-		} else if (!value && inputValue) {
+		} else if (!isUserTyping && !value && inputValue) {
 			// Clear input if value becomes null/undefined
 			inputValue = '';
 		}
@@ -37,6 +40,17 @@
 	async function handleInput(e: Event) {
 		const target = e.target as HTMLInputElement;
 		inputValue = target.value;
+		isUserTyping = true;
+		
+		// If user clears the input, clear the address
+		if (inputValue.trim() === '') {
+			onchange?.(createEmptyAddress());
+			suggestions = [];
+			showSuggestions = false;
+			// Reset typing flag after a delay
+			setTimeout(() => { isUserTyping = false; }, 100);
+			return;
+		}
 		
 		if (inputValue.length < 3) {
 			suggestions = [];
@@ -63,6 +77,7 @@
 	async function selectSuggestion(suggestion: PlaceSuggestion) {
 		isLoading = true;
 		showSuggestions = false;
+		isUserTyping = false; // User selected, so sync with prop
 		
 		try {
 			const details = await getPlaceDetails(suggestion.placeResource);
@@ -78,6 +93,20 @@
 			// Generate new session token for next search
 			sessionToken = Math.random().toString(36).slice(2);
 		}
+	}
+	
+	function createEmptyAddress(): AddressType {
+		return {
+			address1: '',
+			address2: '',
+			formattedAddress: '',
+			city: '',
+			region: '',
+			postalCode: '',
+			country: '',
+			lat: 0,
+			lng: 0
+		};
 	}
 	
 	function handleBlur() {
@@ -102,12 +131,28 @@
 			{placeholder}
 			value={inputValue}
 			oninput={handleInput}
-			onblur={handleBlur}
+			onblur={() => {
+				handleBlur();
+				// Reset typing flag on blur
+				setTimeout(() => { isUserTyping = false; }, 300);
+			}}
 			onfocus={handleFocus}
 			class="pl-10 pr-10"
 		/>
 		{#if isLoading}
 			<Loader2 class="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground animate-spin" />
+		{:else if inputValue}
+			<button
+				type="button"
+				onclick={() => {
+					inputValue = '';
+					onchange?.(createEmptyAddress());
+					isUserTyping = false;
+				}}
+				class="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground hover:text-foreground"
+			>
+				×
+			</button>
 		{/if}
 	</div>
 	

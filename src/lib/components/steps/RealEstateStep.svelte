@@ -117,7 +117,7 @@
 				<CardContent class="space-y-6">
 					<!-- Property Address -->
 					<div class="space-y-2">
-						<Label>Property Address *</Label>
+						<Label class="after:content-['*'] after:ml-0.5 after:text-destructive">Property Address</Label>
 						<AddressAutocomplete
 							value={property.address}
 							placeholder="Start typing property address..."
@@ -173,7 +173,7 @@
 					
 					<!-- Property Value -->
 					<div class="space-y-2">
-						<Label>Property Value *</Label>
+						<Label class="after:content-['*'] after:ml-0.5 after:text-destructive">Property Value</Label>
 						<div class="relative">
 							<DollarSign class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 							<Input

@@ -119,9 +119,22 @@ export function validateClientInfo(state: ApplicationState, clientId: string): S
     const diffMonths = diffTime / (30.44 * 24 * 60 * 60 * 1000);
     
     if (diffMonths < 24 && diffMonths > 0) {
-      const hasFormerAddresses = (state.addressData[clientId]?.former?.length || 0) > 0;
-      if (!hasFormerAddresses) {
+      const formerAddresses = state.addressData[clientId]?.former || [];
+      if (formerAddresses.length === 0) {
         errors.push({ field: 'formerAddresses', message: 'Former addresses are required (less than 24 months at current address)' });
+      } else {
+        // Validate each former address
+        formerAddresses.forEach((addr, index) => {
+          if (!addr.addr?.formattedAddress && !addr.addr?.address1) {
+            errors.push({ field: `formerAddress.${index}.address`, message: `Former address ${index + 1} is required` });
+          }
+          if (!addr.fromDate) {
+            errors.push({ field: `formerAddress.${index}.fromDate`, message: `From date is required for former address ${index + 1}` });
+          }
+          if (!addr.toDate) {
+            errors.push({ field: `formerAddress.${index}.toDate`, message: `To date is required for former address ${index + 1}` });
+          }
+        });
       }
     }
   }
@@ -158,10 +171,16 @@ function isEmploymentComplete(state: ApplicationState, clientId: string): boolea
     return !!(employment.employmentNote?.trim());
   }
   
-  // Check that each record has required fields
-  return records.every(record => 
-    !!(record.employerName?.trim() && record.jobTitle?.trim() && record.startDate)
-  );
+  // Check that each record has ALL required fields
+  return records.every(record => {
+    const hasBasicInfo = !!(record.employerName?.trim() && record.jobTitle?.trim() && record.startDate);
+    const hasPhone = !!record.phoneNumber?.trim();
+    const hasAddress = !!(record.employerAddress?.formattedAddress || record.employerAddress?.address1);
+    const hasIncomeType = !!record.incomeType?.trim();
+    const hasEndDate = record.currentlyEmployed || record.hasOfferLetter || !!record.endDate;
+    
+    return hasBasicInfo && hasPhone && hasAddress && hasIncomeType && hasEndDate;
+  });
 }
 
 /**
@@ -181,16 +200,38 @@ export function validateEmployment(state: ApplicationState, clientId: string): S
   
   // Validate each record
   records.forEach((record, index) => {
+    const companyName = record.employerName?.trim() || 'Unknown Company';
+    
     if (!record.employerName?.trim()) {
-      errors.push({ field: `employment.${index}.employerName`, message: `Employer name is required for employment ${index + 1}` });
+      errors.push({ field: `employment.${index}.employerName`, message: `Employer name is required for ${companyName}` });
     }
     
     if (!record.jobTitle?.trim()) {
-      errors.push({ field: `employment.${index}.jobTitle`, message: `Job title is required for employment ${index + 1}` });
+      errors.push({ field: `employment.${index}.jobTitle`, message: `Job title is required for ${companyName}` });
     }
     
     if (!record.startDate) {
-      errors.push({ field: `employment.${index}.startDate`, message: `Start date is required for employment ${index + 1}` });
+      errors.push({ field: `employment.${index}.startDate`, message: `Start date is required for ${companyName}` });
+    }
+    
+    // End date is required if not currently employed and no offer letter
+    if (!record.currentlyEmployed && !record.hasOfferLetter && !record.endDate) {
+      errors.push({ field: `employment.${index}.endDate`, message: `End date is required for ${companyName} (not currently employed)` });
+    }
+    
+    // Phone number is required
+    if (!record.phoneNumber?.trim()) {
+      errors.push({ field: `employment.${index}.phoneNumber`, message: `Phone number is required for ${companyName}` });
+    }
+    
+    // Employer address is required
+    if (!record.employerAddress?.formattedAddress && !record.employerAddress?.address1) {
+      errors.push({ field: `employment.${index}.employerAddress`, message: `Employer address is required for ${companyName}` });
+    }
+    
+    // Income type is required
+    if (!record.incomeType?.trim()) {
+      errors.push({ field: `employment.${index}.incomeType`, message: `Income type is required for ${companyName}` });
     }
     
     if (record.startDate) {
@@ -241,6 +282,46 @@ export function validateIncome(state: ApplicationState, clientId: string): StepV
   
   if (!hasActiveIncome && !hasPassiveIncome) {
     errors.push({ field: 'income', message: 'At least one income source is required (employment income or other income)' });
+  }
+  
+  // Get employment records to validate against
+  const employment = state.employmentData[clientId];
+  const employmentRecords = employment?.records || [];
+  
+  // Validate active income records - base monthly is required for each employment
+  if (employmentRecords.length > 0) {
+    employmentRecords.forEach((empRecord, empIndex) => {
+      const incomeRecord = income.activeIncomeRecords?.find(r => r.employmentRecordId === empRecord.id);
+      const companyName = empRecord.employerName?.trim() || 'Unknown Company';
+      
+      if (!incomeRecord) {
+        // Income record doesn't exist - create one automatically or require it
+        errors.push({ 
+          field: `activeIncome.${empIndex}.monthlyAmount`, 
+          message: `Base monthly income is required for ${companyName}` 
+        });
+      } else {
+        // Income record exists - validate base monthly amount
+        if (!incomeRecord.monthlyAmount || incomeRecord.monthlyAmount <= 0) {
+          errors.push({ 
+            field: `activeIncome.${empIndex}.monthlyAmount`, 
+            message: `Base monthly income is required for ${companyName}` 
+          });
+        }
+      }
+    });
+  }
+  
+  // Validate passive income records
+  if (income.passiveIncomeRecords) {
+    income.passiveIncomeRecords.forEach((record, index) => {
+      if (!record.source?.trim()) {
+        errors.push({ field: `passiveIncome.${index}.source`, message: `Income source is required for passive income ${index + 1}` });
+      }
+      if (!record.amount || record.amount <= 0) {
+        errors.push({ field: `passiveIncome.${index}.amount`, message: `Income amount is required for passive income ${index + 1}` });
+      }
+    });
   }
   
   return { isValid: errors.length === 0, errors };
@@ -510,14 +591,21 @@ export function getStepStatus(stepId: ApplicationStepId, currentStepId: Applicat
     return 'pending';
   }
   
-  if (stepIndex < currentIndex) {
-    // Step is before current - check if it's complete
-    if (state) {
-      return isStepComplete(stepId, state) ? 'completed' : 'incomplete';
+  // Check completion status for ALL steps (not just those before current)
+  // This way checkmarks persist when navigating between steps
+  if (state) {
+    const isComplete = isStepComplete(stepId, state);
+    if (isComplete) {
+      return 'completed';
+    } else if (stepIndex < currentIndex) {
+      // Step is before current and not complete - show as incomplete
+      return 'incomplete';
+    } else {
+      // Step is after current and not complete - show as pending
+      return 'pending';
     }
-    // If no state provided, we can't determine - will be handled by caller
-    return 'pending';
   }
   
+  // If no state provided, we can't determine
   return 'pending';
 }

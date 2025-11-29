@@ -49,7 +49,8 @@
 
 	// Use external error if provided, otherwise use internal validation
 	const error = $derived(externalError || internalError);
-	const showErrorMessage = $derived(hasBlurred && showError && error !== null);
+	// Show error if external error is provided (from step validation) OR if internal validation shows error
+	const showErrorMessage = $derived((externalError || (hasBlurred && showError && internalError)) && error !== null);
 
 	function handleValueChange(newValue: string | undefined) {
 		console.log(`📝 [VALIDATED-SELECT] Value changed for "${label}":`, newValue);

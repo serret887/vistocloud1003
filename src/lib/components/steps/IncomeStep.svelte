@@ -9,6 +9,7 @@
 	import ClientTabs from './ClientTabs.svelte';
 	import { PASSIVE_INCOME_TYPE_LABELS, type PassiveIncomeType } from '$lib/types/income';
 	import type { PassiveIncomeRecord } from '$lib/types/income';
+	import { cn } from '$lib/utils';
 	
 	const passiveIncomeTypes = Object.entries(PASSIVE_INCOME_TYPE_LABELS).map(([value, label]) => ({
 		value: value as PassiveIncomeType,
@@ -35,6 +36,31 @@
 	);
 	
 	let totalMonthlyIncome = $derived(totalActiveIncome + totalPassiveIncome);
+	
+	// Helper to check if a field has validation error
+	function hasFieldError(fieldPath: string): boolean {
+		return $currentStepValidationErrors.some(err => err.field === fieldPath);
+	}
+	
+	// Helper to get error message for a field
+	function getFieldError(fieldPath: string): string | null {
+		const error = $currentStepValidationErrors.find(err => err.field === fieldPath);
+		return error?.message || null;
+	}
+	
+	// Helper to update active income record
+	function updateActiveIncome(empId: string, field: string, value: number | string) {
+		const incomeRecord = $activeIncomeData?.activeIncomeRecords?.find(r => r.employmentRecordId === empId);
+		if (incomeRecord) {
+			applicationStore.updateActiveIncomeRecord($activeClientId, incomeRecord.id, { [field]: value });
+		} else {
+			// Create income record if it doesn't exist
+			const recordId = applicationStore.addActiveIncome($activeClientId, empId);
+			applicationStore.updateActiveIncomeRecord($activeClientId, recordId, { [field]: value });
+		}
+		// Re-validate step after updating
+		setTimeout(() => applicationStore.revalidateCurrentStep(), 100);
+	}
 </script>
 
 <div class="max-w-4xl mx-auto space-y-6">
@@ -109,16 +135,34 @@
 							
 							<div class="grid md:grid-cols-4 gap-4">
 								<div class="space-y-2">
-									<Label>Base Monthly</Label>
+									<Label class="after:content-['*'] after:ml-0.5 after:text-destructive">Base Monthly</Label>
 									<div class="relative">
 										<DollarSign class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 										<Input
 											type="number"
-											class="pl-9"
+											class={cn(
+												"pl-9",
+												hasFieldError(`activeIncome.${$activeEmploymentData?.records?.findIndex(r => r.id === emp.id) || 0}.monthlyAmount`) 
+													? 'border-destructive focus-visible:border-destructive' 
+													: ''
+											)}
 											placeholder="0.00"
 											value={incomeRecord?.monthlyAmount || ''}
+											oninput={(e) => {
+												const val = parseFloat(e.currentTarget.value) || 0;
+												updateActiveIncome(emp.id, 'monthlyAmount', val);
+											}}
+											onblur={() => {
+												// Re-validate on blur
+												applicationStore.revalidateCurrentStep();
+											}}
 										/>
 									</div>
+									{#if hasFieldError(`activeIncome.${$activeEmploymentData?.records?.findIndex(r => r.id === emp.id) || 0}.monthlyAmount`)}
+										<p class="text-sm text-destructive">
+											{getFieldError(`activeIncome.${$activeEmploymentData?.records?.findIndex(r => r.id === emp.id) || 0}.monthlyAmount`)}
+										</p>
+									{/if}
 								</div>
 								<div class="space-y-2">
 									<Label>Overtime</Label>
@@ -129,6 +173,10 @@
 											class="pl-9"
 											placeholder="0.00"
 											value={incomeRecord?.overtime || ''}
+											oninput={(e) => {
+												const val = parseFloat(e.currentTarget.value) || 0;
+												updateActiveIncome(emp.id, 'overtime', val);
+											}}
 										/>
 									</div>
 								</div>
@@ -141,6 +189,10 @@
 											class="pl-9"
 											placeholder="0.00"
 											value={incomeRecord?.bonus || ''}
+											oninput={(e) => {
+												const val = parseFloat(e.currentTarget.value) || 0;
+												updateActiveIncome(emp.id, 'bonus', val);
+											}}
 										/>
 									</div>
 								</div>
@@ -153,6 +205,10 @@
 											class="pl-9"
 											placeholder="0.00"
 											value={incomeRecord?.commissions || ''}
+											oninput={(e) => {
+												const val = parseFloat(e.currentTarget.value) || 0;
+												updateActiveIncome(emp.id, 'commissions', val);
+											}}
 										/>
 									</div>
 								</div>
@@ -163,6 +219,7 @@
 								<Input
 									placeholder="Additional income notes..."
 									value={incomeRecord?.notes || ''}
+									oninput={(e) => updateActiveIncome(emp.id, 'notes', e.currentTarget.value)}
 								/>
 							</div>
 						</div>
@@ -227,7 +284,7 @@
 									/>
 								</div>
 								<div class="space-y-2">
-									<Label>Monthly Amount *</Label>
+									<Label class="after:content-['*'] after:ml-0.5 after:text-destructive">Monthly Amount</Label>
 									<div class="relative">
 										<DollarSign class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 										<Input 
