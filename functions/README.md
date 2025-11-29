@@ -150,3 +150,4 @@ firebase deploy --only functions:processConversation
 - Vertex AI models: `gemini-1.5-flash`, `gemini-1.5-pro`, etc.
 - Google AI models: Same names, but may have different availability
 
+

@@ -1,0 +1,93 @@
+<script lang="ts">
+  import { Card, CardHeader, CardTitle, CardDescription, CardContent, Label } from '$lib/components/ui';
+  import { DateInput } from '$lib/components/ui/validated-input';
+  import AddressAutocomplete from '$lib/components/ui/address-autocomplete.svelte';
+  import { Home, AlertCircle } from 'lucide-svelte';
+  import { cn } from '$lib/utils';
+  import type { AddressRecord, AddressType } from '$lib/types/address';
+  
+  interface Props {
+    presentAddress: AddressRecord | undefined;
+    onUpdateAddress: (address: AddressType) => void;
+    onUpdateDate: (field: 'fromDate' | 'toDate', value: string) => void;
+  }
+  
+  let { presentAddress, onUpdateAddress, onUpdateDate }: Props = $props();
+  
+  const getMonthsAtAddress = $derived.by(() => {
+    const fromDate = presentAddress?.fromDate;
+    if (!fromDate) return 0;
+    
+    const moveInDate = new Date(fromDate);
+    const today = new Date();
+    const diffTime = today.getTime() - moveInDate.getTime();
+    return Math.floor(diffTime / (30.44 * 24 * 60 * 60 * 1000));
+  });
+  
+  const shouldShowWarning = $derived(getMonthsAtAddress > 0 && getMonthsAtAddress < 24);
+</script>
+
+<Card>
+  <CardHeader>
+    <div class="flex items-center gap-2">
+      <Home class="h-5 w-5 text-primary" />
+      <div>
+        <CardTitle>Present Address</CardTitle>
+        <CardDescription>Current residence address</CardDescription>
+      </div>
+    </div>
+  </CardHeader>
+  <CardContent class="space-y-4">
+    <div class="space-y-2">
+      <Label>Street Address</Label>
+      <AddressAutocomplete
+        value={presentAddress?.addr}
+        placeholder="Start typing your address..."
+        onchange={onUpdateAddress}
+      />
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-4">
+      <DateInput
+        label="Move-in Date"
+        value={presentAddress?.fromDate || ''}
+        onValueChange={(val) => onUpdateDate('fromDate', val)}
+        required
+        allowFuture={false}
+      />
+      <div class="space-y-2">
+        <Label>Months at Address</Label>
+        <div class={cn(
+          "px-3 py-2 text-sm rounded-md border bg-muted",
+          shouldShowWarning && "border-warning/50 text-warning-foreground"
+        )}>
+          {getMonthsAtAddress === 0 
+            ? 'Enter move-in date'
+            : getMonthsAtAddress < 24
+              ? `${getMonthsAtAddress} months (Former addresses required)`
+              : `${getMonthsAtAddress} months`}
+        </div>
+        {#if shouldShowWarning}
+          <p class="text-sm text-warning flex items-center gap-1">
+            <AlertCircle class="h-3 w-3" />
+            You must provide former addresses (less than 24 months at current address)
+          </p>
+        {/if}
+      </div>
+    </div>
+    
+    {#if presentAddress?.addr?.formattedAddress}
+      <div class="p-3 rounded-lg bg-muted/50 text-sm">
+        <div class="font-medium mb-1">Resolved Address:</div>
+        <div>{presentAddress.addr.formattedAddress}</div>
+        {#if presentAddress.addr.city}
+          <div class="text-muted-foreground mt-1">
+            {presentAddress.addr.city}, {presentAddress.addr.region} {presentAddress.addr.postalCode}
+          </div>
+        {/if}
+      </div>
+    {/if}
+  </CardContent>
+</Card>
+
+

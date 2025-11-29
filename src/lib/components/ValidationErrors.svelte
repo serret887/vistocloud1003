@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { AlertCircle } from 'lucide-svelte';
-	import type { ValidationError } from '$lib/stepValidation';
+	import type { ValidationError } from '$lib/validation/types';
 	
 	interface Props {
 		errors: ValidationError[];

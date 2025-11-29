@@ -116,8 +116,8 @@
 					showErrorMessage && "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20",
 					className
 				)}
-				aria-invalid={showErrorMessage}
-				aria-describedby={showErrorMessage ? `${selectId}-error` : undefined}
+			aria-invalid={showErrorMessage ? true : undefined}
+			aria-describedby={showErrorMessage ? `${selectId}-error` : undefined}
 			>
 				<SelectValue 
 					{placeholder}

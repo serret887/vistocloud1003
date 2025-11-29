@@ -181,3 +181,4 @@ Change in `functions/src/config/modelConfig.ts` or via environment variables.
 - Set up monitoring and logging
 - Consider adding caching for common queries
 
+

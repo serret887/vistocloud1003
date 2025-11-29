@@ -55,16 +55,16 @@
 			>
 				<User class="h-4 w-4 shrink-0" />
 				<span>{$clientNames[clientId] || 'Unnamed Borrower'}</span>
-				{#if $clientIds.length > 1}
-					<button
-						onclick={(e) => removeClient(clientId, e)}
-						class="ml-2 p-1 rounded hover:bg-destructive/20 text-destructive shrink-0 flex items-center justify-center"
-						title="Remove borrower"
-					>
-						<X class="h-4 w-4" />
-					</button>
-				{/if}
 			</button>
+			{#if $clientIds.length > 1}
+				<button
+					onclick={(e) => removeClient(clientId, e)}
+					class="p-1 rounded hover:bg-destructive/20 text-destructive shrink-0 flex items-center justify-center"
+					title="Remove borrower"
+				>
+					<X class="h-4 w-4" />
+				</button>
+			{/if}
 		{/each}
 	</div>
 	

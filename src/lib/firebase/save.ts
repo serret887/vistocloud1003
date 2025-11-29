@@ -60,8 +60,9 @@ export async function createApplicationInFirebase(
       isSaving: state.isSaving,
       lastSaved: state.lastSaved,
       validationErrors: state.validationErrors,
-      visitedSteps: Array.from(state.visitedSteps), // Convert Set to Array for Firebase
-      touchedFields: Array.from(state.touchedFields), // Convert Set to Array for Firebase
+      // Convert Record<string, Set> to Record<string, Array> for Firebase
+      visitedSteps: Object.fromEntries(Object.entries(state.visitedSteps).map(([k, v]) => [k, Array.from(v)])),
+      touchedFields: Object.fromEntries(Object.entries(state.touchedFields).map(([k, v]) => [k, Array.from(v)])),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
@@ -109,8 +110,9 @@ export async function saveApplicationToFirebase(
       isSaving: state.isSaving,
       lastSaved: state.lastSaved,
       validationErrors: state.validationErrors,
-      visitedSteps: Array.from(state.visitedSteps), // Convert Set to Array for Firebase
-      touchedFields: Array.from(state.touchedFields), // Convert Set to Array for Firebase
+      // Convert Record<string, Set> to Record<string, Array> for Firebase
+      visitedSteps: Object.fromEntries(Object.entries(state.visitedSteps).map(([k, v]) => [k, Array.from(v)])),
+      touchedFields: Object.fromEntries(Object.entries(state.touchedFields).map(([k, v]) => [k, Array.from(v)])),
       updatedAt: new Date().toISOString()
     });
     

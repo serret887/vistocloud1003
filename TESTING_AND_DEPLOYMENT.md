@@ -343,3 +343,4 @@ firebase use                        # Check current project
 - [ ] Functions have appropriate `maxInstances` limits
 - [ ] Secrets are not logged or exposed
 
+

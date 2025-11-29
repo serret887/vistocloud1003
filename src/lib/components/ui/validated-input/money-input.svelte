@@ -2,15 +2,16 @@
 	import { Input, Label } from '$lib/components/ui';
 	import { DollarSign, AlertCircle } from 'lucide-svelte';
 	import { cn } from '$lib/utils';
-	import type { HTMLInputAttributes } from 'svelte/elements';
 
-	interface Props extends Omit<HTMLInputAttributes, 'value' | 'oninput' | 'type'> {
+	interface Props {
 		label?: string;
 		value?: number | string;
 		onValueChange?: (value: number) => void;
 		required?: boolean;
 		error?: string;
 		showError?: boolean;
+		class?: string;
+		id?: string;
 	}
 
 	let {
@@ -21,8 +22,7 @@
 		error,
 		showError = false,
 		class: className,
-		id,
-		...restProps
+		id
 	}: Props = $props();
 
 	// Convert number to string for display, but show empty if 0
@@ -80,10 +80,9 @@
 				hasError && "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20",
 				className
 			)}
-			aria-invalid={hasError}
+			aria-invalid={hasError ? true : undefined}
 			aria-describedby={hasError ? `${inputId}-error` : undefined}
 			placeholder="0.00"
-			{...restProps}
 		/>
 		{#if hasError}
 			<AlertCircle class="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-destructive pointer-events-none" />
