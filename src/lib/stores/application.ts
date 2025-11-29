@@ -166,8 +166,14 @@ export interface ApplicationState {
   isSaving: boolean;
   lastSaved: string | null;
   
-  // Validation errors by step
-  validationErrors: Record<ApplicationStepId, ValidationError[]>;
+  // Validation errors by client and step
+  validationErrors: Record<string, Record<ApplicationStepId, ValidationError[]>>; // clientId -> stepId -> errors
+  
+  // Track which steps have been visited (navigated away from) per client
+  visitedSteps: Record<string, Set<ApplicationStepId>>; // clientId -> Set of visited steps
+  
+  // Track which fields have been touched (blurred) - only show errors for touched fields per client
+  touchedFields: Record<string, Set<string>>; // clientId -> Set of "stepId.fieldPath"
 }
 
 // Initial state
@@ -204,7 +210,9 @@ const createInitialState = (): ApplicationState => {
     isLoading: false,
     isSaving: false,
     lastSaved: null,
-    validationErrors: {} as Record<ApplicationStepId, ValidationError[]>
+    validationErrors: {} as Record<string, Record<ApplicationStepId, ValidationError[]>>,
+    visitedSteps: {} as Record<string, Set<ApplicationStepId>>,
+    touchedFields: {} as Record<string, Set<string>>
   };
 };
 
@@ -270,6 +278,50 @@ function createApplicationStore() {
         
         // Reset auto-save hash to match loaded state
         resetLastSavedHash();
+        
+        // Validate all steps after loading to ensure status is correct (per client)
+        const stepIds: ApplicationStepId[] = ['client-info', 'employment', 'income', 'assets', 'real-estate', 'documents'];
+        const freshValidationErrors: Record<string, Record<ApplicationStepId, ValidationError[]>> = {};
+        const visitedSteps: Record<string, Set<ApplicationStepId>> = {};
+        
+        // Validate for each client
+        for (const clientId of loadedState.clientIds) {
+          if (!visitedSteps[clientId]) {
+            visitedSteps[clientId] = new Set<ApplicationStepId>();
+          }
+          if (!freshValidationErrors[clientId]) {
+            freshValidationErrors[clientId] = {} as Record<ApplicationStepId, ValidationError[]>;
+          }
+          
+          // Temporarily set active client for validation
+          const originalActiveClientId = loadedState.activeClientId;
+          loadedState.activeClientId = clientId;
+          
+          for (const stepId of stepIds) {
+            try {
+              const validation = validateStep(stepId, loadedState);
+              freshValidationErrors[clientId][stepId] = validation.errors;
+              
+              // If step has errors, mark it as visited so errors will show when user navigates to it
+              if (validation.errors.length > 0) {
+                visitedSteps[clientId].add(stepId);
+              }
+            } catch (error) {
+              console.warn(`Failed to validate step ${stepId} for client ${clientId} after load:`, error);
+              freshValidationErrors[clientId][stepId] = [];
+            }
+          }
+          
+          // Restore original active client
+          loadedState.activeClientId = originalActiveClientId;
+        }
+        
+        // Update store with fresh validation errors and visited steps
+        update(s => ({
+          ...s,
+          validationErrors: freshValidationErrors,
+          visitedSteps
+        }));
         
         debug.log('✅ Application loaded and store hydrated');
         console.log('✅ [STORE] Application loaded successfully');
@@ -368,24 +420,39 @@ function createApplicationStore() {
       const state = get(applicationStore);
       const previousStepId = state.currentStepId;
       
+      const activeClientId = state.activeClientId;
+      
       // Validate previous step before leaving (if we're moving to a different step)
       // Only validate if we have a valid previous step and it's not the initial load
-      if (previousStepId !== stepId && previousStepId && state.currentApplicationId) {
+      if (previousStepId !== stepId && previousStepId && state.currentApplicationId && activeClientId) {
         try {
           const validation = validateStep(previousStepId, state);
           
-          // Store validation errors for the previous step
-          update(s => ({
-            ...s,
-            validationErrors: {
-              ...s.validationErrors,
-              [previousStepId]: validation.errors
+          // Store validation errors for the previous step per client
+          // Mark the previous step as visited (user navigated away from it)
+          update(s => {
+            const visitedSteps = { ...s.visitedSteps };
+            if (!visitedSteps[activeClientId]) {
+              visitedSteps[activeClientId] = new Set<ApplicationStepId>();
             }
-          }));
+            visitedSteps[activeClientId].add(previousStepId);
+            
+            const validationErrors = { ...s.validationErrors };
+            if (!validationErrors[activeClientId]) {
+              validationErrors[activeClientId] = {} as Record<ApplicationStepId, ValidationError[]>;
+            }
+            validationErrors[activeClientId][previousStepId] = validation.errors;
+            
+            return {
+              ...s,
+              validationErrors,
+              visitedSteps
+            };
+          });
           
           // Log validation results
           if (!validation.isValid) {
-            console.warn(`⚠️ [VALIDATION] Step ${previousStepId} has ${validation.errors.length} error(s):`, validation.errors);
+            console.warn(`⚠️ [VALIDATION] Step ${previousStepId} for client ${activeClientId} has ${validation.errors.length} error(s):`, validation.errors);
           }
         } catch (error) {
           // Don't block navigation if validation fails
@@ -393,8 +460,33 @@ function createApplicationStore() {
         }
       }
       
-      // Update step
+      // Update step first
       update(s => ({ ...s, currentStepId: stepId }));
+      
+      // When entering a step, validate it immediately if it's been visited before
+      // This ensures errors are shown when revisiting
+      if (stepId !== previousStepId && activeClientId) {
+        try {
+          // Get fresh state after updating currentStepId
+          const newState = get(applicationStore);
+          const validation = validateStep(stepId, newState);
+          
+          update(s => {
+            const validationErrors = { ...s.validationErrors };
+            if (!validationErrors[activeClientId]) {
+              validationErrors[activeClientId] = {} as Record<ApplicationStepId, ValidationError[]>;
+            }
+            validationErrors[activeClientId][stepId] = validation.errors;
+            
+            return {
+              ...s,
+              validationErrors
+            };
+          });
+        } catch (error) {
+          console.error('Validation error on step entry:', error);
+        }
+      }
       
       // Auto-save to Firebase when changing steps (if application ID exists)
       if (state.currentApplicationId && previousStepId !== stepId) {
@@ -412,33 +504,68 @@ function createApplicationStore() {
       }
     },
     
-    // Clear validation errors for a step
+    // Clear validation errors for a step (per client)
     clearValidationErrors: (stepId: ApplicationStepId) => {
       update(s => {
-        const errors = { ...s.validationErrors };
-        delete errors[stepId];
-        return { ...s, validationErrors: errors };
+        const clientId = s.activeClientId;
+        if (!clientId) return s;
+        
+        const validationErrors = { ...s.validationErrors };
+        if (validationErrors[clientId]) {
+          const clientErrors = { ...validationErrors[clientId] };
+          delete clientErrors[stepId];
+          validationErrors[clientId] = clientErrors;
+        }
+        return { ...s, validationErrors };
       });
     },
     
-    // Re-validate current step (called when fields change)
+    // Mark a field as touched (blurred) - only show errors for touched fields
+    markFieldTouched: (fieldPath: string) => {
+      update(s => {
+        const clientId = s.activeClientId;
+        if (!clientId) return s;
+        
+        const touchedFields = { ...s.touchedFields };
+        if (!touchedFields[clientId]) {
+          touchedFields[clientId] = new Set<string>();
+        }
+        touchedFields[clientId].add(`${s.currentStepId}.${fieldPath}`);
+        return { ...s, touchedFields };
+      });
+    },
+    
+    // Re-validate current step (called on blur for individual fields)
+    // This updates errors for field-level validation (red borders) but doesn't mark step as visited
+    // Only updates errors if the step has been visited (navigated away from)
     revalidateCurrentStep: () => {
       const state = get(applicationStore);
       const currentStepId = state.currentStepId;
+      const clientId = state.activeClientId;
       
-      if (!currentStepId) return;
+      if (!currentStepId || !clientId) return;
       
       try {
         const validation = validateStep(currentStepId, state);
         
-        // Update validation errors for current step
-        update(s => ({
-          ...s,
-          validationErrors: {
-            ...s.validationErrors,
-            [currentStepId]: validation.errors
-          }
-        }));
+        // Only update validation errors if the step has been visited (navigated away from)
+        // This prevents showing the big error box while actively typing
+        // Field-level errors (red borders) will still work via hasFieldError()
+        const clientVisitedSteps = state.visitedSteps[clientId];
+        if (clientVisitedSteps?.has(currentStepId)) {
+          update(s => {
+            const validationErrors = { ...s.validationErrors };
+            if (!validationErrors[clientId]) {
+              validationErrors[clientId] = {} as Record<ApplicationStepId, ValidationError[]>;
+            }
+            validationErrors[clientId][currentStepId] = validation.errors;
+            
+            return {
+              ...s,
+              validationErrors
+            };
+          });
+        }
       } catch (error) {
         console.error('Re-validation error:', error);
       }
@@ -479,6 +606,63 @@ function createApplicationStore() {
             ...state.documentsData,
             [newClientId]: createDefaultDocumentsData(newClientId)
           }
+        };
+      });
+    },
+    
+    // Remove a client (co-borrower) - cannot remove if it's the only client
+    removeClient: (clientId: string) => {
+      update(state => {
+        // Don't allow removing the last client
+        if (state.clientIds.length <= 1) {
+          console.warn('Cannot remove the last client');
+          return state;
+        }
+        
+        // If removing the active client, switch to the first remaining client
+        let newActiveClientId = state.activeClientId;
+        if (state.activeClientId === clientId) {
+          newActiveClientId = state.clientIds.find(id => id !== clientId) || state.clientIds[0];
+        }
+        
+        // Remove client from all data structures
+        const newClientIds = state.clientIds.filter(id => id !== clientId);
+        const newClientData = { ...state.clientData };
+        const newAddressData = { ...state.addressData };
+        const newEmploymentData = { ...state.employmentData };
+        const newIncomeData = { ...state.incomeData };
+        const newAssetsData = { ...state.assetsData };
+        const newRealEstateData = { ...state.realEstateData };
+        const newDocumentsData = { ...state.documentsData };
+        const newValidationErrors = { ...state.validationErrors };
+        const newVisitedSteps = { ...state.visitedSteps };
+        const newTouchedFields = { ...state.touchedFields };
+        
+        delete newClientData[clientId];
+        delete newAddressData[clientId];
+        delete newEmploymentData[clientId];
+        delete newIncomeData[clientId];
+        delete newAssetsData[clientId];
+        delete newRealEstateData[clientId];
+        delete newDocumentsData[clientId];
+        delete newValidationErrors[clientId];
+        delete newVisitedSteps[clientId];
+        delete newTouchedFields[clientId];
+        
+        return {
+          ...state,
+          clientIds: newClientIds,
+          activeClientId: newActiveClientId,
+          clientData: newClientData,
+          addressData: newAddressData,
+          employmentData: newEmploymentData,
+          incomeData: newIncomeData,
+          assetsData: newAssetsData,
+          realEstateData: newRealEstateData,
+          documentsData: newDocumentsData,
+          validationErrors: newValidationErrors,
+          visitedSteps: newVisitedSteps,
+          touchedFields: newTouchedFields
         };
       });
     },
@@ -1053,9 +1237,37 @@ export const activeIncomeData = derived(applicationStore, $state =>
   $state.incomeData[$state.activeClientId]
 );
 
-// Validation errors for current step
+// Validation errors for current step - only show if step has been visited (navigated away from)
+// When revisiting, show ALL errors. When actively working, only show errors for touched fields
+// Errors are per client (per borrower)
 export const currentStepValidationErrors = derived(
-  [applicationStore, currentStepId],
-  ([$store, $stepId]) => $store.validationErrors[$stepId] || []
+  [applicationStore, currentStepId, activeClientId],
+  ([$store, $stepId, $clientId]) => {
+    if (!$clientId) return [];
+    
+    const clientVisitedSteps = $store.visitedSteps[$clientId];
+    const clientValidationErrors = $store.validationErrors[$clientId];
+    const clientTouchedFields = $store.touchedFields[$clientId];
+    
+    // Only show errors if the step has been visited (user navigated away and came back)
+    // This prevents showing the big error box while actively typing on first visit
+    // Ensure clientVisitedSteps is a Set before calling .has()
+    if (clientVisitedSteps instanceof Set && clientVisitedSteps.has($stepId)) {
+      const allErrors = clientValidationErrors?.[$stepId] || [];
+      
+      // When revisiting (current step and has been visited), show ALL errors
+      if ($store.currentStepId === $stepId) {
+        // Show all errors when revisiting
+        return allErrors;
+      } else {
+        // Filter to only show errors for fields that have been touched (blurred)
+        return allErrors.filter(error => {
+          const fieldPath = `${$stepId}.${error.field}`;
+          return clientTouchedFields instanceof Set && clientTouchedFields.has(fieldPath);
+        });
+      }
+    }
+    return [];
+  }
 );
 

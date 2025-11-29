@@ -140,7 +140,23 @@ export async function loadApplicationFromFirebase(
       isLoading: false,
       isSaving: false,
       lastSaved: appData.lastSaved || appData.updatedAt || null,
-      validationErrors: appData.validationErrors || {} as Record<string, any[]>
+      validationErrors: appData.validationErrors || {} as Record<string, Record<string, any[]>>,
+      visitedSteps: appData.visitedSteps && typeof appData.visitedSteps === 'object' && !Array.isArray(appData.visitedSteps) && !(appData.visitedSteps instanceof Set)
+        ? Object.fromEntries(
+            Object.entries(appData.visitedSteps).map(([clientId, steps]) => [
+              clientId,
+              Array.isArray(steps) ? new Set(steps) : steps instanceof Set ? steps : new Set()
+            ])
+          )
+        : {} as Record<string, Set<string>>,
+      touchedFields: appData.touchedFields && typeof appData.touchedFields === 'object' && !Array.isArray(appData.touchedFields) && !(appData.touchedFields instanceof Set)
+        ? Object.fromEntries(
+            Object.entries(appData.touchedFields).map(([clientId, fields]) => [
+              clientId,
+              Array.isArray(fields) ? new Set(fields) : fields instanceof Set ? fields : new Set()
+            ])
+          )
+        : {} as Record<string, Set<string>>
     };
     
     // Merge subcollection data with main document data (subcollections take precedence)

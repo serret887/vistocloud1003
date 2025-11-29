@@ -68,8 +68,8 @@
 			const recordId = applicationStore.addActiveIncome($activeClientId, empId);
 			applicationStore.updateActiveIncomeRecord($activeClientId, recordId, { [field]: value });
 		}
-		// Re-validate step after updating
-		setTimeout(() => applicationStore.revalidateCurrentStep(), 100);
+		// Don't validate on input - validation happens on blur for individual fields
+		// Full step validation only happens when entering/revisiting the step
 	}
 </script>
 
@@ -151,7 +151,6 @@
 									required
 									error={hasFieldError(`activeIncome.${currentEmploymentRecords.findIndex(r => r.id === emp.id)}.monthlyAmount`) ? getFieldError(`activeIncome.${currentEmploymentRecords.findIndex(r => r.id === emp.id)}.monthlyAmount`) : undefined}
 									showError={true}
-									onblur={() => applicationStore.revalidateCurrentStep()}
 								/>
 								<MoneyInput
 									label="Overtime"
@@ -167,15 +166,6 @@
 									label="Commissions"
 									value={incomeRecord?.commissions || 0}
 									onValueChange={(val) => updateActiveIncome(emp.id, 'commissions', val)}
-								/>
-							</div>
-							
-							<div class="space-y-2">
-								<Label>Notes</Label>
-								<Input
-									placeholder="Additional income notes..."
-									value={incomeRecord?.notes || ''}
-									oninput={(e) => updateActiveIncome(emp.id, 'notes', e.currentTarget.value)}
 								/>
 							</div>
 						</div>
@@ -244,17 +234,9 @@
 									value={income.monthlyAmount || 0}
 									onValueChange={(val) => {
 										applicationStore.updatePassiveIncomeRecord($activeClientId, income.id, { monthlyAmount: val });
-										setTimeout(() => applicationStore.revalidateCurrentStep(), 100);
+										// Don't validate on input - validation happens on blur for individual fields
 									}}
 									required
-								/>
-							</div>
-							
-							<div class="space-y-2">
-								<Label>Notes</Label>
-								<Input
-									placeholder="Additional notes about this income..."
-									value={income.notes || ''}
 								/>
 							</div>
 						</div>

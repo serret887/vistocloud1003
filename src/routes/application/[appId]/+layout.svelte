@@ -8,7 +8,6 @@
 	import { ChevronRight, Check, Circle, Home, AlertCircle } from 'lucide-svelte';
 	import DebugPanel from '$lib/components/DebugPanel.svelte';
 	import { getStepStatus } from '$lib/stepValidation';
-	import { get } from 'svelte/store';
 	
 	let { children } = $props();
 	
@@ -54,12 +53,6 @@
 		}
 	});
 	
-	function getStepIcon(stepId: string) {
-		// Get state from store for validation
-		const state = get(applicationStore);
-		return getStepStatus(stepId as any, $currentStepId, state);
-	}
-	
 	// Get current step from URL to highlight correctly
 	const currentStepFromUrl = $derived(getStepIdFromPath($page.url.pathname));
 	
@@ -97,7 +90,7 @@
 		<aside class="w-[280px] border-r bg-card/50 backdrop-blur-sm overflow-y-auto shrink-0">
 			<nav class="p-4 space-y-1">
 				{#each stepDefinitions as step, idx}
-					{@const status = getStepIcon(step.id)}
+					{@const status = getStepStatus(step.id as any, $currentStepId, $applicationStore)}
 					<button
 						onclick={() => navigateToStep(step.id)}
 						class={cn(

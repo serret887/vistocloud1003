@@ -43,6 +43,9 @@ export function generateIncomeConditions(
       generateW2Conditions(emp, employerName, addCondition);
       generatePaystubConditions(emp, employerName, addCondition);
       
+      // Always request tax returns for years worked (up to 2 years)
+      generateTaxReturnConditions(emp, employerName, addCondition);
+      
       // If ownership > 25%, also need business tax returns (underwriting requirement)
       if (emp.ownershipPercentage) {
         generateBusinessTaxReturnsForOwnership(emp, employerName, addCondition);
@@ -99,6 +102,34 @@ function generatePaystubConditions(
       `Please provide your most recent 30 days of pay stubs from ${employerName}`,
       'high',
       7
+    );
+  }
+}
+
+/**
+ * Generate tax return conditions for all employees (W-2 and self-employed)
+ * Always request tax returns for years worked, up to 2 years
+ */
+function generateTaxReturnConditions(
+  emp: EmploymentRecord,
+  employerName: string,
+  addCondition: AddConditionFn
+): void {
+  const yearsWorked = getYearsWorkedForTaxReturns(emp.startDate, emp.endDate);
+
+  // Only request last 2 years
+  const lastTwoYears = yearsWorked.slice(-2);
+
+  if (lastTwoYears.length > 0) {
+    const yearsList = lastTwoYears.join(', ');
+    const yearsText = lastTwoYears.length === 1 ? 'year' : 'years';
+
+    addCondition(
+      'Income',
+      `Tax Returns (${yearsList})`,
+      `Please provide personal tax returns (Form 1040 with all schedules) for ${yearsText}: ${yearsList}`,
+      'high',
+      14
     );
   }
 }

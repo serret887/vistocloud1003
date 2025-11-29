@@ -307,32 +307,4 @@
 		</Button>
 	{/if}
 	
-	<!-- Employment Note (for less than 2 years history) -->
-	{#if needsMoreHistory}
-		<Card>
-			<CardHeader>
-				<CardTitle class="text-base">Employment History Note</CardTitle>
-				<CardDescription>
-					If you have less than 2 years of employment history, please explain
-				</CardDescription>
-			</CardHeader>
-			<CardContent>
-				<Textarea
-					placeholder="Explain any gaps in employment history (e.g., student, stay-at-home parent, medical leave)..."
-					value={$activeEmploymentData?.employmentNote || ''}
-					oninput={(e) => {
-						applicationStore.updateEmploymentData($activeClientId, { employmentNote: e.currentTarget.value });
-						setTimeout(() => applicationStore.revalidateCurrentStep(), 100);
-					}}
-					class={cn(
-						"min-h-[100px]",
-						hasFieldError('employmentNote') ? 'border-destructive focus-visible:border-destructive' : ''
-					)}
-				/>
-				{#if hasFieldError('employmentNote')}
-					<p class="text-sm text-destructive mt-2">{getFieldError('employmentNote')}</p>
-				{/if}
-			</CardContent>
-		</Card>
-	{/if}
 </div>

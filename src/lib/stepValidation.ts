@@ -343,9 +343,9 @@ export function validateIncome(state: ApplicationState, clientId: string): StepV
  */
 function isAssetsComplete(state: ApplicationState, clientId: string): boolean {
   const assets = state.assetsData[clientId];
-  // Assets are optional, but if they exist, they should be valid
+  // At least one asset is required
   if (!assets || !assets.records || assets.records.length === 0) {
-    return true; // Assets are optional, so empty is considered complete
+    return false; // At least one asset is required
   }
   
   // If assets exist, check they have required fields
@@ -361,18 +361,22 @@ export function validateAssets(state: ApplicationState, clientId: string): StepV
   const errors: ValidationError[] = [];
   const assets = state.assetsData[clientId];
   
-  // Assets are optional, but if they exist, validate them
-  if (assets && assets.records && assets.records.length > 0) {
-    assets.records.forEach((asset, index) => {
-      if (!asset.institutionName?.trim()) {
-        errors.push({ field: `assets.${index}.institutionName`, message: `Institution name is required for asset ${index + 1}` });
-      }
-      
-      if (!asset.type?.trim()) {
-        errors.push({ field: `assets.${index}.type`, message: `Account type is required for asset ${index + 1}` });
-      }
-    });
+  // At least one asset is required
+  if (!assets || !assets.records || assets.records.length === 0) {
+    errors.push({ field: 'assets', message: 'At least one asset is required' });
+    return { isValid: false, errors };
   }
+  
+  // Validate each asset
+  assets.records.forEach((asset, index) => {
+    if (!asset.institutionName?.trim()) {
+      errors.push({ field: `assets.${index}.institutionName`, message: `Institution name is required for asset ${index + 1}` });
+    }
+    
+    if (!asset.type?.trim()) {
+      errors.push({ field: `assets.${index}.type`, message: `Account type is required for asset ${index + 1}` });
+    }
+  });
   
   return { isValid: errors.length === 0, errors };
 }

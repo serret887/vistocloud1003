@@ -1,17 +1,26 @@
 <script lang="ts">
 	import { applicationStore, clientIds, activeClientId } from '$lib/stores/application';
 	import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '$lib/components/ui';
-	import { Button, Badge } from '$lib/components/ui';
-	import { CheckCircle, AlertCircle, Send, Download, FileText, Loader2 } from 'lucide-svelte';
+	import { Button, Badge, Textarea, Label } from '$lib/components/ui';
+	import { CheckCircle, AlertCircle, Send, Download, FileText, Loader2, StickyNote } from 'lucide-svelte';
 	import ClientTabs from './ClientTabs.svelte';
 	import { get } from 'svelte/store';
 	import { downloadMISMO, validateMISMO, generateMISMO } from '$lib/mismo';
+	import { isStepComplete } from '$lib/stepValidation';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	
 	let store = $derived(get(applicationStore));
 	let isSubmitting = $state(false);
 	let isExporting = $state(false);
 	let validationErrors = $state<string[]>([]);
 	let submitSuccess = $state(false);
+	let showDocumentWarning = $state(false);
+	
+	// Check if documents are complete for all clients
+	const documentsComplete = $derived(
+		$clientIds.every(clientId => isStepComplete('documents', store))
+	);
 	
 	function getClientData(clientId: string) {
 		return store.clientData[clientId];
@@ -76,7 +85,14 @@
 		}
 	}
 	
-	async function handleSubmit() {
+	async function handleSubmit(confirmed: boolean = false) {
+		// If documents are incomplete, show warning first
+		if (!documentsComplete && !confirmed) {
+			showDocumentWarning = true;
+			return;
+		}
+		
+		showDocumentWarning = false;
 		isSubmitting = true;
 		validationErrors = [];
 		submitSuccess = false;
@@ -199,6 +215,38 @@
 		</CardContent>
 	</Card>
 
+	<!-- Document Warning -->
+	{#if showDocumentWarning}
+		<Card class="border-warning bg-warning/5">
+			<CardHeader>
+				<CardTitle class="text-warning flex items-center gap-2">
+					<AlertCircle class="h-5 w-5" />
+					Incomplete Documentation
+				</CardTitle>
+			</CardHeader>
+			<CardContent class="space-y-4">
+				<p class="text-sm text-muted-foreground">
+					Some required documents have not been uploaded. The application can still be submitted, 
+					but you may need to provide these documents later during the loan process.
+				</p>
+				<div class="flex gap-3">
+					<Button variant="outline" onclick={async () => {
+						showDocumentWarning = false;
+						const appId = $page.params.appId;
+						if (appId) {
+							await goto(`/application/${appId}/documents`);
+						}
+					}}>
+						Go to Documentation
+					</Button>
+					<Button variant="default" onclick={() => handleSubmit(true)}>
+						Submit Anyway
+					</Button>
+				</div>
+			</CardContent>
+		</Card>
+	{/if}
+
 	<!-- Validation Errors -->
 	{#if validationErrors.length > 0}
 		<Card class="border-destructive">
@@ -235,6 +283,108 @@
 			</CardContent>
 		</Card>
 	{/if}
+
+	<!-- Notes Section -->
+	<Card>
+		<CardHeader>
+			<div class="flex items-center gap-2">
+				<StickyNote class="h-5 w-5 text-primary" />
+				<div>
+					<CardTitle>Application Notes</CardTitle>
+					<CardDescription>Add notes and comments about the application for internal processing</CardDescription>
+				</div>
+			</div>
+		</CardHeader>
+		<CardContent class="space-y-6">
+			{#each $clientIds as clientId}
+				{@const client = getClientData(clientId)}
+				{@const employment = store.employmentData[clientId]}
+				{@const income = store.incomeData[clientId]}
+				<div class="space-y-4 border-b border-border pb-6 last:border-b-0 last:pb-0">
+					<div class="font-medium text-base">{client?.firstName} {client?.lastName}</div>
+					
+					<!-- General Notes -->
+					<div class="space-y-2">
+						<Label>General Notes</Label>
+						<Textarea
+							placeholder="Add any notes about this client that may help with processing (not part of the application form)..."
+							value={client?.generalNotes || ''}
+							oninput={(e) => {
+								applicationStore.updateClientData(clientId, { generalNotes: e.currentTarget.value });
+							}}
+							class="min-h-[100px]"
+						/>
+						<p class="text-xs text-muted-foreground">
+							These notes are for internal use only and will not be included in the application.
+						</p>
+					</div>
+
+					<!-- Employment Note -->
+					<div class="space-y-2">
+						<Label>Employment History Note</Label>
+						<Textarea
+							placeholder="Explain any gaps in employment history (e.g., student, stay-at-home parent, medical leave)..."
+							value={employment?.employmentNote || ''}
+							oninput={(e) => {
+								applicationStore.updateEmploymentData(clientId, { employmentNote: e.currentTarget.value });
+							}}
+							class="min-h-[100px]"
+						/>
+						<p class="text-xs text-muted-foreground">
+							Use this field if you have less than 2 years of employment history or need to explain gaps.
+						</p>
+					</div>
+
+					<!-- Income Notes -->
+					{#if income?.activeIncomeRecords?.length > 0 || income?.passiveIncomeRecords?.length > 0}
+						<div class="space-y-3">
+							<Label>Income Notes</Label>
+							
+							<!-- Active Income Notes -->
+							{#if income.activeIncomeRecords?.length > 0}
+								<div class="space-y-2">
+									<div class="text-sm font-medium text-muted-foreground">Active Income</div>
+									{#each income.activeIncomeRecords as incomeRecord}
+										<div class="space-y-1">
+											<div class="text-xs text-muted-foreground">{incomeRecord.companyName}</div>
+											<Textarea
+												placeholder="Additional notes about this income source..."
+												value={incomeRecord.notes || ''}
+												oninput={(e) => {
+													applicationStore.updateActiveIncomeRecord(clientId, incomeRecord.id, { notes: e.currentTarget.value });
+												}}
+												class="min-h-[60px] text-sm"
+											/>
+										</div>
+									{/each}
+								</div>
+							{/if}
+
+							<!-- Passive Income Notes -->
+							{#if income.passiveIncomeRecords?.length > 0}
+								<div class="space-y-2">
+									<div class="text-sm font-medium text-muted-foreground">Passive Income</div>
+									{#each income.passiveIncomeRecords as incomeRecord}
+										<div class="space-y-1">
+											<div class="text-xs text-muted-foreground">{incomeRecord.sourceName}</div>
+											<Textarea
+												placeholder="Additional notes about this income source..."
+												value={incomeRecord.notes || ''}
+												oninput={(e) => {
+													applicationStore.updatePassiveIncomeRecord(clientId, incomeRecord.id, { notes: e.currentTarget.value });
+												}}
+												class="min-h-[60px] text-sm"
+											/>
+										</div>
+									{/each}
+								</div>
+							{/if}
+						</div>
+					{/if}
+				</div>
+			{/each}
+		</CardContent>
+	</Card>
 
 	<!-- MISMO Export Section -->
 	<Card>
@@ -279,18 +429,28 @@
 					<h3 class="font-medium">Ready to Submit?</h3>
 					<p class="text-sm text-muted-foreground">
 						{#if isApplicationComplete()}
-							All required information is complete. You can submit the application.
+							{#if documentsComplete}
+								All required information and documents are complete. You can submit the application.
+							{:else}
+								All required information is complete, but some documents are missing. You can still submit, but documents may be required later.
+							{/if}
 						{:else}
 							Some required information is missing. Please complete all sections before submitting.
 						{/if}
 					</p>
+					{#if isApplicationComplete() && !documentsComplete}
+						<p class="text-xs text-warning mt-1 flex items-center gap-1">
+							<AlertCircle class="h-3 w-3" />
+							Some documents are missing
+						</p>
+					{/if}
 				</div>
 				<div class="flex gap-3">
 					<Button variant="outline" onclick={() => applicationStore.saveToFirebase()}>
 						Save Draft
 					</Button>
 					<Button 
-						onclick={handleSubmit} 
+						onclick={() => handleSubmit(false)} 
 						disabled={isSubmitting || !isApplicationComplete()}
 						class="gap-2"
 					>

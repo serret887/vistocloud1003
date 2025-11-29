@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { applicationStore, activeClientId, activeClientData, activeAddressData, currentStepValidationErrors } from '$lib/stores/application';
+	import { applicationStore, activeClientId, activeClientData, activeAddressData, currentStepValidationErrors, currentStepId } from '$lib/stores/application';
 	import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui';
 	import { Input, Label, Checkbox, Switch, Button, Textarea } from '$lib/components/ui';
 	import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '$lib/components/ui';
@@ -15,22 +15,25 @@
 	
 	function updateField(field: string, value: string | boolean) {
 		applicationStore.updateClientData($activeClientId, { [field]: value });
-		// Re-validate step after updating
-		setTimeout(() => applicationStore.revalidateCurrentStep(), 100);
+		// Don't validate on input - validation happens on blur for individual fields
+		// Full step validation only happens when entering/revisiting the step
+	}
+	
+	// Mark a field as touched when it's blurred
+	function markFieldTouched(fieldPath: string) {
+		applicationStore.markFieldTouched(fieldPath);
 	}
 	
 	function updatePresentAddress(address: AddressType) {
 		applicationStore.updatePresentAddress($activeClientId, { 
 			addr: address 
 		});
-		// Re-validate step after updating
-		setTimeout(() => applicationStore.revalidateCurrentStep(), 100);
+		// Don't validate on input - validation happens on blur for individual fields
 	}
 	
 	function updatePresentAddressDate(field: 'fromDate' | 'toDate', value: string) {
 		applicationStore.updatePresentAddress($activeClientId, { [field]: value });
-		// Re-validate step after updating
-		setTimeout(() => applicationStore.revalidateCurrentStep(), 100);
+		// Don't validate on input - validation happens on blur for individual fields
 	}
 	
 	function addFormerAddress() {
@@ -206,19 +209,6 @@
 				/>
 			</div>
 			
-			<!-- General Notes -->
-			<div class="space-y-2">
-				<Label>General Notes</Label>
-				<Textarea
-					placeholder="Add any notes about this client that may help with processing (not part of the application form)..."
-					value={$activeClientData?.generalNotes || ''}
-					oninput={(e) => updateField('generalNotes', e.currentTarget.value)}
-					class="min-h-[100px]"
-				/>
-				<p class="text-xs text-muted-foreground">
-					These notes are for internal use only and will not be included in the application.
-				</p>
-			</div>
 		</CardContent>
 	</Card>
 	
@@ -323,7 +313,7 @@
 								placeholder="Start typing former address..."
 								onchange={(address) => {
 									applicationStore.updateFormerAddress($activeClientId, addr.id, { addr: address });
-									setTimeout(() => applicationStore.revalidateCurrentStep(), 100);
+									// Don't validate on input - validation happens on blur for individual fields
 								}}
 							/>
 							<div class="grid md:grid-cols-2 gap-4">
@@ -332,7 +322,7 @@
 									value={addr.fromDate || ''}
 									onValueChange={(val) => {
 										applicationStore.updateFormerAddress($activeClientId, addr.id, { fromDate: val });
-										setTimeout(() => applicationStore.revalidateCurrentStep(), 100);
+										// Don't validate on input - validation happens on blur for individual fields
 									}}
 									required
 									allowFuture={false}
@@ -342,7 +332,7 @@
 									value={addr.toDate || ''}
 									onValueChange={(val) => {
 										applicationStore.updateFormerAddress($activeClientId, addr.id, { toDate: val });
-										setTimeout(() => applicationStore.revalidateCurrentStep(), 100);
+										// Don't validate on input - validation happens on blur for individual fields
 									}}
 									required
 									allowFuture={false}

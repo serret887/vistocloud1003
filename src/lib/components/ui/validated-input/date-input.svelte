@@ -52,6 +52,22 @@
 			return 'Invalid date';
 		}
 
+		// Special validation for Date of Birth: must be at least 18 years old
+		// This check comes before future date check to provide more specific error message
+		if (label?.toLowerCase().includes('birth') || label?.toLowerCase().includes('dob')) {
+			const now = new Date();
+			const eighteenYearsAgo = new Date();
+			eighteenYearsAgo.setFullYear(now.getFullYear() - 18);
+			eighteenYearsAgo.setMonth(now.getMonth());
+			eighteenYearsAgo.setDate(now.getDate());
+			eighteenYearsAgo.setHours(23, 59, 59, 999); // End of day 18 years ago
+			
+			// If the birth date is after 18 years ago, they're not 18 yet
+			if (date > eighteenYearsAgo) {
+				return 'Must be at least 18 years old to apply for a mortgage';
+			}
+		}
+
 		// Check future date
 		if (!allowFuture && date > today) {
 			return 'Date cannot be in the future';
@@ -70,17 +86,6 @@
 			const min = new Date(minDate);
 			if (date < min) {
 				return `Date cannot be before ${new Date(minDate).toLocaleDateString()}`;
-			}
-		}
-
-		// Special validation for Date of Birth: must be at least 18 years old
-		if (label?.toLowerCase().includes('birth') || label?.toLowerCase().includes('dob')) {
-			const eighteenYearsAgo = new Date();
-			eighteenYearsAgo.setFullYear(today.getFullYear() - 18);
-			eighteenYearsAgo.setHours(23, 59, 59, 999);
-			
-			if (date > eighteenYearsAgo) {
-				return 'Must be at least 18 years old to apply for a mortgage';
 			}
 		}
 
