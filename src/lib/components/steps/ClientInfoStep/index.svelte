@@ -10,14 +10,17 @@
   
   function updateField(field: string, value: string | boolean) {
     applicationStore.updateClientData($activeClientId, { [field]: value });
+    if (value) applicationStore.clearFieldError(field);
   }
   
   function updatePresentAddress(address: AddressType) {
     applicationStore.updatePresentAddress($activeClientId, { addr: address });
+    if (address?.streetAddress) applicationStore.clearFieldError('present.address');
   }
   
   function updatePresentAddressDate(field: 'fromDate' | 'toDate', value: string) {
     applicationStore.updatePresentAddress($activeClientId, { [field]: value });
+    if (value) applicationStore.clearFieldError(`present.${field}`);
   }
   
   function addFormerAddress() {
@@ -26,10 +29,21 @@
   
   function updateFormerAddress(addressId: string, updates: Partial<AddressRecord>) {
     applicationStore.updateFormerAddress($activeClientId, addressId, updates);
+    // Clear errors for updated fields
+    const formerAddresses = $activeAddressData?.former || [];
+    const idx = formerAddresses.findIndex(a => a.id === addressId);
+    if (idx >= 0) {
+      Object.keys(updates).forEach(key => {
+        if ((updates as Record<string, unknown>)[key]) {
+          applicationStore.clearFieldError(`former.${idx}.${key}`);
+        }
+      });
+    }
   }
   
   function updateMailingAddress(address: AddressType) {
     applicationStore.updateMailingAddress($activeClientId, { addr: address });
+    if (address?.streetAddress) applicationStore.clearFieldError('mailing.address');
   }
   
   // Calculate if former addresses are needed

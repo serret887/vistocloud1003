@@ -17,12 +17,12 @@
   
   let { record, index, onUpdate, onRemove, hasFieldError, getFieldError }: Props = $props();
   
+  // MISMO SpecialBorrowerEmployerRelationshipTypeEnum values
   const incomeTypes = [
-    { value: 'salary', label: 'Salary' },
-    { value: 'hourly', label: 'Hourly' },
-    { value: 'commission', label: 'Commission' },
-    { value: 'contract', label: 'Contract' },
-    { value: 'other', label: 'Other' }
+    { value: 'Standard', label: 'Standard' },
+    { value: 'Foreign', label: 'Foreign' },
+    { value: 'Seasonal', label: 'Seasonal' },
+    { value: 'TemporaryLeave', label: 'Temporary Leave' }
   ];
 </script>
 
@@ -108,7 +108,7 @@
         value={record.startDate || ''}
         onValueChange={(val) => onUpdate('startDate', val)}
         required
-        allowFuture={false}
+        allowFuture={record.hasOfferLetter}
       />
       {#if !record.currentlyEmployed && !record.hasOfferLetter}
         <DateInput

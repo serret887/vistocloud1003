@@ -12,9 +12,22 @@
     applicationStore.addEmploymentRecord($activeClientId);
   }
   
-  function updateRecord(recordId: string, field: string, value: string | boolean | number | AddressType) {
-    applicationStore.updateEmploymentRecord($activeClientId, recordId, { [field]: value });
-    // Don't revalidate while typing - validation happens when leaving the step
+  function updateRecord(recordId: string, index: number, field: string, value: string | boolean | number | AddressType) {
+    const updates: Record<string, string | boolean | number | AddressType> = { [field]: value };
+    
+    // When selfEmployed is toggled OFF, also reset ownershipPercentage to false
+    if (field === 'selfEmployed' && value === false) {
+      updates.ownershipPercentage = false;
+    }
+    
+    applicationStore.updateEmploymentRecord($activeClientId, recordId, updates);
+    
+    // Clear the field error when user provides a value
+    const fieldPath = `employment.${index}.${field}`;
+    console.log(`📝 [EMP-UPDATE] Field: "${field}", Index: ${index}, Value:`, value, `→ clearFieldError("${fieldPath}")`);
+    if (value) {
+      applicationStore.clearFieldError(fieldPath);
+    }
   }
   
   function removeRecord(recordId: string) {
@@ -42,7 +55,11 @@
   const hasRecords = $derived(($activeEmploymentData?.records?.length || 0) > 0);
   
   function hasFieldError(fieldPath: string): boolean {
-    return $currentStepValidationErrors.some(err => err.field === fieldPath);
+    const hasError = $currentStepValidationErrors.some(err => err.field === fieldPath);
+    if (hasError) {
+      console.log(`⚠️ [HAS-ERROR] Field "${fieldPath}" has error. Current errors:`, $currentStepValidationErrors.map(e => e.field));
+    }
+    return hasError;
   }
   
   function getFieldError(fieldPath: string): string | null {
@@ -84,7 +101,7 @@
       <EmploymentCard
         {record}
         index={idx}
-        onUpdate={(field, value) => updateRecord(record.id, field, value)}
+        onUpdate={(field, value) => updateRecord(record.id, idx, field, value)}
         onRemove={() => removeRecord(record.id)}
         {hasFieldError}
         {getFieldError}

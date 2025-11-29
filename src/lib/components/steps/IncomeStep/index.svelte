@@ -31,6 +31,11 @@
       const recordId = applicationStore.addActiveIncome($activeClientId, empId);
       applicationStore.updateActiveIncomeRecord($activeClientId, recordId, { [field]: value });
     }
+    // Clear field error when value provided
+    const empIndex = currentEmploymentRecords.findIndex(e => e.id === empId);
+    if (empIndex >= 0 && value) {
+      applicationStore.clearFieldError(`income.${empIndex}.${field}`);
+    }
   }
   
   function addPassiveIncome() {
@@ -39,6 +44,16 @@
   
   function updatePassiveIncome(recordId: string, updates: Partial<PassiveIncomeRecord>) {
     applicationStore.updatePassiveIncomeRecord($activeClientId, recordId, updates);
+    // Clear errors for updated fields
+    const records = $activeIncomeData?.passiveIncomeRecords || [];
+    const idx = records.findIndex(r => r.id === recordId);
+    if (idx >= 0) {
+      Object.keys(updates).forEach(key => {
+        if ((updates as Record<string, unknown>)[key]) {
+          applicationStore.clearFieldError(`passiveIncome.${idx}.${key}`);
+        }
+      });
+    }
   }
   
   function hasFieldError(fieldPath: string): boolean {

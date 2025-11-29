@@ -42,6 +42,12 @@
   
   function updateAsset(recordId: string, field: string, value: string | number | string[]) {
     applicationStore.updateAssetRecord($activeClientId, recordId, { [field]: value });
+    // Clear field error when value provided
+    const records = $activeAssetsData?.records || [];
+    const idx = records.findIndex(r => r.id === recordId);
+    if (idx >= 0 && value) {
+      applicationStore.clearFieldError(`assets.${idx}.${field}`);
+    }
   }
   
   function removeAsset(recordId: string) {

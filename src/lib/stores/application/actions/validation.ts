@@ -24,6 +24,29 @@ export function createValidationActions(
       });
     },
     
+    clearFieldError: (fieldPath: string) => {
+      update(s => {
+        const clientId = s.activeClientId;
+        const stepId = s.currentStepId;
+        if (!clientId || !stepId) return s;
+        
+        const validationErrors = { ...s.validationErrors };
+        if (validationErrors[clientId]?.[stepId]) {
+          const currentErrors = validationErrors[clientId][stepId];
+          console.log(`🧹 [CLEAR] Clearing "${fieldPath}" from step "${stepId}". Current errors:`, currentErrors.map(e => e.field));
+          const filteredErrors = currentErrors.filter(err => err.field !== fieldPath);
+          console.log(`🧹 [CLEAR] Errors after filter:`, filteredErrors.map(e => e.field));
+          validationErrors[clientId] = {
+            ...validationErrors[clientId],
+            [stepId]: filteredErrors
+          };
+        } else {
+          console.log(`🧹 [CLEAR] No errors found for step "${stepId}" or client "${clientId}"`);
+        }
+        return { ...s, validationErrors };
+      });
+    },
+    
     markFieldTouched: (fieldPath: string) => {
       update(s => {
         const clientId = s.activeClientId;

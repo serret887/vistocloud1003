@@ -2,7 +2,8 @@
 // Generated from data-model.md specification
 
 export type IncomeFrequency = 'hourly' | 'weekly' | 'bi-weekly' | 'monthly' | 'annually';
-export type IncomeType = 'salary' | 'hourly' | 'commission' | 'contract' | 'other';
+// MISMO SpecialBorrowerEmployerRelationshipTypeEnum
+export type IncomeType = 'Standard' | 'Foreign' | 'Seasonal' | 'TemporaryLeave';
 export type PassiveIncomeType = 
   | '401k_ira'
   | 'alimony'
@@ -162,11 +163,10 @@ export interface EmploymentRecord {
 
 // Income source display labels
 export const INCOME_TYPE_LABELS: Record<IncomeType, string> = {
-  salary: 'Salary',
-  hourly: 'Hourly',
-  commission: 'Commission',
-  contract: 'Contract',
-  other: 'Other'
+  Standard: 'Standard',
+  Foreign: 'Foreign',
+  Seasonal: 'Seasonal',
+  TemporaryLeave: 'Temporary Leave'
 };
 
 export const PASSIVE_INCOME_TYPE_LABELS: Record<PassiveIncomeType, string> = {
