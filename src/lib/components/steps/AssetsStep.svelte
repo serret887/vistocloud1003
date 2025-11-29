@@ -3,7 +3,8 @@
 	import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '$lib/components/ui';
 	import { Input, Label, Button, Checkbox } from '$lib/components/ui';
 	import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '$lib/components/ui';
-	import { Plus, Trash2, Wallet, DollarSign, Users, Building, PiggyBank, Gift, TrendingUp } from 'lucide-svelte';
+	import { MoneyInput } from '$lib/components/ui/validated-input';
+	import { Plus, Trash2, Wallet, Users, Building, PiggyBank, Gift, TrendingUp } from 'lucide-svelte';
 	import ClientTabs from './ClientTabs.svelte';
 	import type { AssetCategory } from '$lib/types/assets';
 	
@@ -191,19 +192,12 @@
 								maxlength={4}
 							/>
 						</div>
-						<div class="space-y-2">
-							<Label class="after:content-['*'] after:ml-0.5 after:text-destructive">Current Value</Label>
-							<div class="relative">
-								<DollarSign class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-								<Input
-									type="number"
-									class="pl-9"
-									value={asset.amount}
-									oninput={(e) => updateAsset(asset.id, 'amount', parseFloat(e.currentTarget.value) || 0)}
-									placeholder="0.00"
-								/>
-							</div>
-						</div>
+						<MoneyInput
+							label="Current Value"
+							value={asset.amount || 0}
+							onValueChange={(val) => updateAsset(asset.id, 'amount', val)}
+							required
+						/>
 					</div>
 					
 					<!-- Gift Source (only for Gift category) -->

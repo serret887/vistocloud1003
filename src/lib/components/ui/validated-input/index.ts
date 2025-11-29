@@ -5,4 +5,5 @@ export { default as DateInput } from './date-input.svelte';
 export { default as NameInput } from './name-input.svelte';
 export { default as EmailInput } from './email-input.svelte';
 export { default as PhoneInput } from './phone-input.svelte';
+export { default as MoneyInput } from './money-input.svelte';
 

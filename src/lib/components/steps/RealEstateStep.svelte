@@ -3,9 +3,9 @@
 	import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui';
 	import { Input, Label, Switch, Button } from '$lib/components/ui';
 	import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '$lib/components/ui';
-	import { ValidatedSelect } from '$lib/components/ui/validated-input';
+	import { ValidatedSelect, MoneyInput } from '$lib/components/ui/validated-input';
 	import AddressAutocomplete from '$lib/components/ui/address-autocomplete.svelte';
-	import { Plus, Trash2, Home, DollarSign, Building2 } from 'lucide-svelte';
+	import { Plus, Trash2, Home, Building2 } from 'lucide-svelte';
 	import ClientTabs from './ClientTabs.svelte';
 	import { PROPERTY_TYPE_LABELS, PROPERTY_STATUS_LABELS, OCCUPANCY_TYPE_LABELS } from '$lib/types/real-estate';
 	import type { AddressType } from '$lib/types/address';
@@ -172,48 +172,25 @@
 					</div>
 					
 					<!-- Property Value -->
-					<div class="space-y-2">
-						<Label class="after:content-['*'] after:ml-0.5 after:text-destructive">Property Value</Label>
-						<div class="relative">
-							<DollarSign class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-							<Input
-								type="number"
-								class="pl-9"
-								value={property.propertyValue}
-								oninput={(e) => updateProperty(property.id, 'propertyValue', parseFloat(e.currentTarget.value) || 0)}
-								placeholder="0.00"
-							/>
-						</div>
-					</div>
+					<MoneyInput
+						label="Property Value"
+						value={property.propertyValue || 0}
+						onValueChange={(val) => updateProperty(property.id, 'propertyValue', val)}
+						required
+					/>
 					
 					<!-- Monthly Expenses -->
 					<div class="grid md:grid-cols-2 gap-4">
-						<div class="space-y-2">
-							<Label>Monthly Property Taxes</Label>
-							<div class="relative">
-								<DollarSign class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-								<Input
-									type="number"
-									class="pl-9"
-									value={property.monthlyTaxes}
-									oninput={(e) => updateProperty(property.id, 'monthlyTaxes', parseFloat(e.currentTarget.value) || 0)}
-									placeholder="0.00"
-								/>
-							</div>
-						</div>
-						<div class="space-y-2">
-							<Label>Monthly Insurance</Label>
-							<div class="relative">
-								<DollarSign class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-								<Input
-									type="number"
-									class="pl-9"
-									value={property.monthlyInsurance}
-									oninput={(e) => updateProperty(property.id, 'monthlyInsurance', parseFloat(e.currentTarget.value) || 0)}
-									placeholder="0.00"
-								/>
-							</div>
-						</div>
+						<MoneyInput
+							label="Monthly Property Taxes"
+							value={property.monthlyTaxes || 0}
+							onValueChange={(val) => updateProperty(property.id, 'monthlyTaxes', val)}
+						/>
+						<MoneyInput
+							label="Monthly Insurance"
+							value={property.monthlyInsurance || 0}
+							onValueChange={(val) => updateProperty(property.id, 'monthlyInsurance', val)}
+						/>
 					</div>
 					
 					<!-- Current Residence Toggle -->

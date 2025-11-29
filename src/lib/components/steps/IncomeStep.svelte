@@ -3,9 +3,9 @@
 	import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '$lib/components/ui';
 	import { Input, Label, Button, Textarea } from '$lib/components/ui';
 	import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '$lib/components/ui';
-	import { ValidatedSelect } from '$lib/components/ui/validated-input';
+	import { ValidatedSelect, MoneyInput } from '$lib/components/ui/validated-input';
 	import ValidationErrors from '../ValidationErrors.svelte';
-	import { Plus, DollarSign, Briefcase, Trash2, TrendingUp } from 'lucide-svelte';
+	import { Plus, Briefcase, Trash2, TrendingUp } from 'lucide-svelte';
 	import ClientTabs from './ClientTabs.svelte';
 	import { PASSIVE_INCOME_TYPE_LABELS, type PassiveIncomeType } from '$lib/types/income';
 	import type { PassiveIncomeRecord } from '$lib/types/income';
@@ -134,84 +134,30 @@
 							</div>
 							
 							<div class="grid md:grid-cols-4 gap-4">
-								<div class="space-y-2">
-									<Label class="after:content-['*'] after:ml-0.5 after:text-destructive">Base Monthly</Label>
-									<div class="relative">
-										<DollarSign class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-										<Input
-											type="number"
-											class={cn(
-												"pl-9",
-												hasFieldError(`activeIncome.${$activeEmploymentData?.records?.findIndex(r => r.id === emp.id) || 0}.monthlyAmount`) 
-													? 'border-destructive focus-visible:border-destructive' 
-													: ''
-											)}
-											placeholder="0.00"
-											value={incomeRecord?.monthlyAmount || ''}
-											oninput={(e) => {
-												const val = parseFloat(e.currentTarget.value) || 0;
-												updateActiveIncome(emp.id, 'monthlyAmount', val);
-											}}
-											onblur={() => {
-												// Re-validate on blur
-												applicationStore.revalidateCurrentStep();
-											}}
-										/>
-									</div>
-									{#if hasFieldError(`activeIncome.${$activeEmploymentData?.records?.findIndex(r => r.id === emp.id) || 0}.monthlyAmount`)}
-										<p class="text-sm text-destructive">
-											{getFieldError(`activeIncome.${$activeEmploymentData?.records?.findIndex(r => r.id === emp.id) || 0}.monthlyAmount`)}
-										</p>
-									{/if}
-								</div>
-								<div class="space-y-2">
-									<Label>Overtime</Label>
-									<div class="relative">
-										<DollarSign class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-										<Input
-											type="number"
-											class="pl-9"
-											placeholder="0.00"
-											value={incomeRecord?.overtime || ''}
-											oninput={(e) => {
-												const val = parseFloat(e.currentTarget.value) || 0;
-												updateActiveIncome(emp.id, 'overtime', val);
-											}}
-										/>
-									</div>
-								</div>
-								<div class="space-y-2">
-									<Label>Bonus</Label>
-									<div class="relative">
-										<DollarSign class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-										<Input
-											type="number"
-											class="pl-9"
-											placeholder="0.00"
-											value={incomeRecord?.bonus || ''}
-											oninput={(e) => {
-												const val = parseFloat(e.currentTarget.value) || 0;
-												updateActiveIncome(emp.id, 'bonus', val);
-											}}
-										/>
-									</div>
-								</div>
-								<div class="space-y-2">
-									<Label>Commissions</Label>
-									<div class="relative">
-										<DollarSign class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-										<Input
-											type="number"
-											class="pl-9"
-											placeholder="0.00"
-											value={incomeRecord?.commissions || ''}
-											oninput={(e) => {
-												const val = parseFloat(e.currentTarget.value) || 0;
-												updateActiveIncome(emp.id, 'commissions', val);
-											}}
-										/>
-									</div>
-								</div>
+								<MoneyInput
+									label="Base Monthly"
+									value={incomeRecord?.monthlyAmount || 0}
+									onValueChange={(val) => updateActiveIncome(emp.id, 'monthlyAmount', val)}
+									required
+									error={hasFieldError(`activeIncome.${$activeEmploymentData?.records?.findIndex(r => r.id === emp.id) || 0}.monthlyAmount`) ? getFieldError(`activeIncome.${$activeEmploymentData?.records?.findIndex(r => r.id === emp.id) || 0}.monthlyAmount`) : undefined}
+									showError={true}
+									onblur={() => applicationStore.revalidateCurrentStep()}
+								/>
+								<MoneyInput
+									label="Overtime"
+									value={incomeRecord?.overtime || 0}
+									onValueChange={(val) => updateActiveIncome(emp.id, 'overtime', val)}
+								/>
+								<MoneyInput
+									label="Bonus"
+									value={incomeRecord?.bonus || 0}
+									onValueChange={(val) => updateActiveIncome(emp.id, 'bonus', val)}
+								/>
+								<MoneyInput
+									label="Commissions"
+									value={incomeRecord?.commissions || 0}
+									onValueChange={(val) => updateActiveIncome(emp.id, 'commissions', val)}
+								/>
 							</div>
 							
 							<div class="space-y-2">
@@ -283,18 +229,15 @@
 										placeholder="e.g., SSA, Company Pension" 
 									/>
 								</div>
-								<div class="space-y-2">
-									<Label class="after:content-['*'] after:ml-0.5 after:text-destructive">Monthly Amount</Label>
-									<div class="relative">
-										<DollarSign class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-										<Input 
-											type="number" 
-											class="pl-9"
-											value={income.monthlyAmount} 
-											placeholder="0.00" 
-										/>
-									</div>
-								</div>
+								<MoneyInput
+									label="Monthly Amount"
+									value={income.monthlyAmount || 0}
+									onValueChange={(val) => {
+										applicationStore.updatePassiveIncomeRecord($activeClientId, income.id, { monthlyAmount: val });
+										setTimeout(() => applicationStore.revalidateCurrentStep(), 100);
+									}}
+									required
+								/>
 							</div>
 							
 							<div class="space-y-2">
