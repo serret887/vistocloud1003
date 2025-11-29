@@ -1,20 +1,17 @@
 /**
  * Transcribe Audio Function
- * Converts audio to text using Google Speech-to-Text API via Vertex AI
+ * Converts audio to text using Vertex AI Speech-to-Text API
+ * Uses Application Default Credentials (ADC) - no API key needed
  */
 
 import { onCall } from 'firebase-functions/v2/https';
-import { defineSecret } from 'firebase-functions/params';
-
-// API key for Google Speech-to-Text (can use same key as Gemini)
-const apiKey = defineSecret('GOOGLE_AI_API_KEY');
+import { SpeechClient } from '@google-cloud/speech';
 
 /**
- * Transcribe audio blob to text
+ * Transcribe audio blob to text using Vertex AI
  */
 export const transcribeAudio = onCall(
   {
-    secrets: [apiKey],
     cors: true,
     maxInstances: 10,
   },
@@ -39,70 +36,57 @@ export const transcribeAudio = onCall(
       : audioBase64;
 
     try {
-      // Get API key from secret or environment
-      let keyValue: string | undefined;
-      try {
-        keyValue = apiKey.value();
-      } catch (error) {
-        // Secret not available (e.g., in emulator), try environment variable
-        keyValue = process.env.GOOGLE_AI_API_KEY;
-      }
-      
-      if (!keyValue) {
-        throw new Error(
-          'GOOGLE_AI_API_KEY is not set. ' +
-          'For local development, set the GOOGLE_AI_API_KEY environment variable before starting the emulator.'
-        );
+      // Get project ID from environment
+      // In Firebase Functions, GCLOUD_PROJECT is automatically set
+      const projectId = process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT;
+
+      if (!projectId) {
+        throw new Error('GCLOUD_PROJECT or GCP_PROJECT environment variable is not set');
       }
 
-      // Use Google Speech-to-Text API
-      const response = await fetch(
-        `https://speech.googleapis.com/v1/speech:recognize?key=${keyValue}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            config: {
-              encoding: audioFormat,
-              sampleRateHertz: 16000,
-              languageCode: 'en-US',
-              enableAutomaticPunctuation: true,
-              model: 'latest_long',
-            },
-            audio: {
-              content: base64Content,
-            },
-          }),
-        }
-      );
+      // Initialize Speech client with ADC (Application Default Credentials)
+      // In Firebase Functions, ADC is automatically configured
+      // Vertex AI Speech API uses the standard endpoint
+      const speechClient = new SpeechClient({
+        projectId,
+      });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Speech-to-Text API error:', errorData);
-        throw new Error(`Speech-to-Text API error: ${response.status}`);
-      }
+      // Prepare the recognition request
+      const requestConfig = {
+        encoding: audioFormat as any,
+        sampleRateHertz: 16000,
+        languageCode: 'en-US',
+        enableAutomaticPunctuation: true,
+        model: 'latest_long',
+      };
 
-      const data = await response.json();
+      const audio = {
+        content: base64Content,
+      };
 
-      if (!data.results || data.results.length === 0) {
+      // Call Vertex AI Speech-to-Text API
+      const [response] = await speechClient.recognize({
+        config: requestConfig,
+        audio: audio,
+      });
+
+      if (!response.results || response.results.length === 0) {
         console.warn('No transcription results');
         return { transcription: '' };
       }
 
       // Combine all alternatives
-      const transcription = data.results
-        .map((result: any) => result.alternatives[0]?.transcript || '')
+      const transcription = response.results
+        .map((result: any) => result.alternatives?.[0]?.transcript || '')
         .join(' ')
         .trim();
 
       console.log('Transcription complete:', transcription.substring(0, 100) + '...');
 
       return { transcription };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Transcription error:', error);
-      throw error;
+      throw new Error(`Transcription failed: ${error.message || 'Unknown error'}`);
     }
   }
 );
