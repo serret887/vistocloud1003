@@ -40,9 +40,19 @@ export const transcribeAudio = onCall(
 
     try {
       // Get API key from secret or environment
-      const keyValue = apiKey.value() || process.env.GOOGLE_AI_API_KEY;
+      let keyValue: string | undefined;
+      try {
+        keyValue = apiKey.value();
+      } catch (error) {
+        // Secret not available (e.g., in emulator), try environment variable
+        keyValue = process.env.GOOGLE_AI_API_KEY;
+      }
+      
       if (!keyValue) {
-        throw new Error('GOOGLE_AI_API_KEY is not set');
+        throw new Error(
+          'GOOGLE_AI_API_KEY is not set. ' +
+          'For local development, set the GOOGLE_AI_API_KEY environment variable before starting the emulator.'
+        );
       }
 
       // Use Google Speech-to-Text API
