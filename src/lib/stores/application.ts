@@ -519,36 +519,67 @@ function createApplicationStore() {
     
     // Employment actions
     addEmploymentRecord: (clientId: string) => {
-      const newRecord: EmploymentRecord = {
-        id: generateId('emp'),
-        employerName: '',
-        phoneNumber: '',
-        employerAddress: createEmptyAddress(),
-        jobTitle: '',
-        incomeType: '',
-        selfEmployed: false,
-        ownershipPercentage: false,
-        relatedParty: false,
-        currentlyEmployed: false,
-        startDate: '',
-        endDate: null,
-        hasOfferLetter: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+      let newRecordId = '';
       
-      update(state => ({
-        ...state,
-        employmentData: {
-          ...state.employmentData,
-          [clientId]: {
-            ...state.employmentData[clientId],
-            records: [...state.employmentData[clientId].records, newRecord]
+      update(state => {
+        const existingRecords = state.employmentData[clientId]?.records || [];
+        let mostRecentStartDate: string | null = null;
+        
+        // Find the most recent job's start date to auto-fill end date
+        if (existingRecords.length > 0) {
+          // First, check for currently employed jobs
+          const currentJob = existingRecords.find(r => r.currentlyEmployed && r.startDate);
+          if (currentJob && currentJob.startDate) {
+            mostRecentStartDate = currentJob.startDate;
+          } else {
+            // Otherwise, find the job with the latest start date
+            const sortedByStartDate = existingRecords
+              .filter(r => r.startDate)
+              .sort((a, b) => {
+                const dateA = new Date(a.startDate!).getTime();
+                const dateB = new Date(b.startDate!).getTime();
+                return dateB - dateA; // Descending order (most recent first)
+              });
+            
+            if (sortedByStartDate.length > 0) {
+              mostRecentStartDate = sortedByStartDate[0].startDate!;
+            }
           }
         }
-      }));
+        
+        const newRecord: EmploymentRecord = {
+          id: generateId('emp'),
+          employerName: '',
+          phoneNumber: '',
+          employerAddress: createEmptyAddress(),
+          jobTitle: '',
+          incomeType: '',
+          selfEmployed: false,
+          ownershipPercentage: false,
+          relatedParty: false,
+          currentlyEmployed: false,
+          startDate: '',
+          endDate: mostRecentStartDate, // Auto-fill with most recent job's start date
+          hasOfferLetter: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        
+        newRecordId = newRecord.id;
+        
+        return {
+          ...state,
+          employmentData: {
+            ...state.employmentData,
+            [clientId]: {
+              ...state.employmentData[clientId],
+              records: [...state.employmentData[clientId].records, newRecord]
+            }
+          }
+        };
+      });
       
-      return newRecord.id;
+      return newRecordId;
     },
     
     updateEmploymentRecord: (clientId: string, recordId: string, updates: Partial<EmploymentRecord>) => {

@@ -24,11 +24,21 @@
 		return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
 	}
 	
-	// Calculate totals
+	// Filter to only show currently employed records
+	let currentEmploymentRecords = $derived(
+		($activeEmploymentData?.records || []).filter(emp => emp.currentlyEmployed === true)
+	);
+	
+	// Calculate totals - only include income from currently employed records
 	let totalActiveIncome = $derived(
-		($activeIncomeData?.activeIncomeRecords || []).reduce((sum, rec) => {
-			return sum + (rec.monthlyAmount || 0) + (rec.bonus || 0) + (rec.commissions || 0) + (rec.overtime || 0);
-		}, 0)
+		($activeIncomeData?.activeIncomeRecords || [])
+			.filter(rec => {
+				// Only include income records that are linked to currently employed positions
+				return currentEmploymentRecords.some(emp => emp.id === rec.employmentRecordId);
+			})
+			.reduce((sum, rec) => {
+				return sum + (rec.monthlyAmount || 0) + (rec.bonus || 0) + (rec.commissions || 0) + (rec.overtime || 0);
+			}, 0)
 	);
 	
 	let totalPassiveIncome = $derived(
@@ -106,16 +116,16 @@
 			</div>
 		</CardHeader>
 		<CardContent>
-			{#if ($activeEmploymentData?.records?.length || 0) === 0}
+			{#if currentEmploymentRecords.length === 0}
 				<div class="text-center py-8">
 					<p class="text-muted-foreground">
-						No employment records found. Add employment in the Employment step first.
+						No current employment records found. Mark at least one employer as "Currently Employed Here" in the Employment step.
 					</p>
 					<Button variant="link" class="mt-2">Go to Employment →</Button>
 				</div>
 			{:else}
 				<div class="space-y-6">
-					{#each $activeEmploymentData?.records || [] as emp}
+					{#each currentEmploymentRecords as emp}
 						{@const incomeRecord = $activeIncomeData?.activeIncomeRecords?.find(r => r.employmentRecordId === emp.id)}
 						<div class="p-4 rounded-lg border space-y-4">
 							<div class="flex items-center justify-between">
@@ -139,7 +149,7 @@
 									value={incomeRecord?.monthlyAmount || 0}
 									onValueChange={(val) => updateActiveIncome(emp.id, 'monthlyAmount', val)}
 									required
-									error={hasFieldError(`activeIncome.${$activeEmploymentData?.records?.findIndex(r => r.id === emp.id) || 0}.monthlyAmount`) ? getFieldError(`activeIncome.${$activeEmploymentData?.records?.findIndex(r => r.id === emp.id) || 0}.monthlyAmount`) : undefined}
+									error={hasFieldError(`activeIncome.${currentEmploymentRecords.findIndex(r => r.id === emp.id)}.monthlyAmount`) ? getFieldError(`activeIncome.${currentEmploymentRecords.findIndex(r => r.id === emp.id)}.monthlyAmount`) : undefined}
 									showError={true}
 									onblur={() => applicationStore.revalidateCurrentStep()}
 								/>

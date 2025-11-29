@@ -259,11 +259,21 @@ function isIncomeComplete(state: ApplicationState, clientId: string): boolean {
   const income = state.incomeData[clientId];
   if (!income) return false;
   
-  // Need at least some income records (active or passive)
-  const hasActiveIncome = (income.activeIncomeRecords?.length || 0) > 0;
+  // Only check income for currently employed positions
+  const employment = state.employmentData[clientId];
+  const allEmploymentRecords = employment?.records || [];
+  const currentEmploymentRecords = allEmploymentRecords.filter(emp => emp.currentlyEmployed === true);
+  
+  // Check if we have income records for all currently employed positions
+  const hasActiveIncomeForCurrent = currentEmploymentRecords.length > 0 && 
+    currentEmploymentRecords.every(empRecord => {
+      const incomeRecord = income.activeIncomeRecords?.find(r => r.employmentRecordId === empRecord.id);
+      return incomeRecord && incomeRecord.monthlyAmount && incomeRecord.monthlyAmount > 0;
+    });
+  
   const hasPassiveIncome = (income.passiveIncomeRecords?.length || 0) > 0;
   
-  return hasActiveIncome || hasPassiveIncome;
+  return hasActiveIncomeForCurrent || hasPassiveIncome;
 }
 
 /**
@@ -284,13 +294,14 @@ export function validateIncome(state: ApplicationState, clientId: string): StepV
     errors.push({ field: 'income', message: 'At least one income source is required (employment income or other income)' });
   }
   
-  // Get employment records to validate against
+  // Get employment records to validate against - only currently employed
   const employment = state.employmentData[clientId];
-  const employmentRecords = employment?.records || [];
+  const allEmploymentRecords = employment?.records || [];
+  const currentEmploymentRecords = allEmploymentRecords.filter(emp => emp.currentlyEmployed === true);
   
-  // Validate active income records - base monthly is required for each employment
-  if (employmentRecords.length > 0) {
-    employmentRecords.forEach((empRecord, empIndex) => {
+  // Validate active income records - base monthly is required for each CURRENT employment
+  if (currentEmploymentRecords.length > 0) {
+    currentEmploymentRecords.forEach((empRecord, empIndex) => {
       const incomeRecord = income.activeIncomeRecords?.find(r => r.employmentRecordId === empRecord.id);
       const companyName = empRecord.employerName?.trim() || 'Unknown Company';
       

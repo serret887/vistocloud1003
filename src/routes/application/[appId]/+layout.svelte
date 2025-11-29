@@ -92,61 +92,61 @@
 		</div>
 	</header>
 	
-	<div class="container mx-auto px-4 py-8">
-		<div class="grid lg:grid-cols-[280px_1fr] gap-8">
-			<!-- Sidebar with steps -->
-			<aside class="space-y-2">
-				<nav class="space-y-1">
-					{#each stepDefinitions as step, idx}
-						{@const status = getStepIcon(step.id)}
-						<button
-							onclick={() => navigateToStep(step.id)}
-							class={cn(
-								'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all',
-								step.id === currentStepFromUrl
-									? 'bg-primary text-primary-foreground shadow-md'
-									: 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
-							)}
-						>
+	<div class="flex h-[calc(100vh-4rem)]">
+		<!-- Fixed Sidebar -->
+		<aside class="w-[280px] border-r bg-card/50 backdrop-blur-sm overflow-y-auto shrink-0">
+			<nav class="p-4 space-y-1">
+				{#each stepDefinitions as step, idx}
+					{@const status = getStepIcon(step.id)}
+					<button
+						onclick={() => navigateToStep(step.id)}
+						class={cn(
+							'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all',
+							step.id === currentStepFromUrl
+								? 'bg-primary text-primary-foreground shadow-md'
+								: 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
+						)}
+					>
+						<div class={cn(
+							'h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium shrink-0',
+							step.id === currentStepFromUrl
+								? 'bg-primary-foreground/20 text-primary-foreground'
+								: status === 'completed'
+									? 'bg-success/10 text-success'
+									: status === 'incomplete'
+										? 'bg-warning/10 text-warning'
+										: 'bg-muted text-muted-foreground'
+						)}>
+							{#if status === 'completed'}
+								<Check class="h-4 w-4" />
+							{:else if status === 'incomplete'}
+								<AlertCircle class="h-4 w-4" />
+							{:else}
+								{idx + 1}
+							{/if}
+						</div>
+						<div class="flex-1 min-w-0">
+							<div class="font-medium truncate">{step.title}</div>
 							<div class={cn(
-								'h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium shrink-0',
+								'text-xs truncate',
 								step.id === currentStepFromUrl
-									? 'bg-primary-foreground/20 text-primary-foreground'
-									: status === 'completed'
-										? 'bg-success/10 text-success'
-										: status === 'incomplete'
-											? 'bg-warning/10 text-warning'
-											: 'bg-muted text-muted-foreground'
+									? 'text-primary-foreground/70'
+									: 'text-muted-foreground'
 							)}>
-								{#if status === 'completed'}
-									<Check class="h-4 w-4" />
-								{:else if status === 'incomplete'}
-									<AlertCircle class="h-4 w-4" />
-								{:else}
-									{idx + 1}
-								{/if}
+								{step.description}
 							</div>
-							<div class="flex-1 min-w-0">
-								<div class="font-medium truncate">{step.title}</div>
-								<div class={cn(
-									'text-xs truncate',
-									step.id === currentStepFromUrl
-										? 'text-primary-foreground/70'
-										: 'text-muted-foreground'
-								)}>
-									{step.description}
-								</div>
-							</div>
-						</button>
-					{/each}
-				</nav>
-			</aside>
-			
-			<!-- Main content area -->
-			<main class="min-h-[600px]">
+						</div>
+					</button>
+				{/each}
+			</nav>
+		</aside>
+		
+		<!-- Scrollable Main content area -->
+		<main class="flex-1 overflow-y-auto">
+			<div class="container mx-auto px-4 py-8">
 				{@render children()}
-			</main>
-		</div>
+			</div>
+		</main>
 	</div>
 	
 	<!-- Debug Panel (only in dev mode) -->
