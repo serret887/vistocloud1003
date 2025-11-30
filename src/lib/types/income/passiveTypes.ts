@@ -1,0 +1,25 @@
+// Passive income type definitions
+export type PassiveIncomeType = 
+  | '401k_ira'
+  | 'alimony'
+  | 'asset_depletion'
+  | 'automobile_expense_account'
+  | 'boarder'
+  | 'capital_gains'
+  | 'child_support'
+  | 'dividends_interest'
+  | 'foster_care'
+  | 'gambling_winnings'
+  | 'mortgage_differential'
+  | 'notes_receivable'
+  | 'pension'
+  | 'permanent_disability'
+  | 'VITE_assistance'
+  | 'royalty_payment'
+  | 'social_security'
+  | 'temporary_disability'
+  | 'temporary_leave'
+  | 'trust'
+  | 'unemployment'
+  | 'va_benefits_non_educational';
+
