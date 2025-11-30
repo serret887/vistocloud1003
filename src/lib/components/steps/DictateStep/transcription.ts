@@ -27,31 +27,21 @@ export async function processAudioBlob(
   state.error = null;
   state.pendingTranscription = null;
   
-  const userMessage: ChatMessage = {
-    id: crypto.randomUUID(),
-    role: 'user',
-    content: source === 'voice' ? '🎤 Transcribing voice recording...' : '📁 Transcribing audio file...',
-    timestamp: new Date()
-  };
-  
   try {
     const transcription = await transcribeAudio(audioBlob);
     if (!transcription?.trim()) {
-      userMessage.content = source === 'voice' 
-        ? '🎤 (No speech detected)' 
-        : '📁 (No speech detected in file)';
       state.error = 'No speech detected. Please try again.';
       onError(state.error);
-      return userMessage;
+      return null;
     }
     
-    state.pendingTranscription = transcription;
-    userMessage.content = transcription;
+    // Call the callback to append transcription to input field
     onTranscription(transcription);
-    return userMessage;
+    return null; // Don't add message to chat - transcription goes to input field
   } catch (err) {
     state.error = err instanceof Error ? err.message : 'Failed to transcribe audio';
     onError(state.error);
+    // Return error message to show in chat
     return {
       id: crypto.randomUUID(),
       role: 'assistant',

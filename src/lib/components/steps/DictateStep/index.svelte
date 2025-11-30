@@ -64,13 +64,27 @@
       source,
       transcriptionState,
       (text) => {
-        transcriptionState.pendingTranscription = text;
+        // Append transcription to input field instead of showing popup
+        if (textInput.trim()) {
+          textInput = textInput + ' ' + text;
+        } else {
+          textInput = text;
+        }
+        // Focus the input after appending
+        tick().then(() => {
+          const textarea = document.querySelector('textarea[placeholder*="Type a message"]') as HTMLTextAreaElement;
+          if (textarea) {
+            textarea.focus();
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+          }
+        });
       },
       (err) => {
         error = err;
       }
     );
-    if (message) {
+    // Only add error messages to chat, not transcription messages
+    if (message && message.role === 'assistant') {
       chatMessages = [...chatMessages, message];
       await scrollToBottom();
     }
@@ -78,13 +92,10 @@
     droppedFile = null;
   }
   
+  // This function is no longer needed since transcriptions go directly to input
+  // Keeping for backward compatibility but it won't be called
   async function sendTranscriptionToAI(transcriptionText: string) {
     if (!transcriptionText.trim() || isProcessing) return;
-    const lastUser = chatMessages[chatMessages.length - 1];
-    if (lastUser && lastUser.role === 'user') {
-      lastUser.content = transcriptionText;
-      chatMessages = [...chatMessages];
-    }
     transcriptionState.pendingTranscription = null;
     await handleProcessText(transcriptionText);
   }
@@ -220,12 +231,12 @@
       {#each chatMessages as message, index}
         <ChatMessageItem
           {message}
-          isPendingTranscription={message.role === 'user' && !!transcriptionState.pendingTranscription && index === chatMessages.length - 1}
-          pendingTranscription={transcriptionState.pendingTranscription}
+          isPendingTranscription={false}
+          pendingTranscription={null}
           {isProcessing}
-          onUpdateTranscription={(v) => transcriptionState.pendingTranscription = v}
-          onSendTranscription={() => sendTranscriptionToAI(transcriptionState.pendingTranscription || '')}
-          onCancelTranscription={() => { transcriptionState.pendingTranscription = null; chatMessages = chatMessages.filter(m => m.id !== message.id); }}
+          onUpdateTranscription={() => {}}
+          onSendTranscription={() => {}}
+          onCancelTranscription={() => {}}
           onCopyMessage={() => navigator.clipboard.writeText(message.content)}
           onRetryMessage={() => {
             const idx = chatMessages.findIndex(m => m.id === message.id);
