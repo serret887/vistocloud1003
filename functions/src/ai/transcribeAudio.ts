@@ -54,7 +54,6 @@ export const transcribeAudio = onCall(
       // Prepare the recognition request
       const requestConfig = {
         encoding: audioFormat as any,
-        sampleRateHertz: 16000,
         languageCode: 'en-US',
         enableAutomaticPunctuation: true,
         model: 'latest_long',

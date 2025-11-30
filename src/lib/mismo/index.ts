@@ -3,6 +3,7 @@
  * Provides XML generation and validation for mortgage loan applications
  */
 
-export { generateMISMO, downloadMISMO, validateMISMO, generateAssets } from './generator';
+export { generateMISMO, downloadMISMO } from './generator';
+export { validateMISMO } from './validation';
 
 

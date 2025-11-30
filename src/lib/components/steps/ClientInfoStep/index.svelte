@@ -15,7 +15,7 @@
   
   function updatePresentAddress(address: AddressType) {
     applicationStore.updatePresentAddress($activeClientId, { addr: address });
-    if (address?.streetAddress) applicationStore.clearFieldError('present.address');
+    if (address?.address1) applicationStore.clearFieldError('present.address');
   }
   
   function updatePresentAddressDate(field: 'fromDate' | 'toDate', value: string) {
@@ -43,7 +43,7 @@
   
   function updateMailingAddress(address: AddressType) {
     applicationStore.updateMailingAddress($activeClientId, { addr: address });
-    if (address?.streetAddress) applicationStore.clearFieldError('mailing.address');
+    if (address?.address1) applicationStore.clearFieldError('mailing.address');
   }
   
   // Calculate if former addresses are needed

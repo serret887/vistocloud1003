@@ -18,6 +18,7 @@
     {/if}
   </CardHeader>
   <CardContent>
+    <!-- svelte-ignore slot_element_deprecated -->
     <slot />
   </CardContent>
 </Card>

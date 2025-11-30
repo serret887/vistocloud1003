@@ -17,14 +17,16 @@
   }
   
   let { message, isPendingTranscription, pendingTranscription, isProcessing, onUpdateTranscription, onSendTranscription, onCancelTranscription, onCopyMessage, onRetryMessage }: Props = $props();
+  const transcriptionInputId = $derived(`transcription-${message.id}`);
 </script>
 
 <div class="flex {message.role === 'user' ? 'justify-end' : 'justify-start'}">
   <div class="max-w-[85%] group">
     {#if message.role === 'user' && isPendingTranscription}
       <div class="rounded-2xl border-2 border-primary/50 bg-primary/5 p-4 space-y-3">
-        <label class="text-xs font-medium text-muted-foreground">Review and edit transcription:</label>
+        <label for={transcriptionInputId} class="text-xs font-medium text-muted-foreground">Review and edit transcription:</label>
         <textarea
+          id={transcriptionInputId}
           value={pendingTranscription || ''}
           oninput={(e) => onUpdateTranscription(e.currentTarget.value)}
           rows={4}

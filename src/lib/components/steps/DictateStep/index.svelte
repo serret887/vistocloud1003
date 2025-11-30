@@ -1,34 +1,25 @@
 <script lang="ts">
-  import { Card, CardHeader, CardTitle, CardDescription, CardContent, Button } from '$lib/components/ui';
-  import { 
-    Mic, MicOff, Wand2, Loader2, AlertCircle, Upload, FileAudio, X 
-  } from 'lucide-svelte';
+  import { Card, CardHeader, CardTitle, CardDescription, Button } from '$lib/components/ui';
+  import { Wand2, Loader2, AlertCircle, Upload, X } from 'lucide-svelte';
   import ClientTabs from '../ClientTabs.svelte';
-  import { applicationStore } from '$lib/stores/application';
-  import { executeStoreAction } from '$lib/llm/actionExecutor';
-  import { resolveAddressesInActions } from '$lib/llm/addressResolver';
-  import { filterDuplicateActions } from '$lib/llm/duplicateFilter';
-  import { getCurrentLLMState } from '$lib/llm/storeAdapter';
-  import { transcribeAudio, processConversation } from '$lib/services/aiFunctions';
-  import type { LLMAction, VoiceUpdate, ChatMessage } from '$lib/types/voice-assistant';
-  import type { DynamicIdMap } from '$lib/llm/types';
+  import type { ChatMessage } from '$lib/types/voice-assistant';
   import { onMount, onDestroy, tick } from 'svelte';
   import { browser } from '$app/environment';
   import { cn } from '$lib/utils';
   import ChatMessageItem from './ChatMessage.svelte';
   import ChatInput from './ChatInput.svelte';
+  import { createRecordingState, startRecording, stopRecording } from './audioRecording';
+  import { processTextWithAI } from './aiProcessor';
+  import { createTranscriptionState, processAudioBlob } from './transcription';
   
-  let isRecording = $state(false);
+  const recordingState = $state(createRecordingState());
+  const transcriptionState = $state(createTranscriptionState());
   let isProcessing = $state(false);
   let error = $state<string | null>(null);
-  let mediaRecorder: MediaRecorder | null = null;
-  let audioChunks: Blob[] = [];
   let conversationHistory = $state<any[]>([]);
   let textInput = $state('');
   let chatMessages = $state<ChatMessage[]>([]);
   let chatContainerRef: HTMLDivElement | null = null;
-  let pendingTranscription = $state<string | null>(null);
-  let isTranscribing = $state(false);
   let isDragging = $state(false);
   let droppedFile = $state<File | null>(null);
   const supportsRecording = $derived(browser && typeof MediaRecorder !== 'undefined');
@@ -50,78 +41,41 @@
     }];
   });
   
-  onDestroy(() => stopRecording());
+  onDestroy(() => stopRecording(recordingState));
   
-  async function startRecording() {
-    if (!supportsRecording) { error = 'Voice recording is not supported in this browser'; return; }
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const options: MediaRecorderOptions = {
-        mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-          ? 'audio/webm;codecs=opus'
-          : MediaRecorder.isTypeSupported('audio/webm')
-            ? 'audio/webm'
-            : undefined
-      };
-      mediaRecorder = new MediaRecorder(stream, options);
-      audioChunks = [];
-      mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
-      mediaRecorder.onstop = async () => {
-        stream.getTracks().forEach(t => t.stop());
-        if (audioChunks.length > 0) {
-          const blob = new Blob(audioChunks, { type: mediaRecorder?.mimeType || 'audio/webm' });
-          await processAudioBlob(blob, 'voice');
-        }
-      };
-      mediaRecorder.onerror = () => { error = 'Recording error occurred'; isRecording = false; };
-      mediaRecorder.start();
-      isRecording = true;
-      error = null;
-    } catch {
-      error = 'Failed to access microphone. Please check permissions.';
-    }
+  async function handleStartRecording() {
+    await startRecording(recordingState, async (blob) => {
+      await handleProcessAudioBlob(blob, 'voice');
+    });
+    if (recordingState.error) error = recordingState.error;
   }
   
-  function stopRecording() {
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-      mediaRecorder.stop();
-      isRecording = false;
-    }
+  function handleStopRecording() {
+    stopRecording(recordingState);
   }
   
-  function toggleRecording() { isRecording ? stopRecording() : startRecording(); }
+  function toggleRecording() {
+    recordingState.isRecording ? handleStopRecording() : handleStartRecording();
+  }
   
-  async function processAudioBlob(audioBlob: Blob, source: 'voice' | 'file') {
-    isTranscribing = true;
-    error = null;
-    pendingTranscription = null;
-    const userMessage: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: 'user',
-      content: source === 'voice' ? '🎤 Transcribing voice recording...' : '📁 Transcribing audio file...',
-      timestamp: new Date()
-    };
-    chatMessages = [...chatMessages, userMessage];
-    await scrollToBottom();
-    try {
-      const transcription = await transcribeAudio(audioBlob);
-      if (!transcription?.trim()) {
-        userMessage.content = source === 'voice' ? '🎤 (No speech detected)' : '📁 (No speech detected in file)';
-        chatMessages = [...chatMessages];
-        error = 'No speech detected. Please try again.';
-        return;
+  async function handleProcessAudioBlob(audioBlob: Blob, source: 'voice' | 'file') {
+    const message = await processAudioBlob(
+      audioBlob,
+      source,
+      transcriptionState,
+      (text) => {
+        transcriptionState.pendingTranscription = text;
+      },
+      (err) => {
+        error = err;
       }
-      pendingTranscription = transcription;
-      userMessage.content = transcription;
-      chatMessages = [...chatMessages];
+    );
+    if (message) {
+      chatMessages = [...chatMessages, message];
       await scrollToBottom();
-    } catch (err) {
-      error = err instanceof Error ? err.message : 'Failed to transcribe audio';
-      chatMessages = [...chatMessages, { id: crypto.randomUUID(), role: 'assistant', content: `❌ Error: ${error}`, timestamp: new Date() }];
-    } finally {
-      isTranscribing = false;
-      droppedFile = null;
     }
+    if (transcriptionState.error) error = transcriptionState.error;
+    droppedFile = null;
   }
   
   async function sendTranscriptionToAI(transcriptionText: string) {
@@ -131,7 +85,7 @@
       lastUser.content = transcriptionText;
       chatMessages = [...chatMessages];
     }
-    pendingTranscription = null;
+    transcriptionState.pendingTranscription = null;
     await handleProcessText(transcriptionText);
   }
   
@@ -139,46 +93,26 @@
     isProcessing = true;
     error = null;
     try {
-      await processWithAI(text);
+      const result = await processTextWithAI(text, conversationHistory);
+      chatMessages = [...chatMessages, {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: result.summary + (result.nextSteps ? `\n\n${result.nextSteps}` : ''),
+        timestamp: new Date(),
+        updates: result.updates.map(u => u.description)
+      }];
+      await scrollToBottom();
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to process message';
-      chatMessages = [...chatMessages, { id: crypto.randomUUID(), role: 'assistant', content: `❌ Error: ${error}`, timestamp: new Date() }];
+      chatMessages = [...chatMessages, { 
+        id: crypto.randomUUID(), 
+        role: 'assistant', 
+        content: `❌ Error: ${error}`, 
+        timestamp: new Date() 
+      }];
     } finally {
       isProcessing = false;
     }
-  }
-  
-  async function processWithAI(text: string) {
-    const currentState = getCurrentLLMState();
-    const response = await processConversation(text, currentState, conversationHistory);
-    const dynamicIdMap: DynamicIdMap = new Map();
-    const newUpdates: VoiceUpdate[] = [];
-    const resolvedActions = await resolveAddressesInActions(response.actions);
-    const filteredActions = filterDuplicateActions(resolvedActions, applicationStore);
-    for (const action of filteredActions) {
-      try {
-        const update = executeStoreAction(action, applicationStore, dynamicIdMap);
-        if (update) newUpdates.push(update);
-      } catch (err) {
-        console.error('Error executing action:', err, action);
-      }
-    }
-    if (newUpdates.length > 0) {
-      try { await applicationStore.saveToFirebase(); } catch (err) { console.error('Failed to save to Firebase:', err); }
-    }
-    conversationHistory.push(
-      { role: 'user', content: text, timestamp: new Date().toISOString() },
-      { role: 'assistant', content: response.summary, updates: newUpdates.map(u => u.description), timestamp: new Date().toISOString() }
-    );
-    if (conversationHistory.length > 10) conversationHistory = conversationHistory.slice(-10);
-    chatMessages = [...chatMessages, {
-      id: crypto.randomUUID(),
-      role: 'assistant',
-      content: response.summary + (response.nextSteps ? `\n\n${response.nextSteps}` : ''),
-      timestamp: new Date(),
-      updates: newUpdates.map(u => u.description)
-    }];
-    await scrollToBottom();
   }
   
   async function sendTextMessage() {
@@ -201,16 +135,24 @@
     const files = e.dataTransfer?.files;
     if (files?.length) {
       const file = files[0];
-      if (file.type.startsWith('audio/')) { droppedFile = file; await processAudioBlob(file, 'file'); }
-      else error = 'Please drop an audio file (MP3, WAV, WebM, etc.)';
+      if (file.type.startsWith('audio/')) {
+        droppedFile = file;
+        await handleProcessAudioBlob(file, 'file');
+      } else {
+        error = 'Please drop an audio file (MP3, WAV, WebM, etc.)';
+      }
     }
   }
   
   function handleFileInput(e: Event) {
     const input = e.target as HTMLInputElement;
     const file = input.files?.[0];
-    if (file && file.type.startsWith('audio/')) { droppedFile = file; processAudioBlob(file, 'file'); }
-    else if (file) error = 'Please select an audio file (MP3, WAV, WebM, etc.)';
+    if (file && file.type.startsWith('audio/')) {
+      droppedFile = file;
+      handleProcessAudioBlob(file, 'file');
+    } else if (file) {
+      error = 'Please select an audio file (MP3, WAV, WebM, etc.)';
+    }
   }
   
   function copyMessage(content: string) { navigator.clipboard.writeText(content); }
@@ -257,6 +199,8 @@
     </CardHeader>
 
     <div 
+      role="region"
+      aria-label="Conversation area"
       bind:this={chatContainerRef}
       ondragover={handleDragOver}
       ondragleave={handleDragLeave}
@@ -276,18 +220,27 @@
       {#each chatMessages as message, index}
         <ChatMessageItem
           {message}
-          isPendingTranscription={message.role === 'user' && !!pendingTranscription && index === chatMessages.length - 1}
-          pendingTranscription={pendingTranscription}
+          isPendingTranscription={message.role === 'user' && !!transcriptionState.pendingTranscription && index === chatMessages.length - 1}
+          pendingTranscription={transcriptionState.pendingTranscription}
           {isProcessing}
-          onUpdateTranscription={(v) => pendingTranscription = v}
-          onSendTranscription={() => sendTranscriptionToAI(pendingTranscription || '')}
-          onCancelTranscription={() => { pendingTranscription = null; chatMessages = chatMessages.filter(m => m.id !== message.id); }}
-          onCopyMessage={() => copyMessage(message.content)}
-          onRetryMessage={() => retryMessage(message.id)}
+          onUpdateTranscription={(v) => transcriptionState.pendingTranscription = v}
+          onSendTranscription={() => sendTranscriptionToAI(transcriptionState.pendingTranscription || '')}
+          onCancelTranscription={() => { transcriptionState.pendingTranscription = null; chatMessages = chatMessages.filter(m => m.id !== message.id); }}
+          onCopyMessage={() => navigator.clipboard.writeText(message.content)}
+          onRetryMessage={() => {
+            const idx = chatMessages.findIndex(m => m.id === message.id);
+            if (idx > 0) {
+              const userMsg = chatMessages[idx - 1];
+              if (userMsg.role === 'user') {
+                chatMessages = chatMessages.filter(m => m.id !== message.id);
+                handleProcessText(userMsg.content);
+              }
+            }
+          }}
         />
       {/each}
 
-      {#if isTranscribing}
+      {#if transcriptionState.isTranscribing}
         <div class="flex justify-end">
           <div class="bg-primary/10 text-primary rounded-2xl rounded-br-md px-4 py-3">
             <div class="flex items-center gap-2 text-sm">
@@ -309,11 +262,11 @@
         </div>
       {/if}
 
-      {#if isRecording}
+      {#if recordingState.isRecording}
         <div class="flex justify-end">
           <div class="bg-destructive text-destructive-foreground rounded-2xl rounded-br-md px-4 py-3">
             <div class="flex items-center gap-2 text-sm">
-              <div class="h-2 w-2 rounded-full bg-current animate-pulse" />
+              <div class="h-2 w-2 rounded-full bg-current animate-pulse"></div>
               <span>Recording... Click mic to stop</span>
             </div>
           </div>
@@ -334,7 +287,7 @@
     <ChatInput
       {textInput}
       {isProcessing}
-      {isRecording}
+      isRecording={recordingState.isRecording}
       {supportsRecording}
       onTextInputChange={handleTextInputChange}
       onSendMessage={sendTextMessage}
