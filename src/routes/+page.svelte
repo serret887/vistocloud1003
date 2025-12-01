@@ -4,11 +4,21 @@
 	import { Button } from '$lib/components/ui';
 	import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui';
 	import { Plus, FileText, TrendingUp, Users } from 'lucide-svelte';
+	import { toast } from 'svelte-sonner';
 	
 	async function createNewApplication() {
-		// Create a new application in Firestore (Firestore will auto-generate the ID)
-		const appId = await applicationStore.createApplication();
-		goto(`/application/${appId}/client-info`);
+		try {
+			// Create a new application in Firestore (Firestore will auto-generate the ID)
+			const appId = await applicationStore.createApplication();
+			toast.success('Application created successfully', {
+				description: 'You can now start filling out the application form.'
+			});
+			goto(`/application/${appId}/client-info`);
+		} catch (error) {
+			toast.error('Failed to create application', {
+				description: error instanceof Error ? error.message : 'Please try again.'
+			});
+		}
 	}
 </script>
 
