@@ -41,13 +41,8 @@ export async function processAudioBlob(
   } catch (err) {
     state.error = err instanceof Error ? err.message : 'Failed to transcribe audio';
     onError(state.error);
-    // Return error message to show in chat
-    return {
-      id: crypto.randomUUID(),
-      role: 'assistant',
-      content: `❌ Error: ${state.error}`,
-      timestamp: new Date()
-    };
+    // Don't return error message - it will be shown as toast notification
+    return null;
   } finally {
     state.isTranscribing = false;
   }

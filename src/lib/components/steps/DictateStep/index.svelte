@@ -1,11 +1,12 @@
 <script lang="ts">
   import { Card, CardHeader, CardTitle, CardDescription, Button } from '$lib/components/ui';
-  import { Wand2, Loader2, AlertCircle, Upload, X } from 'lucide-svelte';
+  import { Wand2, Loader2, Upload } from 'lucide-svelte';
   import ClientTabs from '../ClientTabs.svelte';
   import type { ChatMessage } from '$lib/types/voice-assistant';
   import { onMount, onDestroy, tick } from 'svelte';
   import { browser } from '$app/environment';
   import { cn } from '$lib/utils';
+  import { toast } from 'svelte-sonner';
   import ChatMessageItem from './ChatMessage.svelte';
   import ChatInput from './ChatInput.svelte';
   import { createRecordingState, startRecording, stopRecording } from './audioRecording';
@@ -15,7 +16,6 @@
   const recordingState = $state(createRecordingState());
   const transcriptionState = $state(createTranscriptionState());
   let isProcessing = $state(false);
-  let error = $state<string | null>(null);
   let conversationHistory = $state<any[]>([]);
   let textInput = $state('');
   let chatMessages = $state<ChatMessage[]>([]);
@@ -47,7 +47,11 @@
     await startRecording(recordingState, async (blob) => {
       await handleProcessAudioBlob(blob, 'voice');
     });
-    if (recordingState.error) error = recordingState.error;
+    if (recordingState.error) {
+      toast.error('Recording error', {
+        description: recordingState.error
+      });
+    }
   }
   
   function handleStopRecording() {
@@ -80,15 +84,17 @@
         });
       },
       (err) => {
-        error = err;
+        toast.error('Transcription error', {
+          description: err
+        });
       }
     );
-    // Only add error messages to chat, not transcription messages
-    if (message && message.role === 'assistant') {
-      chatMessages = [...chatMessages, message];
-      await scrollToBottom();
+    // Don't add error messages to chat - they're shown as toasts
+    if (transcriptionState.error) {
+      toast.error('Transcription failed', {
+        description: transcriptionState.error
+      });
     }
-    if (transcriptionState.error) error = transcriptionState.error;
     droppedFile = null;
   }
   
@@ -102,7 +108,6 @@
   
   async function handleProcessText(text: string) {
     isProcessing = true;
-    error = null;
     try {
       const result = await processTextWithAI(text, conversationHistory);
       chatMessages = [...chatMessages, {
@@ -114,13 +119,10 @@
       }];
       await scrollToBottom();
     } catch (err) {
-      error = err instanceof Error ? err.message : 'Failed to process message';
-      chatMessages = [...chatMessages, { 
-        id: crypto.randomUUID(), 
-        role: 'assistant', 
-        content: `❌ Error: ${error}`, 
-        timestamp: new Date() 
-      }];
+      const errorMessage = err instanceof Error ? err.message : 'Failed to process message';
+      toast.error('AI processing failed', {
+        description: errorMessage
+      });
     } finally {
       isProcessing = false;
     }
@@ -150,7 +152,9 @@
         droppedFile = file;
         await handleProcessAudioBlob(file, 'file');
       } else {
-        error = 'Please drop an audio file (MP3, WAV, WebM, etc.)';
+        toast.error('Invalid file type', {
+          description: 'Please drop an audio file (MP3, WAV, WebM, etc.)'
+        });
       }
     }
   }
@@ -162,7 +166,9 @@
       droppedFile = file;
       handleProcessAudioBlob(file, 'file');
     } else if (file) {
-      error = 'Please select an audio file (MP3, WAV, WebM, etc.)';
+      toast.error('Invalid file type', {
+        description: 'Please select an audio file (MP3, WAV, WebM, etc.)'
+      });
     }
   }
   
@@ -186,7 +192,6 @@
   function clearChat() {
     chatMessages = [{ id: crypto.randomUUID(), role: 'assistant', content: '💬 Chat cleared. How can I help you with the application?', timestamp: new Date() }];
     conversationHistory = [];
-    error = null;
   }
 </script>
 
@@ -281,16 +286,6 @@
               <span>Recording... Click mic to stop</span>
             </div>
           </div>
-        </div>
-      {/if}
-
-      {#if error}
-        <div class="px-4 py-2 bg-destructive/10 border-t border-destructive/20">
-          <p class="text-sm text-destructive flex items-center gap-2">
-            <AlertCircle class="h-4 w-4 shrink-0" />
-            {error}
-            <button onclick={() => error = null} class="ml-auto"><X class="h-4 w-4" /></button>
-          </p>
         </div>
       {/if}
     </div>
