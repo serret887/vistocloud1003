@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { applicationStore, activeClientId, activeAssetsData, clientIds } from '$lib/stores/application';
+  import { applicationStore, activeClientId, activeAssetsData, clientIds } from '$lib/stores/application/index';
   import { Card, CardHeader, CardTitle, CardContent } from '$lib/components/ui';
   import { EmptyState } from '$lib/components/shared';
   import ClientTabs from '../ClientTabs.svelte';

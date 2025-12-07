@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { applicationStore } from '$lib/stores/application';
+	import { applicationStore } from '$lib/stores/application/index';
 	import { isDebugMode, debug } from '$lib/debug';
 	import { triggerAutoSave } from '$lib/auto-save';
 	import { Button } from '$lib/components/ui';

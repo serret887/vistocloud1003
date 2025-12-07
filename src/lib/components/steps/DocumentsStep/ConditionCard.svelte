@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Card, CardHeader, CardTitle, CardDescription, CardContent, Button, Badge, Textarea } from '$lib/components/ui';
   import { FileText, CheckCircle, AlertCircle, Trash2, Upload, ChevronDown, ChevronUp, History, MessageSquare } from 'lucide-svelte';
-  import type { DocumentRecord, DocumentHistoryEntry } from '$lib/stores/application';
+  import type { DocumentRecord, DocumentHistoryEntry } from '$lib/stores/application/index';
   
   interface Props {
     id: string;

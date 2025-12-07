@@ -1,4 +1,4 @@
-import type { ApplicationState } from '$lib/stores/application';
+import type { ApplicationState } from '$lib/stores/application/index';
 import { escapeXml, mapOccupancyType } from '../utils';
 
 export function generateCollaterals(state: ApplicationState): string {

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { applicationStore, currentStepId } from '$lib/stores/application';
+	import { applicationStore, currentStepId } from '$lib/stores/application/index';
 	import { stepDefinitions, getStepPath } from '$lib/applicationSteps';
 	import { cn } from '$lib/utils';
 	import { onMount } from 'svelte';

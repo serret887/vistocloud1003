@@ -1,4 +1,4 @@
-import type { ApplicationState } from '$lib/stores/application';
+import type { ApplicationState } from '$lib/stores/application/index';
 import { escapeXml, mapMaritalStatus, mapCitizenship } from '../../utils';
 import { generateResidences } from './residences';
 import { generateEmployers } from './employers';

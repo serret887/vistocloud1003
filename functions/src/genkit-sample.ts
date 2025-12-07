@@ -27,7 +27,7 @@ const ai = genkit({
     // and projectID by passing in a config object; if you don't, the provider
     // uses the value from environment variables like GCLOUD_PROJECT and GCLOUD_LOCATION.
     // If you want to use Vertex Express Mode, you can specify apiKey instead.
-    vertexAI({location: "global"})
+    vertexAI({location: "us-central1"})
   ],
 });
 

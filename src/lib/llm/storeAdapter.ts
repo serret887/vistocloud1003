@@ -2,10 +2,10 @@
  * Adapter to convert Svelte store state to LLMApplicationState format
  */
 
-import type { ApplicationState } from '$lib/stores/application';
+import type { ApplicationState } from '$lib/stores/application/index';
 import type { LLMApplicationState } from './types';
 import { get } from 'svelte/store';
-import { applicationStore } from '$lib/stores/application';
+import { applicationStore } from '$lib/stores/application/index';
 
 /**
  * Convert ApplicationState to LLMApplicationState format

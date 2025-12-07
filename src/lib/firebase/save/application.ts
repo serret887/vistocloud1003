@@ -1,7 +1,7 @@
 // Application-level save operations
 import { db } from '$lib/firebase';
 import { collection, doc, setDoc, addDoc } from 'firebase/firestore';
-import type { ApplicationState } from '$lib/stores/application';
+import type { ApplicationState } from '$lib/stores/application/index';
 import { debug } from '$lib/debug';
 import { sanitizeForFirebase } from './utils';
 

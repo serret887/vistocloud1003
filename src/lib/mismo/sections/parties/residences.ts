@@ -1,4 +1,4 @@
-import type { ApplicationState } from '$lib/stores/application';
+import type { ApplicationState } from '$lib/stores/application/index';
 import { escapeXml, calculateMonths, calculateMonthsBetween } from '../../utils';
 
 export function generateResidences(state: ApplicationState, clientId: string): string {

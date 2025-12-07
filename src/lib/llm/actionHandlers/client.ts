@@ -3,7 +3,7 @@ import type { LLMAction, VoiceUpdate } from '$lib/types/voice-assistant';
 import type { DynamicIdMap } from '../types';
 import { validateClientData } from '$lib/dataValidator';
 import { get } from 'svelte/store';
-import type { ApplicationState } from '$lib/stores/application';
+import type { ApplicationState } from '$lib/stores/application/index';
 
 export function handleAddClient(
   action: LLMAction,

@@ -3,8 +3,8 @@
   import { CreditCard, DollarSign, Building2, Home, FileCheck, FileText, AlertCircle } from 'lucide-svelte';
   import ClientTabs from '../ClientTabs.svelte';
   import ConditionCard from './ConditionCard.svelte';
-  import { applicationStore, activeClientId, activeClientData, activeEmploymentData } from '$lib/stores/application';
-  import type { DocumentRecord, DocumentHistoryEntry } from '$lib/stores/application';
+  import { applicationStore, activeClientId, activeClientData, activeEmploymentData } from '$lib/stores/application/index';
+  import type { DocumentRecord, DocumentHistoryEntry } from '$lib/stores/application/index';
   import { generateConditions } from '$lib/conditions';
   
   let expandedConditions = $state<Set<string>>(new Set());

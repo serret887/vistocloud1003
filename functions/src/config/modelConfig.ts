@@ -8,7 +8,7 @@ export interface ModelConfig {
   model: string;
   temperature?: number;
   maxOutputTokens?: number;
-  location?: string; // For Vertex AI (default: 'global')
+  location?: string; // For Vertex AI (default: 'us-central1')
 }
 
 /**

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { applicationStore } from '$lib/stores/application';
+	import { applicationStore } from '$lib/stores/application/index';
 	import { Button } from '$lib/components/ui';
 	import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui';
 	import { Plus, FileText, TrendingUp, Users } from 'lucide-svelte';

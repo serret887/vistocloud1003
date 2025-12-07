@@ -1,5 +1,5 @@
 // AI processing logic for DictateStep
-import { applicationStore } from '$lib/stores/application';
+import { applicationStore } from '$lib/stores/application/index';
 import { executeStoreAction } from '$lib/llm/actionExecutor';
 import { resolveAddressesInActions } from '$lib/llm/addressResolver';
 import { filterDuplicateActions } from '$lib/llm/duplicateFilter';

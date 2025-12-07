@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { applicationStore, activeClientId, activeEmploymentData, currentStepValidationErrors } from '$lib/stores/application';
+  import { applicationStore, activeClientId, activeEmploymentData, currentStepValidationErrors } from '$lib/stores/application/index';
   import { Card, CardContent, Button } from '$lib/components/ui';
   import { EmptyState } from '$lib/components/shared';
   import ValidationErrors from '../../ValidationErrors.svelte';

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { applicationStore, clientIds } from '$lib/stores/application';
+  import { applicationStore, clientIds } from '$lib/stores/application/index';
   import { Card, CardHeader, CardTitle, CardContent, Button } from '$lib/components/ui';
   import { AlertCircle, CheckCircle } from 'lucide-svelte';
   import ClientTabs from '../ClientTabs.svelte';

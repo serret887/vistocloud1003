@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { applicationStore, activeClientId, clientIds, activeClientData } from '$lib/stores/application';
+	import { applicationStore, activeClientId, clientIds, activeClientData } from '$lib/stores/application/index';
 	import { cn } from '$lib/utils';
 	import { Plus, User, X } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui';

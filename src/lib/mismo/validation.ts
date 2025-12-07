@@ -1,4 +1,4 @@
-import type { ApplicationState } from '$lib/stores/application';
+import type { ApplicationState } from '$lib/stores/application/index';
 
 export function validateMISMO(state: ApplicationState): { valid: boolean; errors: string[] } {
   const errors: string[] = [];

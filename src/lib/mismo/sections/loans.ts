@@ -1,4 +1,4 @@
-import type { ApplicationState } from '$lib/stores/application';
+import type { ApplicationState } from '$lib/stores/application/index';
 
 export function generateLoans(state: ApplicationState): string {
   return `          <LOANS>

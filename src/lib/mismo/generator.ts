@@ -1,6 +1,6 @@
-import type { ApplicationState } from '$lib/stores/application';
+import type { ApplicationState } from '$lib/stores/application/index';
 import { get } from 'svelte/store';
-import { applicationStore } from '$lib/stores/application';
+import { applicationStore } from '$lib/stores/application/index';
 import { generateLoans } from './sections/loans';
 import { generateParties } from './sections/parties';
 import { generateCollaterals } from './sections/collaterals';

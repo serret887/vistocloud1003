@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Card, CardContent, Button } from '$lib/components/ui';
   import { Send, Loader2, AlertCircle } from 'lucide-svelte';
-  import { applicationStore } from '$lib/stores/application';
+  import { applicationStore } from '$lib/stores/application/index';
   
   interface Props {
     isApplicationComplete: boolean;

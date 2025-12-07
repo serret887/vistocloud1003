@@ -8,7 +8,7 @@ export { generateId, generateFallbackId } from './idGenerator';
 export { db, initFirebaseEmulator } from './firebase';
 
 // Store
-export { applicationStore, activeClientId, currentStepId, clientIds } from './stores/application';
+export { applicationStore, activeClientId, currentStepId, clientIds } from './stores/application/index';
 
 // Application Steps
 export { stepDefinitions, stepIdToSlug, defaultStepId, getStepPath, getStepIdFromPath } from './applicationSteps';

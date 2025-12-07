@@ -21,11 +21,11 @@ const modelConfig = getModelConfig();
 const ai = genkit({
   plugins: [
     modelConfig.provider === 'vertex'
-      ? vertexAI({ location: modelConfig.location || 'global' })
+      ? vertexAI({ location: modelConfig.location || 'us-central1' })
       : modelConfig.provider === 'vertexExpress'
       ? vertexAI({ 
           apiKey: process.env.GOOGLE_AI_API_KEY || '',
-          location: modelConfig.location || 'global' 
+          location: modelConfig.location || 'us-central1' 
         })
       : googleAI({ apiKey: process.env.GOOGLE_AI_API_KEY || '' }),
   ],

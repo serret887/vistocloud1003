@@ -10,7 +10,7 @@
   import DictateStep from '$lib/components/steps/DictateStep/index.svelte';
   import ReviewStep from '$lib/components/steps/ReviewStep/index.svelte';
   import { goto } from '$app/navigation';
-  import { applicationStore, currentStepId } from '$lib/stores/application';
+  import { applicationStore, currentStepId } from '$lib/stores/application/index';
   
   // Get step from URL
   const stepId = $derived(getStepIdFromPath($page.url.pathname));

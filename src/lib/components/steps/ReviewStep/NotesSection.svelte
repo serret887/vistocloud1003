@@ -1,8 +1,8 @@
 <script lang="ts">
   import { Card, CardHeader, CardTitle, CardDescription, CardContent, Label, Textarea } from '$lib/components/ui';
   import { StickyNote } from 'lucide-svelte';
-  import { applicationStore } from '$lib/stores/application';
-  import type { ApplicationState } from '$lib/stores/application';
+  import { applicationStore } from '$lib/stores/application/index';
+  import type { ApplicationState } from '$lib/stores/application/index';
   
   interface Props {
     clientIds: string[];

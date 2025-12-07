@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Card, CardHeader, CardTitle, CardDescription, CardContent, Badge } from '$lib/components/ui';
   import { CheckCircle, AlertCircle } from 'lucide-svelte';
-  import type { ApplicationState } from '$lib/stores/application';
+  import type { ApplicationState } from '$lib/stores/application/index';
   
   interface Props {
     clientIds: string[];

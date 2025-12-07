@@ -4,8 +4,8 @@
  */
 
 import { get } from 'svelte/store';
-import { applicationStore } from './stores/application';
-import type { ApplicationState } from './stores/application';
+import { applicationStore } from './stores/application/index';
+import type { ApplicationState } from './stores/application/index';
 import { debug } from './debug';
 import { browser } from '$app/environment';
 

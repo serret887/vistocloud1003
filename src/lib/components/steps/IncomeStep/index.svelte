@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { applicationStore, activeClientId, activeIncomeData, activeEmploymentData, currentStepValidationErrors } from '$lib/stores/application';
+  import { applicationStore, activeClientId, activeIncomeData, activeEmploymentData, currentStepValidationErrors } from '$lib/stores/application/index';
   import ValidationErrors from '../../ValidationErrors.svelte';
   import ClientTabs from '../ClientTabs.svelte';
   import IncomeSummary from './IncomeSummary.svelte';
