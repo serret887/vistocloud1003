@@ -6,3 +6,4 @@ export interface ValidationResult<T> {
   warnings: string[];
 }
 
+

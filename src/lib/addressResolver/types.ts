@@ -16,3 +16,4 @@ export interface PlaceSuggestion {
   placeResource: string;
 }
 
+

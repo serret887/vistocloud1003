@@ -71,3 +71,4 @@ export function stopRecording(state: RecordingState): void {
   }
 }
 
+

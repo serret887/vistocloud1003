@@ -9,3 +9,4 @@ export function isPassiveIncomeRecord(record: ActiveIncomeRecord | PassiveIncome
   return 'sourceType' in record && 'sourceName' in record;
 }
 
+

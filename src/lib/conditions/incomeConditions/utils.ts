@@ -107,3 +107,4 @@ export function calculateTotalCoverage(employmentData: EmploymentRecord[]): numb
   return totalMonths;
 }
 
+

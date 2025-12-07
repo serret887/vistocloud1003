@@ -17,3 +17,4 @@ export function generateLoans(state: ApplicationState): string {
           </LOANS>`;
 }
 
+

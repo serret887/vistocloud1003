@@ -43,3 +43,4 @@ export const FREQUENCY_LABELS: Record<IncomeFrequency | PassiveIncomeFrequency, 
   irregular: 'Irregular'
 };
 
+

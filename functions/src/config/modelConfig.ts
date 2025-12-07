@@ -20,7 +20,7 @@ export const DEFAULT_MODEL_CONFIG: ModelConfig = {
   model: 'gemini-1.5-flash', // Can be: gemini-1.5-flash, gemini-1.5-pro, gemini-2.0-flash, etc.
   temperature: 0.3,
   maxOutputTokens: 4000,
-  location: 'global', // For Vertex AI: 'global', 'us-central1', etc.
+  location: 'us-east1', // For Vertex AI: 'global', 'us-central1', etc.
 };
 
 /**

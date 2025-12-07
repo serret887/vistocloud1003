@@ -50,3 +50,4 @@ export function downloadMISMO(state?: ApplicationState, filename = 'application.
   URL.revokeObjectURL(url);
 }
 
+

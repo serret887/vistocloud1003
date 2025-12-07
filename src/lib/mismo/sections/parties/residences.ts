@@ -44,3 +44,4 @@ function residenceTemplate(params: { address: any; type: string; months: number 
                       </RESIDENCE>`;
 }
 
+

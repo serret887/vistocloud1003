@@ -12,3 +12,4 @@ export function isGooglePlacesAvailable(): boolean {
   return Boolean(getGoogleMapsApiKey());
 }
 
+
