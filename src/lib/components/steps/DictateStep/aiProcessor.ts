@@ -7,6 +7,8 @@ import { getCurrentLLMState } from '$lib/llm/storeAdapter';
 import { processConversation } from '$lib/services/aiFunctions';
 import type { LLMAction, VoiceUpdate } from '$lib/types/voice-assistant';
 import type { DynamicIdMap } from '$lib/llm/types';
+import { locale } from '$lib/i18n';
+import { get } from 'svelte/store';
 
 export interface ProcessResult {
   summary: string;
@@ -19,7 +21,8 @@ export async function processTextWithAI(
   conversationHistory: any[]
 ): Promise<ProcessResult> {
   const currentState = getCurrentLLMState();
-  const response = await processConversation(text, currentState, conversationHistory);
+  const currentLocale = get(locale) || 'en';
+  const response = await processConversation(text, currentState, conversationHistory, currentLocale);
   const dynamicIdMap: DynamicIdMap = new Map();
   const newUpdates: VoiceUpdate[] = [];
   

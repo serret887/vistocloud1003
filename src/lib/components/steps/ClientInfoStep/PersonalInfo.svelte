@@ -2,6 +2,7 @@
   import { Card, CardHeader, CardTitle, CardDescription, CardContent, Switch, Label } from '$lib/components/ui';
   import { SSNInput, DateInput, ValidatedSelect, NameInput, EmailInput, PhoneInput } from '$lib/components/ui/validated-input';
   import type { ClientData } from '$lib/types/client-data';
+  import { _ } from 'svelte-i18n';
   
   interface Props {
     clientData: ClientData | undefined;
@@ -10,40 +11,40 @@
   
   let { clientData, onUpdate }: Props = $props();
   
-  const citizenshipOptions = [
-    { value: 'US Citizen', label: 'US Citizen' },
-    { value: 'Permanent Resident Alien', label: 'Permanent Resident Alien' },
-    { value: 'Non-Permanent Resident Alien', label: 'Non-Permanent Resident Alien' }
-  ];
+  const citizenshipOptions = $derived([
+    { value: 'US Citizen', label: $_('clientInfo.citizenship.usCitizen') },
+    { value: 'Permanent Resident Alien', label: $_('clientInfo.citizenship.permanentResident') },
+    { value: 'Non-Permanent Resident Alien', label: $_('clientInfo.citizenship.nonPermanentResident') }
+  ]);
   
-  const maritalStatusOptions = [
-    { value: 'Married', label: 'Married' },
-    { value: 'Unmarried', label: 'Unmarried' },
-    { value: 'Separated', label: 'Separated' }
-  ];
+  const maritalStatusOptions = $derived([
+    { value: 'Married', label: $_('clientInfo.maritalStatus.married') },
+    { value: 'Unmarried', label: $_('clientInfo.maritalStatus.unmarried') },
+    { value: 'Separated', label: $_('clientInfo.maritalStatus.separated') }
+  ]);
 </script>
 
 <Card>
   <CardHeader>
-    <CardTitle>Personal Information</CardTitle>
-    <CardDescription>Basic identifying information for the borrower</CardDescription>
+    <CardTitle>{$_('clientInfo.personalInfo.title')}</CardTitle>
+    <CardDescription>{$_('clientInfo.personalInfo.description')}</CardDescription>
   </CardHeader>
   <CardContent class="space-y-6">
     <!-- Name -->
     <div class="grid md:grid-cols-2 gap-4">
       <NameInput
-        label="First Name"
+        label={$_('clientInfo.personalInfo.firstName')}
         value={clientData?.firstName || ''}
         onValueChange={(val) => onUpdate('firstName', val)}
-        placeholder="John"
+        placeholder={$_('clientInfo.personalInfo.firstNamePlaceholder')}
         required
         allowSpaces={true}
       />
       <NameInput
-        label="Last Name"
+        label={$_('clientInfo.personalInfo.lastName')}
         value={clientData?.lastName || ''}
         onValueChange={(val) => onUpdate('lastName', val)}
-        placeholder="Doe"
+        placeholder={$_('clientInfo.personalInfo.lastNamePlaceholder')}
         required
         allowSpaces={true}
       />
@@ -52,14 +53,14 @@
     <!-- Contact -->
     <div class="grid md:grid-cols-2 gap-4">
       <EmailInput
-        label="Email Address"
+        label={$_('clientInfo.personalInfo.email')}
         value={clientData?.email || ''}
         onValueChange={(val) => onUpdate('email', val)}
-        placeholder="john.doe@example.com"
+        placeholder={$_('clientInfo.personalInfo.emailPlaceholder')}
         required
       />
       <PhoneInput
-        label="Phone Number"
+        label={$_('clientInfo.personalInfo.phone')}
         value={clientData?.phone || ''}
         onValueChange={(val) => onUpdate('phone', val)}
         required
@@ -69,13 +70,13 @@
     <!-- Personal Details -->
     <div class="grid md:grid-cols-2 gap-4">
       <SSNInput
-        label="Social Security Number"
+        label={$_('clientInfo.personalInfo.ssn')}
         value={clientData?.ssn || ''}
         onValueChange={(val) => onUpdate('ssn', val)}
         required
       />
       <DateInput
-        label="Date of Birth"
+        label={$_('clientInfo.personalInfo.dob')}
         value={clientData?.dob || ''}
         onValueChange={(val) => onUpdate('dob', val)}
         required
@@ -86,20 +87,20 @@
     <!-- Status -->
     <div class="grid md:grid-cols-2 gap-4">
       <ValidatedSelect
-        label="Citizenship Status"
+        label={$_('clientInfo.personalInfo.citizenship')}
         value={clientData?.citizenship || undefined}
         onValueChange={(value) => value && onUpdate('citizenship', value)}
         options={citizenshipOptions}
-        placeholder="Select status..."
+        placeholder={$_('common.select')}
         required
         showError={true}
       />
       <ValidatedSelect
-        label="Marital Status"
+        label={$_('clientInfo.personalInfo.maritalStatus')}
         value={clientData?.maritalStatus || undefined}
         onValueChange={(value) => value && onUpdate('maritalStatus', value)}
         options={maritalStatusOptions}
-        placeholder="Select status..."
+        placeholder={$_('common.select')}
         required
         showError={true}
       />
@@ -108,9 +109,9 @@
     <!-- Military Service -->
     <div class="flex items-center justify-between p-4 rounded-lg bg-muted/50">
       <div>
-        <div class="font-medium">Military Service</div>
+        <div class="font-medium">{$_('clientInfo.personalInfo.militaryService')}</div>
         <div class="text-sm text-muted-foreground">
-          Have you served in the U.S. Armed Forces?
+          {$_('clientInfo.personalInfo.militaryServiceDescription')}
         </div>
       </div>
       <Switch

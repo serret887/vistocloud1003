@@ -5,6 +5,7 @@
   import { Home, AlertCircle } from 'lucide-svelte';
   import { cn } from '$lib/utils';
   import type { AddressRecord, AddressType } from '$lib/types/address';
+  import { _ } from 'svelte-i18n';
   
   interface Props {
     presentAddress: AddressRecord | undefined;
@@ -32,45 +33,45 @@
     <div class="flex items-center gap-2">
       <Home class="h-5 w-5 text-primary" />
       <div>
-        <CardTitle>Present Address</CardTitle>
-        <CardDescription>Current residence address</CardDescription>
+        <CardTitle>{$_('clientInfo.address.presentAddress')}</CardTitle>
+        <CardDescription>{$_('clientInfo.address.presentAddressDescription')}</CardDescription>
       </div>
     </div>
   </CardHeader>
   <CardContent class="space-y-4">
     <div class="space-y-2">
-      <Label>Street Address</Label>
+      <Label>{$_('clientInfo.address.streetAddress')}</Label>
       <AddressAutocomplete
         value={presentAddress?.addr}
-        placeholder="Start typing your address..."
+        placeholder={$_('clientInfo.address.streetAddressPlaceholder')}
         onchange={onUpdateAddress}
       />
     </div>
     
     <div class="grid md:grid-cols-2 gap-4">
       <DateInput
-        label="Move-in Date"
+        label={$_('clientInfo.address.moveInDate')}
         value={presentAddress?.fromDate || ''}
         onValueChange={(val) => onUpdateDate('fromDate', val)}
         required
         allowFuture={false}
       />
       <div class="space-y-2">
-        <Label>Months at Address</Label>
+        <Label>{$_('clientInfo.address.monthsAtAddress')}</Label>
         <div class={cn(
           "px-3 py-2 text-sm rounded-md border bg-muted",
           shouldShowWarning && "border-warning/50 text-warning-foreground"
         )}>
           {getMonthsAtAddress === 0 
-            ? 'Enter move-in date'
+            ? $_('clientInfo.address.enterMoveInDate')
             : getMonthsAtAddress < 24
-              ? `${getMonthsAtAddress} months (Former addresses required)`
-              : `${getMonthsAtAddress} months`}
+              ? `${getMonthsAtAddress} ${$_('clientInfo.address.monthsFormerRequired')}`
+              : `${getMonthsAtAddress} ${$_('clientInfo.address.months')}`}
         </div>
         {#if shouldShowWarning}
           <p class="text-sm text-warning flex items-center gap-1">
             <AlertCircle class="h-3 w-3" />
-            You must provide former addresses (less than 24 months at current address)
+            {$_('clientInfo.address.formerAddressesRequired')}
           </p>
         {/if}
       </div>
@@ -78,7 +79,7 @@
     
     {#if presentAddress?.addr?.formattedAddress}
       <div class="p-3 rounded-lg bg-muted/50 text-sm">
-        <div class="font-medium mb-1">Resolved Address:</div>
+        <div class="font-medium mb-1">{$_('clientInfo.address.resolvedAddress')}</div>
         <div>{presentAddress.addr.formattedAddress}</div>
         {#if presentAddress.addr.city}
           <div class="text-muted-foreground mt-1">

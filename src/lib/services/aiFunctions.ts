@@ -51,12 +51,14 @@ export async function transcribeAudio(audioBlob: Blob): Promise<string> {
 export async function processConversation(
   transcription: string,
   currentState: LLMApplicationState,
-  conversationHistory: any[] = []
+  conversationHistory: any[] = [],
+  locale: string = 'en'
 ): Promise<LLMResponse> {
   try {
     console.log('🤖 [CONVERSATION] Calling processConversation function:', {
       transcriptionLength: transcription.length,
-      hasHistory: conversationHistory.length > 0
+      hasHistory: conversationHistory.length > 0,
+      locale
     });
 
     // Call Firebase Function
@@ -64,7 +66,8 @@ export async function processConversation(
     const result = await processFunction({
       transcription,
       currentState,
-      conversationHistory
+      conversationHistory,
+      locale
     });
 
     const data = result.data as LLMResponse;

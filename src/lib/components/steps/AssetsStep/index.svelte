@@ -6,24 +6,32 @@
   import AssetCard from './AssetCard.svelte';
   import { Wallet, Building, TrendingUp, PiggyBank, Gift } from 'lucide-svelte';
   import type { AssetCategory } from '$lib/types/assets';
+  import { _, locale } from 'svelte-i18n';
+  import { get } from 'svelte/store';
   
-  const assetCategories: { value: AssetCategory; label: string; icon: any; description: string }[] = [
-    { value: 'BankAccount', label: 'Bank Account', icon: Building, description: 'Checking, Savings, Money Market' },
-    { value: 'StocksAndBonds', label: 'Stocks & Bonds', icon: TrendingUp, description: 'Stocks, Bonds, Mutual Funds' },
-    { value: 'LifeInsurance', label: 'Life Insurance', icon: Wallet, description: 'Cash value of life insurance' },
-    { value: 'RetirementFund', label: 'Retirement Fund', icon: PiggyBank, description: '401k, IRA, Pension' },
-    { value: 'Gift', label: 'Gift', icon: Gift, description: 'Gifted funds for down payment' },
-    { value: 'Other', label: 'Other', icon: Wallet, description: 'Other assets' }
-  ];
+  const assetCategories = $derived.by(() => {
+    const t = get(_);
+    return [
+      { value: 'BankAccount' as AssetCategory, label: t('assets.categories.bankAccount'), icon: Building, description: t('assets.categories.bankAccountDescription') },
+      { value: 'StocksAndBonds' as AssetCategory, label: t('assets.categories.stocksAndBonds'), icon: TrendingUp, description: t('assets.categories.stocksAndBondsDescription') },
+      { value: 'LifeInsurance' as AssetCategory, label: t('assets.categories.lifeInsurance'), icon: Wallet, description: t('assets.categories.lifeInsuranceDescription') },
+      { value: 'RetirementFund' as AssetCategory, label: t('assets.categories.retirementFund'), icon: PiggyBank, description: t('assets.categories.retirementFundDescription') },
+      { value: 'Gift' as AssetCategory, label: t('assets.categories.gift'), icon: Gift, description: t('assets.categories.giftDescription') },
+      { value: 'Other' as AssetCategory, label: t('assets.categories.other'), icon: Wallet, description: t('assets.categories.otherDescription') }
+    ];
+  });
   
-  const accountTypes: Record<AssetCategory, { value: string; label: string }[]> = {
-    'BankAccount': [{ value: 'Checking', label: 'Checking' }, { value: 'Savings', label: 'Savings' }, { value: 'Money Market', label: 'Money Market' }, { value: 'CD', label: 'CD' }],
-    'StocksAndBonds': [{ value: 'Stocks', label: 'Stocks' }, { value: 'Bonds', label: 'Bonds' }, { value: 'Mutual Funds', label: 'Mutual Funds' }, { value: 'ETFs', label: 'ETFs' }],
-    'LifeInsurance': [{ value: 'Whole Life', label: 'Whole Life' }, { value: 'Universal Life', label: 'Universal Life' }],
-    'RetirementFund': [{ value: '401k', label: '401k' }, { value: 'IRA', label: 'IRA' }, { value: 'Roth IRA', label: 'Roth IRA' }, { value: 'Pension', label: 'Pension' }],
-    'Gift': [{ value: 'Family Gift', label: 'Family Gift' }, { value: 'Employer Gift', label: 'Employer Gift' }],
-    'Other': [{ value: 'Other', label: 'Other' }]
-  };
+  const accountTypes = $derived.by(() => {
+    const t = get(_);
+    return {
+      'BankAccount': [{ value: 'Checking', label: t('assets.types.checking') }, { value: 'Savings', label: t('assets.types.savings') }, { value: 'Money Market', label: t('assets.types.moneyMarket') }, { value: 'CD', label: t('assets.types.cd') }],
+      'StocksAndBonds': [{ value: 'Stocks', label: t('assets.types.stocks') }, { value: 'Bonds', label: t('assets.types.bonds') }, { value: 'Mutual Funds', label: t('assets.types.mutualFunds') }, { value: 'ETFs', label: t('assets.types.etfs') }],
+      'LifeInsurance': [{ value: 'Whole Life', label: t('assets.types.wholeLife') }, { value: 'Universal Life', label: t('assets.types.universalLife') }],
+      'RetirementFund': [{ value: '401k', label: t('assets.types.401k') }, { value: 'IRA', label: t('assets.types.ira') }, { value: 'Roth IRA', label: t('assets.types.rothIra') }, { value: 'Pension', label: t('assets.types.pension') }],
+      'Gift': [{ value: 'Family Gift', label: t('assets.types.familyGift') }, { value: 'Employer Gift', label: t('assets.types.employerGift') }],
+      'Other': [{ value: 'Other', label: t('assets.types.other') }]
+    } as Record<AssetCategory, { value: string; label: string }[]>;
+  });
   
   const totalAssets = $derived(($activeAssetsData?.records || []).reduce((sum, rec) => sum + (rec.amount || 0), 0));
   const hasRecords = $derived(($activeAssetsData?.records?.length || 0) > 0);
@@ -60,7 +68,7 @@
   
   <Card class="bg-gradient-to-r from-success/5 to-success/10 border-success/20">
     <CardContent class="py-6 text-center">
-      <p class="text-sm text-muted-foreground">Total Assets</p>
+      <p class="text-sm text-muted-foreground">{$_('assets.totalAssets')}</p>
       <p class="text-3xl font-bold text-success">{formatCurrency(totalAssets)}</p>
     </CardContent>
   </Card>
@@ -69,7 +77,7 @@
     <Card class="border-dashed">
       <CardContent class="py-12">
         <div class="text-center space-y-4">
-          <EmptyState icon="💰" title="No Assets Added" description="Add your assets to complete the application" />
+          <EmptyState icon="💰" title={$_('assets.noAssetsAdded')} description={$_('assets.addAssetsDescription')} />
           <div class="grid md:grid-cols-3 gap-3 max-w-2xl mx-auto">
             {#each assetCategories as cat}
               {@const Icon = cat.icon}
@@ -97,7 +105,7 @@
     {/each}
     
     <Card>
-      <CardHeader><CardTitle class="text-base">Add Another Asset</CardTitle></CardHeader>
+      <CardHeader><CardTitle class="text-base">{$_('assets.addAnotherAsset')}</CardTitle></CardHeader>
       <CardContent>
         <div class="grid md:grid-cols-3 gap-3">
           {#each assetCategories as cat}

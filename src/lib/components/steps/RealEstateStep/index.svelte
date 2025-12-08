@@ -7,6 +7,7 @@
   import { Plus, Building2 } from 'lucide-svelte';
   import { PROPERTY_TYPE_LABELS, PROPERTY_STATUS_LABELS, OCCUPANCY_TYPE_LABELS } from '$lib/types/real-estate';
   import type { AddressType } from '$lib/types/address';
+  import { _ } from 'svelte-i18n';
   
   const propertyTypes = Object.entries(PROPERTY_TYPE_LABELS).map(([value, label]) => ({ value, label }));
   const propertyStatuses = Object.entries(PROPERTY_STATUS_LABELS).map(([value, label]) => ({ value, label }));
@@ -41,15 +42,15 @@
       <CardContent class="py-6">
         <div class="grid md:grid-cols-3 gap-6 text-center">
           <div>
-            <p class="text-sm text-muted-foreground">Properties Owned</p>
+            <p class="text-sm text-muted-foreground">{$_('realEstate.propertiesOwned')}</p>
             <p class="text-2xl font-bold text-primary">{$activeRealEstateData?.records?.length || 0}</p>
           </div>
           <div>
-            <p class="text-sm text-muted-foreground">Total Value</p>
+            <p class="text-sm text-muted-foreground">{$_('realEstate.totalValue')}</p>
             <p class="text-2xl font-bold text-primary">{formatCurrency(totalPropertyValue)}</p>
           </div>
           <div>
-            <p class="text-sm text-muted-foreground">Monthly Expenses</p>
+            <p class="text-sm text-muted-foreground">{$_('realEstate.monthlyExpenses')}</p>
             <p class="text-2xl font-bold text-primary">{formatCurrency(totalExpenses)}</p>
           </div>
         </div>
@@ -62,9 +63,9 @@
       <CardContent class="py-12">
         <EmptyState
           icon="🏠"
-          title="No Real Estate Owned"
-          description="Add properties you currently own or have recently sold"
-          actionLabel="Add Property"
+          title={$_('realEstate.noRecords')}
+          description={$_('realEstate.noRecordsDescription')}
+          actionLabel={$_('realEstate.addProperty')}
           onAction={addProperty}
         />
       </CardContent>
@@ -84,7 +85,7 @@
     
     <Button onclick={addProperty} variant="secondary" class="gap-2">
       <Plus class="h-4 w-4" />
-      Add Another Property
+      {$_('realEstate.addAnotherProperty')}
     </Button>
   {/if}
 </div>

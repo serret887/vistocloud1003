@@ -5,6 +5,7 @@
   import { Trash2, Home } from 'lucide-svelte';
   import type { RealEstateOwned } from '$lib/types/real-estate';
   import type { AddressType } from '$lib/types/address';
+  import { _ } from 'svelte-i18n';
   
   interface Props {
     property: RealEstateOwned;
@@ -33,12 +34,12 @@
       </div>
       <div>
         <CardTitle class="text-lg">
-          {property.address?.formattedAddress || property.address?.address1 || `Property ${index + 1}`}
+          {property.address?.formattedAddress || property.address?.address1 || $_('realEstate.property') + ' ' + (index + 1)}
         </CardTitle>
         <CardDescription>
-          {property.propertyType || 'Property type not specified'}
+          {property.propertyType || $_('realEstate.propertyTypeNotSpecified')}
           {#if property.currentResidence}
-            <span class="text-success"> • Current Residence</span>
+            <span class="text-success"> • {$_('realEstate.currentResidence')}</span>
           {/if}
         </CardDescription>
       </div>
@@ -49,63 +50,63 @@
   </CardHeader>
   <CardContent class="space-y-6">
     <div class="space-y-2">
-      <Label class="after:content-['*'] after:ml-0.5 after:text-destructive">Property Address</Label>
+      <Label class="after:content-['*'] after:ml-0.5 after:text-destructive">{$_('realEstate.propertyAddress')}</Label>
       <AddressAutocomplete
         value={property.address}
-        placeholder="Start typing property address..."
+        placeholder={$_('realEstate.propertyAddressPlaceholder')}
         onchange={(addr) => onUpdate('address', addr)}
       />
     </div>
     
     <div class="grid md:grid-cols-3 gap-4">
       <ValidatedSelect
-        label="Property Type"
+        label={$_('realEstate.propertyType')}
         value={property.propertyType || undefined}
         onValueChange={(v) => v && onUpdate('propertyType', v)}
         options={propertyTypes}
-        placeholder="Select type..."
+        placeholder={$_('common.select')}
         required showError={true}
       />
       <ValidatedSelect
-        label="Property Status"
+        label={$_('realEstate.propertyStatus')}
         value={property.propertyStatus || undefined}
         onValueChange={(v) => v && onUpdate('propertyStatus', v)}
         options={propertyStatuses}
-        placeholder="Select status..."
+        placeholder={$_('common.select')}
         required showError={true}
       />
       <ValidatedSelect
-        label="Intended Occupancy"
+        label={$_('realEstate.intendedOccupancy')}
         value={property.occupancyType || undefined}
         onValueChange={(v) => v && onUpdate('occupancyType', v)}
         options={occupancyTypes}
-        placeholder="Select occupancy..."
+        placeholder={$_('common.select')}
         required showError={true}
       />
     </div>
     
     <MoneyInput
-      label="Property Value"
+      label={$_('realEstate.propertyValue')}
       value={property.propertyValue || 0}
       onValueChange={(val) => onUpdate('propertyValue', val)}
       required
     />
     
     <div class="grid md:grid-cols-2 gap-4">
-      <MoneyInput label="Monthly Property Taxes" value={property.monthlyTaxes || 0} onValueChange={(v) => onUpdate('monthlyTaxes', v)} />
-      <MoneyInput label="Monthly Insurance" value={property.monthlyInsurance || 0} onValueChange={(v) => onUpdate('monthlyInsurance', v)} />
+      <MoneyInput label={$_('realEstate.monthlyPropertyTaxes')} value={property.monthlyTaxes || 0} onValueChange={(v) => onUpdate('monthlyTaxes', v)} />
+      <MoneyInput label={$_('realEstate.monthlyInsurance')} value={property.monthlyInsurance || 0} onValueChange={(v) => onUpdate('monthlyInsurance', v)} />
     </div>
     
     <div class="flex items-center justify-between p-4 rounded-lg bg-muted/50">
       <div>
-        <Label>Current Residence</Label>
-        <p class="text-sm text-muted-foreground">This is where I currently live</p>
+        <Label>{$_('realEstate.currentResidence')}</Label>
+        <p class="text-sm text-muted-foreground">{$_('realEstate.currentResidenceDescription')}</p>
       </div>
       <Switch checked={property.currentResidence} onCheckedChange={(c) => onUpdate('currentResidence', c)} />
     </div>
     
     <div class="p-4 rounded-lg border bg-card flex items-center justify-between">
-      <span class="text-sm text-muted-foreground">Total Monthly Expenses</span>
+      <span class="text-sm text-muted-foreground">{$_('realEstate.totalMonthlyExpenses')}</span>
       <span class="font-semibold">{formatCurrency(totalExpenses)}</span>
     </div>
   </CardContent>

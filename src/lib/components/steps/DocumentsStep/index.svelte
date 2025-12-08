@@ -6,6 +6,7 @@
   import { applicationStore, activeClientId, activeClientData, activeEmploymentData } from '$lib/stores/application/index';
   import type { DocumentRecord, DocumentHistoryEntry } from '$lib/stores/application/index';
   import { generateConditions } from '$lib/conditions';
+  import { _ } from 'svelte-i18n';
   
   let expandedConditions = $state<Set<string>>(new Set());
   let showHistoryFor = $state<string | null>(null);
@@ -80,8 +81,8 @@
     <Card>
       <CardContent class="py-12 text-center">
         <AlertCircle class="h-12 w-12 text-muted-foreground mx-auto" />
-        <h3 class="font-medium text-lg mt-4">No Documents Required Yet</h3>
-        <p class="text-muted-foreground text-sm">Complete previous steps to see required documents.</p>
+        <h3 class="font-medium text-lg mt-4">{$_('documents.noDocumentsRequired')}</h3>
+        <p class="text-muted-foreground text-sm">{$_('documents.completePreviousSteps')}</p>
       </CardContent>
     </Card>
   {:else}
@@ -89,8 +90,8 @@
       {@const CategoryIcon = categoryIcons[category] || FileText}
       <Card>
         <CardHeader>
-          <div class="flex items-center gap-2"><CategoryIcon class="h-5 w-5 text-primary" /><CardTitle>{category} Documents</CardTitle></div>
-          <CardDescription>{docs.length} document{docs.length !== 1 ? 's' : ''} required</CardDescription>
+          <div class="flex items-center gap-2"><CategoryIcon class="h-5 w-5 text-primary" /><CardTitle>{category} {$_('documents.documents')}</CardTitle></div>
+          <CardDescription>{docs.length} {$_('documents.documentsRequired')}</CardDescription>
         </CardHeader>
         <CardContent class="space-y-4">
           {#each docs as doc}

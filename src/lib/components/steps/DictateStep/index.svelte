@@ -12,6 +12,7 @@
   import { createRecordingState, startRecording, stopRecording } from './audioRecording';
   import { processTextWithAI } from './aiProcessor';
   import { createTranscriptionState, processAudioBlob } from './transcription';
+  import { _ } from 'svelte-i18n';
   
   const recordingState = $state(createRecordingState());
   const transcriptionState = $state(createTranscriptionState());
@@ -31,12 +32,7 @@
     chatMessages = [{
       id: crypto.randomUUID(),
       role: 'assistant',
-      content: `👋 Hi! I'm your AI assistant for this mortgage application.
-\nYou can:
-• **Type** your information in the chat
-• **Click the mic** 🎤 to speak
-• **Drop an audio file** to transcribe a recording
-\nTell me about the borrower and I'll fill the application.`,
+      content: $_('dictate.welcome') + '\n\n' + $_('dictate.instructions'),
       timestamp: new Date()
     }];
   });
@@ -48,7 +44,7 @@
       await handleProcessAudioBlob(blob, 'voice');
     });
     if (recordingState.error) {
-      toast.error('Recording error', {
+      toast.error($_('toast.recordingError'), {
         description: recordingState.error
       });
     }

@@ -11,11 +11,16 @@ import { getCurrentDateContext } from './dateUtils';
  */
 export function buildSystemPrompt(
   currentState: LLMApplicationState,
-  conversationHistory: any[] = []
+  conversationHistory: any[] = [],
+  locale: string = 'en'
 ): string {
   const { todayFormatted, todayReadable } = getCurrentDateContext();
+  
+  const languageContext = locale === 'es' 
+    ? '\n\n**IMPORTANT: LANGUAGE CONTEXT**\nThe user is communicating in Spanish. You should:\n- Understand and process Spanish input\n- Respond in Spanish in the summary and nextSteps fields\n- Extract data correctly regardless of language\n- Use Spanish for all user-facing messages'
+    : '\n\n**IMPORTANT: LANGUAGE CONTEXT**\nThe user is communicating in English. You should:\n- Understand and process English input\n- Respond in English in the summary and nextSteps fields\n- Extract data correctly regardless of language\n- Use English for all user-facing messages';
 
-  return `You are a professional mortgage loan officer helping to fill out applications through conversation. 
+  return `You are a professional mortgage loan officer helping to fill out applications through conversation.${languageContext} 
 Your goal is to extract structured data from spoken input, update the application via JSON actions, and guide the conversation by asking for clarifications or missing info in nextSteps. Be patient, confirm details, and handle erratic or jumping conversations gracefully—like a real loan officer would.
 
 **Prompt Engineering Optimization**:

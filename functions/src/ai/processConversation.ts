@@ -39,6 +39,7 @@ const processConversationFlow = ai.defineFlow(
       transcription: z.string().describe('The text input from the user'),
       currentState: z.any().describe('Current application state'),
       conversationHistory: z.array(z.any()).optional().describe('Previous conversation messages'),
+      locale: z.string().optional().describe('Current locale (en or es)'),
     }),
     outputSchema: z.object({
       actions: z.array(
@@ -53,10 +54,10 @@ const processConversationFlow = ai.defineFlow(
     }),
   },
   async (input) => {
-    const { transcription, currentState, conversationHistory = [] } = input;
+    const { transcription, currentState, conversationHistory = [], locale = 'en' } = input;
 
     // Build the system prompt
-    const systemPrompt = buildSystemPrompt(currentState, conversationHistory);
+    const systemPrompt = buildSystemPrompt(currentState, conversationHistory, locale);
 
     // Build conversation context
     const conversationContext = conversationHistory.slice(-4).map((msg: any) => {

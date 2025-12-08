@@ -2,6 +2,7 @@
 import type { ApplicationState } from '$lib/stores/application/types';
 import type { ValidationError, StepValidationResult } from './types';
 import { generateConditions } from '$lib/conditions';
+import { t } from '$lib/i18n';
 
 export function isDocumentsComplete(state: ApplicationState, clientId: string): boolean {
   const documents = state.documentsData[clientId]?.documents || [];
@@ -37,7 +38,7 @@ export function validateDocuments(state: ApplicationState, clientId: string): St
   const assets = state.assetsData[clientId]?.records || [];
   
   if (!client?.firstName) {
-    return { isValid: false, errors: [{ field: 'client', message: 'Client information must be completed first' }] };
+    return { isValid: false, errors: [{ field: 'client', message: t('errors.clientInfoMustCompleteFirst') }] };
   }
   
   const requiredConditions = generateConditions({
@@ -48,7 +49,7 @@ export function validateDocuments(state: ApplicationState, clientId: string): St
   });
   
   if (requiredConditions.length === 0) {
-    return { isValid: false, errors: [{ field: 'documents', message: 'No documents required yet. Complete previous steps first.' }] };
+    return { isValid: false, errors: [{ field: 'documents', message: t('errors.noDocumentsRequiredYet') }] };
   }
   
   const uploadedConditionIds = new Set(

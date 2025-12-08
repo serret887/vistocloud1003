@@ -1,6 +1,7 @@
 // Income validation
 import type { ApplicationState } from '$lib/stores/application/types';
 import type { ValidationError, StepValidationResult } from './types';
+import { t } from '$lib/i18n';
 
 export function isIncomeComplete(state: ApplicationState, clientId: string): boolean {
   const income = state.incomeData[clientId];
@@ -27,14 +28,14 @@ export function validateIncome(state: ApplicationState, clientId: string): StepV
   const income = state.incomeData[clientId];
   
   if (!income) {
-    return { isValid: false, errors: [{ field: 'income', message: 'Income data not found' }] };
+    return { isValid: false, errors: [{ field: 'income', message: t('errors.incomeDataNotFound') }] };
   }
   
   const hasActiveIncome = (income.activeIncomeRecords?.length || 0) > 0;
   const hasPassiveIncome = (income.passiveIncomeRecords?.length || 0) > 0;
   
   if (!hasActiveIncome && !hasPassiveIncome) {
-    errors.push({ field: 'income', message: 'At least one income source is required' });
+    errors.push({ field: 'income', message: t('errors.atLeastOneIncome') });
   }
   
   // Validate only currently employed positions
@@ -49,7 +50,7 @@ export function validateIncome(state: ApplicationState, clientId: string): StepV
       if (!incomeRecord || !incomeRecord.monthlyAmount || incomeRecord.monthlyAmount <= 0) {
         errors.push({ 
           field: `activeIncome.${empIndex}.monthlyAmount`, 
-          message: `Base monthly income required for ${companyName}` 
+          message: t('errors.baseMonthlyIncomeRequired', { company: companyName })
         });
       }
     });
@@ -58,10 +59,10 @@ export function validateIncome(state: ApplicationState, clientId: string): StepV
   // Validate passive income records
   income.passiveIncomeRecords?.forEach((record, index) => {
     if (!record.sourceName?.trim()) {
-      errors.push({ field: `passiveIncome.${index}.sourceName`, message: `Income source required for passive income ${index + 1}` });
+      errors.push({ field: `passiveIncome.${index}.sourceName`, message: t('errors.incomeSourceRequired', { index: (index + 1).toString() }) });
     }
     if (!record.monthlyAmount || record.monthlyAmount <= 0) {
-      errors.push({ field: `passiveIncome.${index}.monthlyAmount`, message: `Income amount required for passive income ${index + 1}` });
+      errors.push({ field: `passiveIncome.${index}.monthlyAmount`, message: t('errors.incomeAmountRequired', { index: (index + 1).toString() }) });
     }
   });
   

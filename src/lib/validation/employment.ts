@@ -1,6 +1,7 @@
 // Employment validation
 import type { ApplicationState } from '$lib/stores/application/types';
 import type { ValidationError, StepValidationResult } from './types';
+import { t } from '$lib/i18n';
 
 export function isEmploymentComplete(state: ApplicationState, clientId: string): boolean {
   const employment = state.employmentData[clientId];
@@ -31,7 +32,7 @@ export function validateEmployment(state: ApplicationState, clientId: string): S
   const employment = state.employmentData[clientId];
   
   if (!employment?.records?.length) {
-    return { isValid: false, errors: [{ field: 'employment', message: 'At least one employment record is required' }] };
+    return { isValid: false, errors: [{ field: 'employment', message: t('errors.atLeastOneEmployment') }] };
   }
   
   const records = employment.records;
@@ -40,31 +41,31 @@ export function validateEmployment(state: ApplicationState, clientId: string): S
     const companyName = record.employerName?.trim() || 'Unknown Company';
     
     if (!record.employerName?.trim()) {
-      errors.push({ field: `employment.${index}.employerName`, message: `Employer name required for ${companyName}` });
+      errors.push({ field: `employment.${index}.employerName`, message: t('errors.employerNameRequired', { company: companyName }) });
     }
     if (!record.jobTitle?.trim()) {
-      errors.push({ field: `employment.${index}.jobTitle`, message: `Job title required for ${companyName}` });
+      errors.push({ field: `employment.${index}.jobTitle`, message: t('errors.jobTitleRequired', { company: companyName }) });
     }
     if (!record.startDate) {
-      errors.push({ field: `employment.${index}.startDate`, message: `Start date required for ${companyName}` });
+      errors.push({ field: `employment.${index}.startDate`, message: t('errors.startDateRequired', { company: companyName }) });
     }
     if (!record.currentlyEmployed && !record.hasOfferLetter && !record.endDate) {
-      errors.push({ field: `employment.${index}.endDate`, message: `End date required for ${companyName} (not currently employed)` });
+      errors.push({ field: `employment.${index}.endDate`, message: t('errors.endDateRequired', { company: companyName }) });
     }
     if (!record.phoneNumber?.trim()) {
-      errors.push({ field: `employment.${index}.phoneNumber`, message: `Phone number required for ${companyName}` });
+      errors.push({ field: `employment.${index}.phoneNumber`, message: t('errors.phoneNumberRequired', { company: companyName }) });
     }
     if (!record.employerAddress?.formattedAddress && !record.employerAddress?.address1) {
-      errors.push({ field: `employment.${index}.employerAddress`, message: `Employer address required for ${companyName}` });
+      errors.push({ field: `employment.${index}.employerAddress`, message: t('errors.employerAddressRequired', { company: companyName }) });
     }
     if (!record.incomeType?.trim()) {
-      errors.push({ field: `employment.${index}.incomeType`, message: `Income type required for ${companyName}` });
+      errors.push({ field: `employment.${index}.incomeType`, message: t('errors.incomeTypeRequired', { company: companyName }) });
     }
   });
   
   const totalMonths = calculateTotalMonths(records);
   if (totalMonths < 24 && !employment.employmentNote?.trim()) {
-    errors.push({ field: 'employmentNote', message: 'Employment history note required (less than 24 months of coverage)' });
+    errors.push({ field: 'employmentNote', message: t('errors.employmentNoteRequired') });
   }
   
   return { isValid: errors.length === 0, errors };

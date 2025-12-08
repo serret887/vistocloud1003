@@ -12,6 +12,7 @@
   import { isStepComplete } from '$lib/validation/index';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
+  import { _ } from 'svelte-i18n';
   
   let store = $derived(get(applicationStore));
   let isSubmitting = $state(false);
@@ -38,7 +39,7 @@
       const validation = validateMISMO(state);
       if (!validation.valid) { validationErrors = validation.errors; isExporting = false; return; }
       downloadMISMO(state, `mismo-${state.currentApplicationId || 'application'}.xml`);
-    } catch (error) { validationErrors = ['Failed to generate MISMO XML']; }
+    } catch (error) { validationErrors = [$_('errors.failedToGenerateMISMO')]; }
     finally { isExporting = false; }
   }
   
@@ -57,7 +58,7 @@
       await applicationStore.saveToFirebase();
       submitSuccess = true;
       downloadMISMO(state, `submitted-${state.currentApplicationId || 'application'}.xml`);
-    } catch (error) { validationErrors = ['Failed to submit application. Please try again.']; }
+    } catch (error) { validationErrors = [$_('errors.failedToSubmit')]; }
     finally { isSubmitting = false; }
   }
   
@@ -76,12 +77,12 @@
   
   {#if showDocumentWarning}
     <Card class="border-warning bg-warning/5">
-      <CardHeader><CardTitle class="text-warning flex items-center gap-2"><AlertCircle class="h-5 w-5" />Incomplete Documentation</CardTitle></CardHeader>
+      <CardHeader><CardTitle class="text-warning flex items-center gap-2"><AlertCircle class="h-5 w-5" />{$_('review.incompleteDocumentation')}</CardTitle></CardHeader>
       <CardContent class="space-y-4">
-        <p class="text-sm text-muted-foreground">Some documents haven't been uploaded. You can still submit, but may need to provide them later.</p>
+        <p class="text-sm text-muted-foreground">{$_('review.documentsNotUploaded')}</p>
         <div class="flex gap-3">
-          <Button variant="outline" onclick={async () => { showDocumentWarning = false; const appId = $page.params.appId; if (appId) await goto(`/application/${appId}/documents`); }}>Go to Documentation</Button>
-          <Button variant="default" onclick={() => handleSubmit(true)}>Submit Anyway</Button>
+          <Button variant="outline" onclick={async () => { showDocumentWarning = false; const appId = $page.params.appId; if (appId) await goto(`/application/${appId}/documents`); }}>{$_('review.goToDocumentation')}</Button>
+          <Button variant="default" onclick={() => handleSubmit(true)}>{$_('review.submitAnyway')}</Button>
         </div>
       </CardContent>
     </Card>
@@ -89,7 +90,7 @@
   
   {#if validationErrors.length > 0}
     <Card class="border-destructive">
-      <CardHeader><CardTitle class="text-destructive flex items-center gap-2"><AlertCircle class="h-5 w-5" />Validation Errors</CardTitle></CardHeader>
+      <CardHeader><CardTitle class="text-destructive flex items-center gap-2"><AlertCircle class="h-5 w-5" />{$_('review.validationErrors')}</CardTitle></CardHeader>
       <CardContent>
         <ul class="space-y-1 text-sm text-destructive">
           {#each validationErrors as error}<li class="flex items-start gap-2"><AlertCircle class="h-4 w-4 mt-0.5 shrink-0" />{error}</li>{/each}
@@ -103,7 +104,7 @@
       <CardContent class="pt-6">
         <div class="flex items-center gap-3 text-success">
           <CheckCircle class="h-6 w-6" />
-          <div><div class="font-medium">Application Submitted Successfully</div><div class="text-sm opacity-80">MISMO XML has been downloaded for your records</div></div>
+          <div><div class="font-medium">{$_('review.applicationSubmittedSuccessfully')}</div><div class="text-sm opacity-80">{$_('review.mismoDownloaded')}</div></div>
         </div>
       </CardContent>
     </Card>

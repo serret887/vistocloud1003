@@ -8,6 +8,8 @@
 	import { goto } from '$app/navigation';
 	import { FileText, Plus, Calendar, User } from 'lucide-svelte';
 	import { debug } from '$lib/debug';
+	import { _ } from 'svelte-i18n';
+	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
 	
 	let applications = $state<any[]>([]);
 	let isLoading = $state(true);
@@ -35,7 +37,7 @@
 			debug.log(`Loaded ${applications.length} applications`);
 			debug.groupEnd();
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to load applications';
+			error = err instanceof Error ? err.message : $_('applications.failedToLoad');
 			debug.error('Failed to load applications:', err);
 		} finally {
 			isLoading = false;
@@ -43,14 +45,14 @@
 	}
 	
 	function formatDate(date: any): string {
-		if (!date) return 'N/A';
+		if (!date) return $_('common.na');
 		if (date.toDate) {
 			return date.toDate().toLocaleDateString();
 		}
 		if (typeof date === 'string') {
 			return new Date(date).toLocaleDateString();
 		}
-		return 'N/A';
+		return $_('common.na');
 	}
 	
 	function getClientName(app: any): string {
@@ -60,7 +62,7 @@
 		if (client?.firstName && client?.lastName) {
 			return `${client.firstName} ${client.lastName}`;
 		}
-		return 'Unnamed Application';
+		return $_('applications.unnamedApplication');
 	}
 </script>
 
@@ -68,19 +70,22 @@
 	<div class="container mx-auto px-4 py-8">
 		<div class="flex items-center justify-between mb-8">
 			<div>
-				<h1 class="text-3xl font-bold">Applications</h1>
-				<p class="text-muted-foreground mt-2">View and manage all mortgage applications</p>
+				<h1 class="text-3xl font-bold">{$_('applications.title')}</h1>
+				<p class="text-muted-foreground mt-2">{$_('applications.subtitle')}</p>
 			</div>
-			<Button onclick={() => goto('/')} class="gap-2">
-				<Plus class="h-5 w-5" />
-				New Application
-			</Button>
+			<div class="flex items-center gap-4">
+				<LanguageSelector />
+				<Button onclick={() => goto('/')} class="gap-2">
+					<Plus class="h-5 w-5" />
+					{$_('applications.newApplication')}
+				</Button>
+			</div>
 		</div>
 		
 		{#if isLoading}
 			<Card>
 				<CardContent class="py-12">
-					<div class="text-center text-muted-foreground">Loading applications...</div>
+					<div class="text-center text-muted-foreground">{$_('applications.loading')}</div>
 				</CardContent>
 			</Card>
 		{:else if error}
@@ -88,7 +93,7 @@
 				<CardContent class="py-12">
 					<div class="text-center">
 						<div class="text-destructive mb-4">{error}</div>
-						<Button onclick={loadApplications} variant="outline">Retry</Button>
+						<Button onclick={loadApplications} variant="outline">{$_('common.retry')}</Button>
 					</div>
 				</CardContent>
 			</Card>
@@ -98,14 +103,14 @@
 					<div class="text-center space-y-4">
 						<FileText class="h-16 w-16 text-muted-foreground mx-auto" />
 						<div>
-							<h3 class="font-medium text-lg">No Applications Found</h3>
+							<h3 class="font-medium text-lg">{$_('applications.noApplications')}</h3>
 							<p class="text-muted-foreground text-sm mt-2">
-								Create your first application to get started
+								{$_('applications.noApplicationsDescription')}
 							</p>
 						</div>
 						<Button onclick={() => goto('/')} class="gap-2">
 							<Plus class="h-4 w-4" />
-							Create Application
+							{$_('applications.createApplication')}
 						</Button>
 					</div>
 				</CardContent>
@@ -113,19 +118,19 @@
 		{:else}
 			<Card>
 				<CardHeader>
-					<CardTitle>All Applications ({applications.length})</CardTitle>
-					<CardDescription>Click on an application to view or edit</CardDescription>
+					<CardTitle>{$_('applications.allApplications')} ({applications.length})</CardTitle>
+					<CardDescription>{$_('applications.allApplicationsDescription')}</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<div class="rounded-md border">
 						<Table>
 							<TableHeader>
 								<TableRow>
-									<TableHead>Application ID</TableHead>
-									<TableHead>Client Name</TableHead>
-									<TableHead>Current Step</TableHead>
-									<TableHead>Last Updated</TableHead>
-									<TableHead class="text-right">Actions</TableHead>
+									<TableHead>{$_('applications.applicationId')}</TableHead>
+									<TableHead>{$_('applications.clientName')}</TableHead>
+									<TableHead>{$_('applications.currentStep')}</TableHead>
+									<TableHead>{$_('applications.lastUpdated')}</TableHead>
+									<TableHead class="text-right">{$_('applications.actions')}</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
@@ -165,7 +170,7 @@
 													goto(`/application/${app.id}`);
 												}}
 											>
-												View
+												{$_('common.view')}
 											</Button>
 										</TableCell>
 									</TableRow>

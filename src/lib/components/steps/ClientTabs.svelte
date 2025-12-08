@@ -3,7 +3,8 @@
 	import { cn } from '$lib/utils';
 	import { Plus, User, X } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui';
-	import { derived } from 'svelte/store';
+	import { derived, get } from 'svelte/store';
+	import { _ } from 'svelte-i18n';
 	
 	function setActiveClient(clientId: string) {
 		applicationStore.setActiveClient(clientId);
@@ -27,13 +28,14 @@
 		[applicationStore, clientIds],
 		([$store, $ids]) => {
 			const names: Record<string, string> = {};
+			const unnamedBorrower = get(_)('clientInfo.unnamedBorrower');
 			for (const clientId of $ids) {
 				const client = $store.clientData[clientId];
 				if (client?.firstName || client?.lastName) {
 					const name = `${client.firstName || ''} ${client.lastName || ''}`.trim();
-					names[clientId] = name || 'Unnamed Borrower';
+					names[clientId] = name || unnamedBorrower;
 				} else {
-					names[clientId] = 'Unnamed Borrower';
+					names[clientId] = unnamedBorrower;
 				}
 			}
 			return names;
@@ -54,13 +56,13 @@
 				)}
 			>
 				<User class="h-4 w-4 shrink-0" />
-				<span>{$clientNames[clientId] || 'Unnamed Borrower'}</span>
+				<span>{$clientNames[clientId] || $_('clientInfo.unnamedBorrower')}</span>
 			</button>
 			{#if $clientIds.length > 1}
 				<button
 					onclick={(e) => removeClient(clientId, e)}
 					class="p-1 rounded hover:bg-destructive/20 text-destructive shrink-0 flex items-center justify-center"
-					title="Remove borrower"
+					title={$_('clientInfo.removeBorrower')}
 				>
 					<X class="h-4 w-4" />
 				</button>
@@ -70,7 +72,7 @@
 	
 	<Button variant="outline" size="sm" onclick={addClient} class="gap-2">
 		<Plus class="h-4 w-4" />
-		Add Co-Borrower
+		{$_('clientInfo.addCoBorrower')}
 	</Button>
 </div>
 

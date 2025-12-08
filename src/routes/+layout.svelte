@@ -5,6 +5,8 @@
 	import { initFirebaseEmulator } from '$lib/firebase';
 	import { initAutoSave, clearAutoSaveTimer } from '$lib/auto-save';
 	import { Toaster } from 'svelte-sonner';
+	import '$lib/i18n';
+	import { _ } from 'svelte-i18n';
 	
 	let { children } = $props();
 	
@@ -27,8 +29,8 @@
 </script>
 
 <svelte:head>
-	<title>VistoCloud - Mortgage Application Platform</title>
-	<meta name="description" content="Modern mortgage application processing platform" />
+	<title>{$_('app.title')}</title>
+	<meta name="description" content={$_('app.description')} />
 </svelte:head>
 
 <Toaster position="top-right" richColors closeButton />

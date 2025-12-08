@@ -3,6 +3,8 @@
 	import { cn } from '$lib/utils';
 	import { AlertCircle } from 'lucide-svelte';
 	import type { HTMLInputAttributes } from 'svelte/elements';
+	import { _ } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 
 	interface Props extends Omit<HTMLInputAttributes, 'value' | 'oninput' | 'onblur'> {
 		label?: string;
@@ -68,7 +70,9 @@
 			internalError = validationError;
 			onValidationChange?.(validationError === null, validationError);
 		} else if (required && !internalValue) {
-			internalError = `${label || 'This field'} is required`;
+			const translate = get(_);
+			const fieldRequired = translate('errors.fieldRequired');
+			internalError = label ? fieldRequired.replace('This field', label) : fieldRequired;
 			onValidationChange?.(false, internalError);
 		} else {
 			internalError = null;

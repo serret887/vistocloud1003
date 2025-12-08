@@ -6,10 +6,21 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { ChevronRight, Check, Circle, Home, AlertCircle } from 'lucide-svelte';
-import DebugPanel from '$lib/components/DebugPanel.svelte';
-import { getStepStatus } from '$lib/validation/index';
+	import DebugPanel from '$lib/components/DebugPanel.svelte';
+	import { getStepStatus } from '$lib/validation/index';
+	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
+	import { _ } from 'svelte-i18n';
 	
 	let { children } = $props();
+	
+	// Convert step ID (kebab-case) to translation key (camelCase)
+	function getStepTranslationKey(stepId: string): string {
+		const mapping: Record<string, string> = {
+			'client-info': 'clientInfo',
+			'real-estate': 'realEstate'
+		};
+		return mapping[stepId] || stepId;
+	}
 	
 	import { getStepIdFromPath } from '$lib/applicationSteps';
 	
@@ -73,14 +84,17 @@ import { getStepStatus } from '$lib/validation/index';
 			<div class="flex items-center gap-4">
 				<a href="/" class="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
 					<Home class="h-5 w-5" />
-					<span class="font-medium">VistoCloud</span>
+					<span class="font-medium">{$_('app.name')}</span>
 				</a>
 				<ChevronRight class="h-4 w-4 text-muted-foreground" />
-				<span class="font-medium">Application</span>
+				<span class="font-medium">{$_('applications.title')}</span>
 			</div>
 			
-			<div class="text-sm text-muted-foreground">
-				App ID: <code class="bg-muted px-2 py-1 rounded text-xs">{$page.params.appId?.slice(0, 12)}...</code>
+			<div class="flex items-center gap-4">
+				<LanguageSelector />
+				<div class="text-sm text-muted-foreground">
+					App ID: <code class="bg-muted px-2 py-1 rounded text-xs">{$page.params.appId?.slice(0, 12)}...</code>
+				</div>
 			</div>
 		</div>
 	</header>
@@ -91,6 +105,7 @@ import { getStepStatus } from '$lib/validation/index';
 			<nav class="p-4 space-y-1">
 					{#each stepDefinitions as step, idx}
 					{@const status = getStepStatus(step.id as any, $currentStepId, $applicationStore)}
+					{@const stepKey = getStepTranslationKey(step.id)}
 						<button
 							onclick={() => navigateToStep(step.id)}
 							class={cn(
@@ -119,14 +134,14 @@ import { getStepStatus } from '$lib/validation/index';
 								{/if}
 							</div>
 							<div class="flex-1 min-w-0">
-								<div class="font-medium truncate">{step.title}</div>
+								<div class="font-medium truncate">{$_('steps.' + stepKey + '.title')}</div>
 								<div class={cn(
 									'text-xs truncate',
 									step.id === currentStepFromUrl
 										? 'text-primary-foreground/70'
 										: 'text-muted-foreground'
 								)}>
-									{step.description}
+									{$_('steps.' + stepKey + '.description')}
 								</div>
 							</div>
 						</button>

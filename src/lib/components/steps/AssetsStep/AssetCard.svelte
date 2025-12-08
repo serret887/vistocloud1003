@@ -4,6 +4,7 @@
   import { MoneyInput } from '$lib/components/ui/validated-input';
   import { Trash2, Users } from 'lucide-svelte';
   import type { AssetRecord, AssetCategory } from '$lib/types/assets';
+  import { _ } from 'svelte-i18n';
   
   interface Props {
     asset: AssetRecord;
@@ -28,9 +29,9 @@
       <div>
         <CardTitle class="text-lg">{categoryInfo.label}</CardTitle>
         <CardDescription>
-          {asset.institutionName || 'No institution specified'}
+          {asset.institutionName || $_('assets.noInstitutionSpecified')}
           {#if asset.sharedClientIds?.length}
-            <span class="text-primary"> • Joint Account</span>
+            <span class="text-primary"> • {$_('assets.jointAccount')}</span>
           {/if}
         </CardDescription>
       </div>
@@ -42,18 +43,18 @@
   <CardContent class="space-y-4">
     <div class="grid md:grid-cols-2 gap-4">
       <div class="space-y-2">
-        <Label class="after:content-['*'] after:ml-0.5 after:text-destructive">Institution Name</Label>
+        <Label class="after:content-['*'] after:ml-0.5 after:text-destructive">{$_('assets.institutionName')}</Label>
         <Input
           value={asset.institutionName || ''}
           oninput={(e) => onUpdate('institutionName', e.currentTarget.value)}
-          placeholder="Bank of America, Fidelity, etc."
+          placeholder={$_('assets.institutionNamePlaceholder')}
         />
       </div>
       <div class="space-y-2">
-        <Label>Account Type</Label>
+        <Label>{$_('assets.accountType')}</Label>
         <Select type="single" value={asset.type || undefined} onValueChange={(v) => v && onUpdate('type', v)}>
           <SelectTrigger class="w-full">
-            <SelectValue placeholder="Select type..." />
+            <SelectValue placeholder={$_('common.select')} />
           </SelectTrigger>
           <SelectContent>
             {#each accountTypes as type}
@@ -66,16 +67,16 @@
     
     <div class="grid md:grid-cols-2 gap-4">
       <div class="space-y-2">
-        <Label>Account Number (last 4 digits)</Label>
+        <Label>{$_('assets.accountNumberLabel')}</Label>
         <Input
           value={asset.accountNumber || ''}
           oninput={(e) => onUpdate('accountNumber', e.currentTarget.value)}
-          placeholder="****1234"
+          placeholder={$_('assets.accountNumberPlaceholder')}
           maxlength={4}
         />
       </div>
       <MoneyInput
-        label="Current Value"
+        label={$_('assets.currentValue')}
         value={asset.amount || 0}
         onValueChange={(val) => onUpdate('amount', val)}
         required
@@ -84,11 +85,11 @@
     
     {#if asset.category === 'Gift'}
       <div class="space-y-2">
-        <Label class="after:content-['*'] after:ml-0.5 after:text-destructive">Gift Source</Label>
+        <Label class="after:content-['*'] after:ml-0.5 after:text-destructive">{$_('assets.giftSource')}</Label>
         <Input
           value={asset.source || ''}
           oninput={(e) => onUpdate('source', e.currentTarget.value)}
-          placeholder="Name of person/entity providing gift"
+          placeholder={$_('assets.giftSourcePlaceholder')}
         />
       </div>
     {/if}
@@ -97,7 +98,7 @@
       <div class="p-4 rounded-lg border bg-muted/30">
         <div class="flex items-center gap-2 mb-3">
           <Users class="h-4 w-4 text-primary" />
-          <Label>Joint Account Owners</Label>
+          <Label>{$_('assets.jointAccountOwners')}</Label>
         </div>
         <div class="space-y-2">
           {#each clientIds.filter(id => id !== activeClientId) as clientId}

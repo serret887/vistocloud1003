@@ -13,6 +13,7 @@ import type { ApplicationState } from '$lib/stores/application/types';
 import type { ApplicationStepId } from '$lib/types/application';
 import type { StepValidationResult, StepStatus } from './types';
 import { STEP_ORDER } from './types';
+import { t } from '$lib/i18n';
 
 import { isClientInfoComplete, validateClientInfo } from './client-info';
 import { isEmploymentComplete, validateEmployment } from './employment';
@@ -25,7 +26,7 @@ export function validateStep(stepId: ApplicationStepId, state: ApplicationState)
   const clientId = state.activeClientId;
   
   if (!clientId) {
-    return { isValid: false, errors: [{ field: 'client', message: 'No active client' }] };
+    return { isValid: false, errors: [{ field: 'client', message: t('errors.noActiveClient') }] };
   }
   
   switch (stepId) {
@@ -39,7 +40,7 @@ export function validateStep(stepId: ApplicationStepId, state: ApplicationState)
     case 'review':
       return { isValid: true, errors: [] };
     default:
-      return { isValid: false, errors: [{ field: 'step', message: 'Unknown step' }] };
+      return { isValid: false, errors: [{ field: 'step', message: t('errors.unknownStep') }] };
   }
 }
 

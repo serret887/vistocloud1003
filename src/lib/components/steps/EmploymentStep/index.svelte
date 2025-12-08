@@ -7,6 +7,7 @@
   import EmploymentCard from './EmploymentCard.svelte';
   import { Plus, Building2, AlertTriangle } from 'lucide-svelte';
   import type { AddressType } from '$lib/types/address';
+  import { _ } from 'svelte-i18n';
   
   function addEmployment() {
     applicationStore.addEmploymentRecord($activeClientId);
@@ -78,8 +79,8 @@
     <div class="flex items-center gap-3 p-4 rounded-lg bg-warning/10 border border-warning/20">
       <AlertTriangle class="h-5 w-5 text-warning shrink-0" />
       <div class="text-sm">
-        <span class="font-medium">Employment history gap:</span> 
-        Currently showing {coverageMonths} months. Please add at least 24 months of employment history.
+        <span class="font-medium">{$_('employment.historyGap')}</span> 
+        {$_('employment.historyGapDescription').replace('{months}', coverageMonths.toString())}
       </div>
     </div>
   {/if}
@@ -89,9 +90,9 @@
       <CardContent class="py-12">
         <EmptyState
           icon="🏢"
-          title="No Employment Records"
-          description="Add employment history for the past 2 years"
-          actionLabel="Add Employer"
+          title={$_('employment.noRecords')}
+          description={$_('employment.noRecordsDescription')}
+          actionLabel={$_('employment.addEmployer')}
           onAction={addEmployment}
         />
       </CardContent>
@@ -110,7 +111,7 @@
     
     <Button onclick={addEmployment} variant="secondary" class="gap-2">
       <Plus class="h-4 w-4" />
-      Add Another Employer
+      {$_('employment.addAnotherEmployer')}
     </Button>
   {/if}
 </div>

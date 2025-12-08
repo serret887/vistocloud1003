@@ -5,6 +5,7 @@
   import { Trash2 } from 'lucide-svelte';
   import type { EmploymentRecord } from '$lib/types/employment';
   import type { AddressType } from '$lib/types/address';
+  import { _ } from 'svelte-i18n';
   
   interface Props {
     record: EmploymentRecord;
@@ -30,12 +31,12 @@
   <CardHeader class="flex flex-row items-start justify-between space-y-0">
     <div>
       <CardTitle class="text-lg">
-        {record.employerName || `Employer ${index + 1}`}
+        {record.employerName || $_('employment.employer') + ' ' + (index + 1)}
       </CardTitle>
       <CardDescription>
-        {record.jobTitle || 'No position specified'}
+        {record.jobTitle || $_('employment.noPositionSpecified')}
         {#if record.currentlyEmployed}
-          <span class="text-success"> • Current</span>
+          <span class="text-success"> • {$_('employment.current')}</span>
         {/if}
       </CardDescription>
     </div>
@@ -47,16 +48,16 @@
     <!-- Employer Info -->
     <div class="grid md:grid-cols-2 gap-4">
       <div class="space-y-2">
-        <Label class="after:content-['*'] after:ml-0.5 after:text-destructive">Employer Name</Label>
+        <Label class="after:content-['*'] after:ml-0.5 after:text-destructive">{$_('employment.employerName')}</Label>
         <Input
           value={record.employerName}
           oninput={(e) => onUpdate('employerName', e.currentTarget.value)}
-          placeholder="Company Name"
+          placeholder={$_('employment.companyName')}
           class={hasFieldError(`employment.${index}.employerName`) ? 'border-destructive' : ''}
         />
       </div>
       <PhoneInput
-        label="Employer Phone"
+        label={$_('employment.employerPhone')}
         value={record.phoneNumber || ''}
         onValueChange={(val) => onUpdate('phoneNumber', val)}
         required
@@ -65,11 +66,11 @@
     
     <!-- Employer Address -->
     <div class="space-y-2">          
-      <Label class="after:content-['*'] after:ml-0.5 after:text-destructive">Employer Address</Label>
+      <Label class="after:content-['*'] after:ml-0.5 after:text-destructive">{$_('employment.employerAddress')}</Label>
       <div class={hasFieldError(`employment.${index}.employerAddress`) ? 'border border-destructive rounded-md p-1' : ''}>
         <AddressAutocomplete
           value={record.employerAddress}
-          placeholder="Start typing employer address..."
+          placeholder={$_('employment.employerAddressPlaceholder')}
           onchange={(addr) => onUpdate('employerAddress', addr)}
         />
       </div>
@@ -81,21 +82,21 @@
     <!-- Job Info -->
     <div class="grid md:grid-cols-2 gap-4">
       <div class="space-y-2">
-        <Label class="after:content-['*'] after:ml-0.5 after:text-destructive">Job Title / Position</Label>
+        <Label class="after:content-['*'] after:ml-0.5 after:text-destructive">{$_('employment.jobTitlePosition')}</Label>
         <Input
           value={record.jobTitle}
           oninput={(e) => onUpdate('jobTitle', e.currentTarget.value)}
-          placeholder="Software Engineer"
+          placeholder={$_('employment.jobTitlePlaceholder')}
           class={hasFieldError(`employment.${index}.jobTitle`) ? 'border-destructive' : ''}
         />
       </div>
       <ValidatedSelect
-        label="Income Type"
+        label={$_('employment.incomeType')}
         value={record.incomeType || undefined}
         onValueChange={(value) => value && onUpdate('incomeType', value)}
         options={incomeTypes}
         required
-        placeholder="Select type..."
+        placeholder={$_('common.select')}
         showError={true}
         error={hasFieldError(`employment.${index}.incomeType`) ? getFieldError(`employment.${index}.incomeType`) || undefined : undefined}
       />

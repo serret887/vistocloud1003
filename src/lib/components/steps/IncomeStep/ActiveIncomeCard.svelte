@@ -4,6 +4,7 @@
   import { Briefcase } from 'lucide-svelte';
   import type { EmploymentRecord } from '$lib/types/employment';
   import type { ActiveIncomeRecord } from '$lib/types/income';
+  import { _ } from 'svelte-i18n';
   
   interface Props {
     employmentRecords: EmploymentRecord[];
@@ -25,8 +26,8 @@
     <div class="flex items-center gap-2">
       <Briefcase class="h-5 w-5 text-primary" />
       <div>
-        <CardTitle>Employment Income</CardTitle>
-        <CardDescription>Income from current employers</CardDescription>
+        <CardTitle>{$_('income.employmentIncome')}</CardTitle>
+        <CardDescription>{$_('income.employmentIncomeDescription')}</CardDescription>
       </div>
     </div>
   </CardHeader>
@@ -34,9 +35,9 @@
     {#if employmentRecords.length === 0}
       <div class="text-center py-8">
         <p class="text-muted-foreground">
-          No current employment records found. Mark at least one employer as "Currently Employed Here" in the Employment step.
+          {$_('income.noCurrentEmployment')}
         </p>
-        <Button variant="link" class="mt-2">Go to Employment →</Button>
+        <Button variant="link" class="mt-2">{$_('income.goToEmployment')}</Button>
       </div>
     {:else}
       <div class="space-y-6">
@@ -45,22 +46,22 @@
           <div class="p-4 rounded-lg border space-y-4">
             <div class="flex items-center justify-between">
               <div>
-                <div class="font-medium">{emp.employerName || 'Employer'}</div>
+                <div class="font-medium">{emp.employerName || $_('employment.employer')}</div>
                 <div class="text-sm text-muted-foreground">
-                  {emp.jobTitle || 'Position'} 
+                  {emp.jobTitle || $_('income.position')} 
                   {#if emp.currentlyEmployed}
-                    <span class="text-success">• Current</span>
+                    <span class="text-success">• {$_('employment.current')}</span>
                   {/if}
                 </div>
               </div>
               {#if emp.selfEmployed}
-                <span class="text-xs bg-warning/10 text-warning px-2 py-1 rounded">Self-Employed</span>
+                <span class="text-xs bg-warning/10 text-warning px-2 py-1 rounded">{$_('employment.selfEmployed')}</span>
               {/if}
             </div>
             
             <div class="grid md:grid-cols-4 gap-4">
               <MoneyInput
-                label="Base Monthly"
+                label={$_('income.baseMonthly')}
                 value={incomeRecord?.monthlyAmount || 0}
                 onValueChange={(val) => onUpdateIncome(emp.id, 'monthlyAmount', val)}
                 required
@@ -68,17 +69,17 @@
                 showError={true}
               />
               <MoneyInput
-                label="Overtime"
+                label={$_('income.overtime')}
                 value={incomeRecord?.overtime || 0}
                 onValueChange={(val) => onUpdateIncome(emp.id, 'overtime', val)}
               />
               <MoneyInput
-                label="Bonus"
+                label={$_('income.bonus')}
                 value={incomeRecord?.bonus || 0}
                 onValueChange={(val) => onUpdateIncome(emp.id, 'bonus', val)}
               />
               <MoneyInput
-                label="Commissions"
+                label={$_('income.commissions')}
                 value={incomeRecord?.commissions || 0}
                 onValueChange={(val) => onUpdateIncome(emp.id, 'commissions', val)}
               />

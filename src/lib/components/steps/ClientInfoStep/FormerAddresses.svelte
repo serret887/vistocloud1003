@@ -4,6 +4,7 @@
   import AddressAutocomplete from '$lib/components/ui/address-autocomplete.svelte';
   import { Plus, Trash2, AlertCircle } from 'lucide-svelte';
   import type { AddressRecord, AddressType } from '$lib/types/address';
+  import { _ } from 'svelte-i18n';
   
   interface Props {
     formerAddresses: AddressRecord[];
@@ -18,26 +19,26 @@
 <Card>
   <CardHeader class="flex flex-row items-center justify-between space-y-0">
     <div>
-      <CardTitle>Former Addresses</CardTitle>
-      <CardDescription>Previous addresses (required: less than 24 months at present address)</CardDescription>
+      <CardTitle>{$_('clientInfo.address.formerAddresses')}</CardTitle>
+      <CardDescription>{$_('clientInfo.address.formerAddressesDescription')}</CardDescription>
     </div>
     <Button variant="outline" size="sm" onclick={onAddAddress} class="gap-2">
       <Plus class="h-4 w-4" />
-      Add Former Address
+      {$_('clientInfo.address.addFormerAddress')}
     </Button>
   </CardHeader>
   <CardContent>
     {#if formerAddresses.length === 0}
       <p class="text-warning text-center py-6 flex items-center justify-center gap-2">
         <AlertCircle class="h-4 w-4" />
-        You must add at least one former address (less than 24 months at current address)
+        {$_('clientInfo.address.mustAddFormerAddress')}
       </p>
     {:else}
       <div class="space-y-4">
         {#each formerAddresses as addr, idx}
           <div class="p-4 rounded-lg border space-y-4">
             <div class="flex items-center justify-between">
-              <span class="font-medium">Former Address {idx + 1}</span>
+              <span class="font-medium">{$_('clientInfo.address.formerAddress')} {idx + 1}</span>
               {#if onRemoveAddress}
                 <Button variant="ghost" size="icon" onclick={() => onRemoveAddress?.(addr.id)}>
                   <Trash2 class="h-4 w-4 text-destructive" />
@@ -46,19 +47,19 @@
             </div>
             <AddressAutocomplete
               value={addr.addr}
-              placeholder="Start typing former address..."
+              placeholder={$_('clientInfo.address.formerAddressPlaceholder')}
               onchange={(address) => onUpdateAddress(addr.id, { addr: address })}
             />
             <div class="grid md:grid-cols-2 gap-4">
               <DateInput
-                label="From Date"
+                label={$_('clientInfo.address.fromDate')}
                 value={addr.fromDate || ''}
                 onValueChange={(val) => onUpdateAddress(addr.id, { fromDate: val })}
                 required
                 allowFuture={false}
               />
               <DateInput
-                label="To Date"
+                label={$_('clientInfo.address.toDate')}
                 value={addr.toDate || ''}
                 onValueChange={(val) => onUpdateAddress(addr.id, { toDate: val })}
                 required
