@@ -1,8 +1,6 @@
 // AI processing logic for DictateStep
 import { applicationStore } from '$lib/stores/application/index';
 import { executeStoreAction } from '$lib/llm/actionExecutor';
-import { resolveAddressesInActions } from '$lib/llm/addressResolver';
-import { filterDuplicateActions } from '$lib/llm/duplicateFilter';
 import { getCurrentLLMState } from '$lib/llm/storeAdapter';
 import { processConversation } from '$lib/services/aiFunctions';
 import type { LLMAction, VoiceUpdate } from '$lib/types/voice-assistant';
@@ -22,14 +20,21 @@ export async function processTextWithAI(
 ): Promise<ProcessResult> {
   const currentState = getCurrentLLMState();
   const currentLocale = get(locale) || 'en';
+  
+  // Server now handles: address resolution, duplicate filtering, and validation
   const response = await processConversation(text, currentState, conversationHistory, currentLocale);
+  
+  // Log validation errors if any
+  if (response.validationErrors && response.validationErrors.length > 0) {
+    console.warn('Server-side validation errors:', response.validationErrors);
+  }
+  
   const dynamicIdMap: DynamicIdMap = new Map();
   const newUpdates: VoiceUpdate[] = [];
   
-  const resolvedActions = await resolveAddressesInActions(response.actions);
-  const filteredActions = filterDuplicateActions(resolvedActions, applicationStore);
-  
-  for (const action of filteredActions) {
+  // Actions are already processed server-side (addresses resolved, duplicates filtered, validated)
+  // Just execute them on the client store
+  for (const action of response.actions) {
     try {
       const update = executeStoreAction(action, applicationStore, dynamicIdMap);
       if (update) newUpdates.push(update);

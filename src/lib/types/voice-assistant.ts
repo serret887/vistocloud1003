@@ -17,6 +17,11 @@ export interface LLMResponse {
   actions: LLMAction[]
   summary: string
   nextSteps?: string
+  validationErrors?: Array<{
+    action: string
+    errors: string[]
+    warnings: string[]
+  }>
 }
 
 export interface ChatMessage {

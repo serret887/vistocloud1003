@@ -1,18 +1,16 @@
 /**
  * LLM Processing Module
  * 
- * This module handles the client-side processing of AI responses:
+ * This module handles the client-side execution of AI responses:
  * - Converting store state to LLM format
- * - Executing actions returned from the server
- * - Resolving addresses and filtering duplicates
+ * - Executing pre-processed, validated actions returned from the server
  * 
- * Note: Actual AI processing happens server-side via Firebase Functions
+ * Note: All AI processing, transformations, and validation happen server-side via Firebase Functions.
+ * The server handles address resolution, duplicate filtering, and validation before returning actions.
  */
 
-// Action execution and processing
+// Action execution
 export { executeStoreAction } from './actionExecutor'
-export { resolveAddressesInActions } from './addressResolver'
-export { filterDuplicateActions } from './duplicateFilter'
 
 // Store adapter - converts store state to LLM format
 export { convertToLLMState, getCurrentLLMState } from './storeAdapter'
