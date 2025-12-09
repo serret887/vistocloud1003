@@ -1,5 +1,5 @@
 // Test helper functions
-import { Page, expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 export async function fillClientInfo(page: Page, data: {
   firstName?: string;

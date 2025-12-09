@@ -1,0 +1,6 @@
+import type { PageLoad } from './$types';
+
+export const load: PageLoad = ({ params }) => ({
+	conversationId: params.conversationId
+});
+

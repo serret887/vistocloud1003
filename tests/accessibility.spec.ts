@@ -159,7 +159,7 @@ test.describe('Accessibility - ARIA and 508 Compliance', () => {
       .analyze();
     
     const contrastViolations = accessibilityScanResults.violations.filter(
-      v => v.id === 'color-contrast'
+      (v) => v.id === 'color-contrast'
     );
     expect(contrastViolations).toEqual([]);
   });

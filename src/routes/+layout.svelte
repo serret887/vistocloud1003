@@ -6,32 +6,38 @@
 	import { initAutoSave, clearAutoSaveTimer } from '$lib/auto-save';
 	import { Toaster } from 'svelte-sonner';
 	import '$lib/i18n';
-	import { _ } from 'svelte-i18n';
+	import { _, waitLocale } from 'svelte-i18n';
 	
 	let { children } = $props();
-	
+	let ready = $state(false);
+	let title = $state('VistoCloud');
+	let description = $state('Mortgage Application Platform');
 	let unsubscribeAutoSave: (() => void) | undefined;
-	
-	// Initialize Firebase emulator and auto-save in development
-	onMount(() => {
+
+	// Initialize i18n, Firebase emulator, and auto-save in development
+	onMount(async () => {
+		await waitLocale();
+		title = $_('app.title');
+		description = $_('app.description');
+		ready = true;
 		if (browser) {
 			initFirebaseEmulator();
 			unsubscribeAutoSave = initAutoSave();
 		}
 	});
-	
+
 	onDestroy(() => {
-		if (unsubscribeAutoSave) {
-			unsubscribeAutoSave();
-		}
+		unsubscribeAutoSave?.();
 		clearAutoSaveTimer();
 	});
 </script>
 
 <svelte:head>
-	<title>{$_('app.title')}</title>
-	<meta name="description" content={$_('app.description')} />
+	<title>{title}</title>
+	<meta name="description" content={description} />
 </svelte:head>
 
-<Toaster position="top-right" richColors closeButton />
-{@render children()}
+{#if ready}
+	<Toaster position="top-right" richColors closeButton />
+	{@render children()}
+{/if}

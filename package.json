@@ -20,6 +20,7 @@
 		"test:headed": "playwright test --headed"
 	},
 	"devDependencies": {
+		"@axe-core/playwright": "^4.10.1",
 		"@playwright/test": "^1.57.0",
 		"@sveltejs/adapter-auto": "^7.0.0",
 		"@sveltejs/kit": "^2.48.5",
@@ -39,7 +40,9 @@
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"firebase": "^12.5.0",
+		"firebase-admin": "^12.7.0",
 		"lucide-svelte": "^0.525.0",
+		"@lucide/svelte": "^0.525.0",
 		"svelte-i18n": "^4.0.1",
 		"svelte-sonner": "^1.0.7",
 		"tailwind-merge": "^3.4.0",
