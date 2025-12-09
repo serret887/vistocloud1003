@@ -216,18 +216,23 @@
 				<div class="p-2 space-y-1">
 					{#each filteredConversations() as conversation (conversation.id)}
 						{@const isActive = $page.url.pathname === `/ai/app/${conversation.id}`}
-						<button
-							onclick={() => selectConversation(conversation.id)}
-							class="w-full text-left px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors group {isActive ? 'bg-primary/20' : ''}"
+						<div
+							class="relative w-full px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors group {isActive ? 'bg-primary/20' : ''}"
 						>
-							<div class="flex items-start gap-2">
-								<button
-									onclick={(e) => toggleFavorite(conversation, e)}
-									class="mt-0.5 shrink-0 {conversation.favorite ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity"
-									title={conversation.favorite ? 'Remove from favorites' : 'Add to favorites'}
-								>
-									<Star class="h-3.5 w-3.5 {conversation.favorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}" />
-								</button>
+							<div
+								role="button"
+								tabindex="0"
+								onclick={(e) => toggleFavorite(conversation, e)}
+								onkeydown={(e) => e.key === 'Enter' && toggleFavorite(conversation, e)}
+								class="absolute left-3 top-2.5 mt-0.5 shrink-0 {conversation.favorite ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary rounded z-10"
+								title={conversation.favorite ? 'Remove from favorites' : 'Add to favorites'}
+							>
+								<Star class="h-3.5 w-3.5 {conversation.favorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}" />
+							</div>
+							<button
+								onclick={() => selectConversation(conversation.id)}
+								class="w-full text-left flex items-start gap-2 pl-6"
+							>
 								<div class="flex-1 min-w-0">
 									<div class="font-medium text-sm truncate {isActive ? 'text-primary' : 'text-sidebar-foreground'}">
 										{conversation.title}
@@ -238,8 +243,8 @@
 										</div>
 									{/if}
 								</div>
-							</div>
-						</button>
+							</button>
+						</div>
 					{/each}
 				</div>
 			{/if}
