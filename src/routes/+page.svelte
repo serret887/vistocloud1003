@@ -1,11 +1,28 @@
 <script lang="ts">
 	import { Button, Badge, Card, CardContent } from '$lib/components/ui';
+	import {
+		AlertDialog,
+		AlertDialogAction,
+		AlertDialogCancel,
+		AlertDialogContent,
+		AlertDialogDescription,
+		AlertDialogFooter,
+		AlertDialogHeader,
+		AlertDialogTitle
+	} from '$lib/components/ui';
 	import { applicationStore } from '$lib/stores/application/index';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import { _ } from 'svelte-i18n';
 
+	let showCreateDialog = $state(false);
+
+	const openCreateDialog = () => {
+		showCreateDialog = true;
+	};
+
 	const createNewApplication = async () => {
+		showCreateDialog = false;
 		try {
 			const id = await applicationStore.createApplication();
 			toast.success($_('toast.applicationCreated'), { description: $_('toast.applicationCreatedDescription') });
@@ -36,7 +53,7 @@
 				'Multi-client support for borrowers and co-borrowers'
 			],
 			cta: 'Start a 1003',
-			ctaAction: createNewApplication,
+			ctaAction: openCreateDialog,
 			icon: '📋'
 		},
 		{
@@ -135,7 +152,7 @@
 					The only platform that combines streamlined mortgage application generation with AI-powered guideline intelligence. Stop switching between tools—everything you need lives in one workspace.
 				</p>
 				<div class="flex flex-wrap justify-center gap-4">
-					<Button size="lg" class="px-8 text-base" onclick={createNewApplication}>
+					<Button size="lg" class="px-8 text-base" onclick={openCreateDialog}>
 						Start a 1003 Application
 					</Button>
 					<Button size="lg" variant="outline" class="px-8 text-base" onclick={() => goto('/ai/app')}>
@@ -300,9 +317,9 @@
 					<Button variant="outline" class="px-6" onclick={() => goto('/ai/app')}>
 						See AI Copilot in action
 					</Button>
-					<Button class="px-6" onclick={createNewApplication}>
-						Start a 1003 Application
-					</Button>
+				<Button class="px-6" onclick={openCreateDialog}>
+					Start a 1003 Application
+				</Button>
 				</div>
 			</div>
 		</div>
@@ -343,7 +360,7 @@
 				Connect your Firebase project, drop in org overlays, and start generating 1003s and answering overlay questions today. No lengthy onboarding required.
 			</p>
 			<div class="flex flex-wrap justify-center gap-4">
-				<Button size="lg" class="px-8 text-base" onclick={createNewApplication}>
+				<Button size="lg" class="px-8 text-base" onclick={openCreateDialog}>
 					Start a 1003 Application
 				</Button>
 				<Button size="lg" variant="outline" class="px-8 text-base" onclick={() => goto('/ai/app')}>
@@ -356,3 +373,23 @@
 		</div>
 	</section>
 </div>
+
+<!-- Create Application Confirmation Dialog -->
+<AlertDialog bind:open={showCreateDialog}>
+	<AlertDialogContent>
+		<AlertDialogHeader>
+			<AlertDialogTitle>Create New 1003 Application</AlertDialogTitle>
+			<AlertDialogDescription>
+				Are you sure you want to create a new 1003 application? This will start a fresh application form.
+			</AlertDialogDescription>
+		</AlertDialogHeader>
+		<AlertDialogFooter>
+			<AlertDialogCancel onclick={() => { showCreateDialog = false; }}>
+				Cancel
+			</AlertDialogCancel>
+			<AlertDialogAction onclick={createNewApplication}>
+				Create Application
+			</AlertDialogAction>
+		</AlertDialogFooter>
+	</AlertDialogContent>
+</AlertDialog>

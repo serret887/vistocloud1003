@@ -61,9 +61,13 @@ function createApplicationStore() {
     
     // Firebase operations
     createApplication: async () => {
-      const state = getStore();
+      // Reset store to initial state before creating new application
+      // This ensures we start with clean data for the new application
+      const initialState = createInitialState();
+      set(initialState);
+      
       try {
-        const appId = await createApplicationInFirebase(state);
+        const appId = await createApplicationInFirebase(initialState);
         update(s => ({ ...s, currentApplicationId: appId }));
         debug.log('✅ Application created:', appId);
         return appId;

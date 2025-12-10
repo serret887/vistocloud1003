@@ -7,6 +7,16 @@
 	import { _ } from 'svelte-i18n';
 	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
 	import { cn } from '$lib/utils';
+	import {
+		AlertDialog,
+		AlertDialogAction,
+		AlertDialogCancel,
+		AlertDialogContent,
+		AlertDialogDescription,
+		AlertDialogFooter,
+		AlertDialogHeader,
+		AlertDialogTitle
+	} from '$lib/components/ui';
 
 	const navItems = [
 		{ label: 'Home', href: '/', icon: Home },
@@ -15,7 +25,14 @@
 		{ label: 'AI Copilot', href: '/ai/app', icon: MessageCircle }
 	];
 
+	let showCreateDialog = $state(false);
+
+	const openCreateDialog = () => {
+		showCreateDialog = true;
+	};
+
 	const createNewApplication = async () => {
+		showCreateDialog = false;
 		try {
 			const id = await applicationStore.createApplication();
 			toast.success($_('toast.applicationCreated'), { description: $_('toast.applicationCreatedDescription') });
@@ -50,7 +67,7 @@
 			{#each navItems as item}
 				{#if item.action}
 					<button
-						onclick={createNewApplication}
+						onclick={openCreateDialog}
 						class="px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 text-muted-foreground hover:text-foreground hover:bg-muted"
 					>
 						<svelte:component this={item.icon} class="h-4 w-4" />
@@ -77,5 +94,25 @@
 			<LanguageSelector />
 		</div>
 	</nav>
+
+	<!-- Create Application Confirmation Dialog -->
+	<AlertDialog bind:open={showCreateDialog}>
+		<AlertDialogContent>
+			<AlertDialogHeader>
+				<AlertDialogTitle>Create New 1003 Application</AlertDialogTitle>
+				<AlertDialogDescription>
+					Are you sure you want to create a new 1003 application? This will start a fresh application form.
+				</AlertDialogDescription>
+			</AlertDialogHeader>
+			<AlertDialogFooter>
+				<AlertDialogCancel onclick={() => { showCreateDialog = false; }}>
+					Cancel
+				</AlertDialogCancel>
+				<AlertDialogAction onclick={createNewApplication}>
+					Create Application
+				</AlertDialogAction>
+			</AlertDialogFooter>
+		</AlertDialogContent>
+	</AlertDialog>
 </header>
 
