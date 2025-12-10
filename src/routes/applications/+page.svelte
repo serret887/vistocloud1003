@@ -92,8 +92,8 @@
 			// Remove from local state
 			applications = applications.filter(app => app.id !== applicationToDelete!.id);
 			
-			toast.success('Application deleted', {
-				description: 'The application has been permanently deleted.'
+			toast.success($_('toast.applicationDeleted'), {
+				description: $_('toast.applicationDeletedDescription')
 			});
 			
 			debug.log('✅ Application deleted:', applicationToDelete.id);
@@ -103,8 +103,8 @@
 			applicationToDelete = null;
 		} catch (error) {
 			console.error('Failed to delete application:', error);
-			toast.error('Failed to delete application', {
-				description: error instanceof Error ? error.message : 'An error occurred while deleting the application.'
+			toast.error($_('toast.applicationDeleteFailed'), {
+				description: error instanceof Error ? error.message : $_('toast.applicationDeleteFailedDescription')
 			});
 		}
 	}
@@ -218,7 +218,7 @@
 														e.stopPropagation();
 														openDeleteDialog(app.id, getClientName(app));
 													}}
-													title="Delete application"
+													title={$_('applications.deleteTitle')}
 												>
 													<Trash2 class="h-4 w-4" />
 												</Button>
@@ -238,26 +238,26 @@
 	<AlertDialog bind:open={deleteDialogOpen}>
 		<AlertDialogContent>
 			<AlertDialogHeader>
-				<AlertDialogTitle>Delete Application</AlertDialogTitle>
+				<AlertDialogTitle>{$_('dialogs.deleteApplication.title')}</AlertDialogTitle>
 				<AlertDialogDescription>
-					Are you sure you want to delete this application? This action cannot be undone.
+					{$_('dialogs.deleteApplication.description')}
 					{#if applicationToDelete}
 						<div class="mt-4 space-y-1 text-sm">
-							<p><strong>Client:</strong> {applicationToDelete.name}</p>
-							<p><strong>Application ID:</strong> <code class="bg-muted px-1.5 py-0.5 rounded text-xs">{applicationToDelete.id.slice(0, 12)}...</code></p>
+							<p><strong>{$_('dialogs.deleteApplication.client')}:</strong> {applicationToDelete.name}</p>
+							<p><strong>{$_('dialogs.deleteApplication.applicationId')}:</strong> <code class="bg-muted px-1.5 py-0.5 rounded text-xs">{applicationToDelete.id.slice(0, 12)}...</code></p>
 						</div>
 					{/if}
 				</AlertDialogDescription>
 			</AlertDialogHeader>
 			<AlertDialogFooter>
 				<AlertDialogCancel onclick={() => { applicationToDelete = null; }}>
-					Cancel
+					{$_('dialogs.deleteApplication.cancel')}
 				</AlertDialogCancel>
 				<AlertDialogAction
 					class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 					onclick={confirmDelete}
 				>
-					Delete
+					{$_('dialogs.deleteApplication.confirm')}
 				</AlertDialogAction>
 			</AlertDialogFooter>
 		</AlertDialogContent>

@@ -34,104 +34,104 @@
 		}
 	};
 
-	const stats = [
-		{ label: 'Programs covered', value: '6+' },
-		{ label: 'Applications generated', value: 'MISMO 3.4' },
-		{ label: 'Org overlays modeled', value: '100%' }
-	];
+	const stats = $derived([
+		{ label: $_('home.stats.programsCovered'), value: '6+' },
+		{ label: $_('home.stats.applicationsGenerated'), value: 'MISMO 3.4' },
+		{ label: $_('home.stats.orgOverlaysModeled'), value: '100%' }
+	]);
 
-	const products = [
+	const products = $derived([
 		{
-			title: '1003 Application Generator',
-			subtitle: 'Streamline borrower intake',
-			description: 'Collect, validate, and export mortgage applications in minutes—not hours. Voice dictation, auto-save, and MISMO 3.4 export built in.',
+			title: $_('home.products.applicationGenerator.title'),
+			subtitle: $_('home.products.applicationGenerator.subtitle'),
+			description: $_('home.products.applicationGenerator.description'),
 			features: [
-				'Multi-step guided workflow for client info, employment, income, assets, and documents',
-				'AI-powered voice dictation to capture borrower scenarios quickly',
-				'Real-time validation and auto-save—never lose progress',
-				'Export to MISMO 3.4 XML for seamless LOS integration',
-				'Multi-client support for borrowers and co-borrowers'
+				$_('home.products.applicationGenerator.features.workflow'),
+				$_('home.products.applicationGenerator.features.dictation'),
+				$_('home.products.applicationGenerator.features.validation'),
+				$_('home.products.applicationGenerator.features.export'),
+				$_('home.products.applicationGenerator.features.multiClient')
 			],
-			cta: 'Start a 1003',
+			cta: $_('home.products.applicationGenerator.cta'),
 			ctaAction: openCreateDialog,
 			icon: '📋'
 		},
 		{
-			title: 'AI Guideline Copilot',
-			subtitle: 'Answer overlay questions instantly',
-			description: 'Get cited, overlay-aware answers to underwriting questions in seconds. Compare programs side-by-side with your org\'s internal policies respected.',
+			title: $_('home.products.aiCopilot.title'),
+			subtitle: $_('home.products.aiCopilot.subtitle'),
+			description: $_('home.products.aiCopilot.description'),
 			features: [
-				'Overlay-aware responses that blend agency guidelines with your internal rules',
-				'Cross-program comparisons: FHA, VA, USDA, Conventional, and Non-QM in one view',
-				'Source-linked citations for every answer—click through to handbooks instantly',
-				'Conversation history with search, favorites, and excerpts',
-				'Vertex AI-powered intelligence that learns your org\'s most common questions'
+				$_('home.products.aiCopilot.features.overlayAware'),
+				$_('home.products.aiCopilot.features.comparisons'),
+				$_('home.products.aiCopilot.features.citations'),
+				$_('home.products.aiCopilot.features.history'),
+				$_('home.products.aiCopilot.features.intelligence')
 			],
-			cta: 'Open AI Copilot',
+			cta: $_('home.products.aiCopilot.cta'),
 			ctaAction: () => goto('/ai/app'),
 			icon: '🤖'
 		}
-	];
+	]);
 
-	const benefits = [
+	const benefits = $derived([
 		{
-			title: 'Save hours every week',
-			body: 'Stop switching between PDFs, spreadsheets, and LOS systems. Everything you need lives in one workspace that auto-saves and validates as you go.'
+			title: $_('home.benefits.saveTime.title'),
+			body: $_('home.benefits.saveTime.body')
 		},
 		{
-			title: 'Reduce errors by 60%+',
-			body: 'Real-time validation catches missing fields and inconsistencies before submission. MISMO compliance built-in means fewer rejections from lenders.'
+			title: $_('home.benefits.reduceErrors.title'),
+			body: $_('home.benefits.reduceErrors.body')
 		},
 		{
-			title: 'Answer questions in seconds',
-			body: 'No more digging through 500-page handbooks. Ask natural-language questions and get cited answers that respect your overlays automatically.'
+			title: $_('home.benefits.answerQuestions.title'),
+			body: $_('home.benefits.answerQuestions.body')
 		},
 		{
-			title: 'Scale without hiring',
-			body: 'Handle more applications and questions with the same team. Voice dictation and AI copilot let processors and underwriters work faster.'
+			title: $_('home.benefits.scale.title'),
+			body: $_('home.benefits.scale.body')
 		}
-	];
+	]);
 
-	const howItWorks = [
+	const howItWorks = $derived([
 		{
-			title: 'Collect borrower data',
-			body: 'Use our guided 1003 workflow or voice dictation to capture client information, employment history, income, assets, and required documents. Everything auto-saves to Firebase.',
-			product: '1003 Generator'
+			title: $_('home.howItWorks.step1.title'),
+			body: $_('home.howItWorks.step1.body'),
+			product: $_('home.howItWorks.step1.product')
 		},
 		{
-			title: 'Ask overlay questions',
-			body: 'Type natural-language questions about guidelines, scenarios, or program comparisons. Our AI copilot surfaces cited answers that blend agency rules with your org\'s overlays.',
-			product: 'AI Copilot'
+			title: $_('home.howItWorks.step2.title'),
+			body: $_('home.howItWorks.step2.body'),
+			product: $_('home.howItWorks.step2.product')
 		},
 		{
-			title: 'Export and submit',
-			body: 'Review your application, validate against MISMO requirements, and export to XML. Share cited answers from the copilot with processors and compliance teams.',
-			product: 'Both'
+			title: $_('home.howItWorks.step3.title'),
+			body: $_('home.howItWorks.step3.body'),
+			product: $_('home.howItWorks.step3.product')
 		}
-	];
+	]);
 
-	const testimonials = [
+	const testimonials = $derived([
 		{
-			quote: 'We cut application processing time from 2 hours to 20 minutes. The voice dictation feature alone saves our processors 30 minutes per file.',
-			author: 'Operations Manager',
-			org: 'Regional Mortgage Broker'
+			quote: $_('home.testimonials.testimonial1.quote'),
+			author: $_('home.testimonials.testimonial1.author'),
+			org: $_('home.testimonials.testimonial1.org')
 		},
 		{
-			quote: 'MortgageGuidesAI helped our underwriting desk reduce clarification emails by 42%. The compare view is incredibly helpful when we run "what if" scenarios.',
-			author: 'Director of Credit Policy',
-			org: 'Regional Lender'
+			quote: $_('home.testimonials.testimonial2.quote'),
+			author: $_('home.testimonials.testimonial2.author'),
+			org: $_('home.testimonials.testimonial2.org')
 		},
 		{
-			quote: 'Overlay management used to live in PDFs on a shared drive. Now every answer respects our overlays automatically—huge win for compliance.',
-			author: 'VP of Operations',
-			org: 'Nationwide Broker Network'
+			quote: $_('home.testimonials.testimonial3.quote'),
+			author: $_('home.testimonials.testimonial3.author'),
+			org: $_('home.testimonials.testimonial3.org')
 		},
 		{
-			quote: 'MISMO export works flawlessly with our LOS. No more manual data entry or formatting errors. Our submission rate improved immediately.',
-			author: 'Loan Officer',
-			org: 'Independent Mortgage Company'
+			quote: $_('home.testimonials.testimonial4.quote'),
+			author: $_('home.testimonials.testimonial4.author'),
+			org: $_('home.testimonials.testimonial4.org')
 		}
-	];
+	]);
 </script>
 
 <div class="min-h-screen bg-background">
@@ -143,20 +143,19 @@
 		</div>
 		<div class="relative z-10 mx-auto max-w-6xl px-6">
 			<div class="text-center space-y-8 mb-16">
-				<Badge variant="outline" class="bg-primary/10 text-primary shadow-sm">Purpose-built for mortgage professionals</Badge>
+				<Badge variant="outline" class="bg-primary/10 text-primary shadow-sm">{$_('home.hero.badge')}</Badge>
 				<h1 class="text-5xl md:text-6xl font-bold leading-tight text-foreground">
-					Build 1003s faster.<br />
-					Answer overlays instantly.
+					{$_('home.hero.title').split('\n').map(line => line.trim()).join(' ')}
 				</h1>
 				<p class="text-xl text-muted-foreground max-w-3xl mx-auto">
-					The only platform that combines streamlined mortgage application generation with AI-powered guideline intelligence. Stop switching between tools—everything you need lives in one workspace.
+					{$_('home.hero.subtitle')}
 				</p>
 				<div class="flex flex-wrap justify-center gap-4">
 					<Button size="lg" class="px-8 text-base" onclick={openCreateDialog}>
-						Start a 1003 Application
+						{$_('home.hero.start1003')} Application
 					</Button>
 					<Button size="lg" variant="outline" class="px-8 text-base" onclick={() => goto('/ai/app')}>
-						Open AI Copilot
+						{$_('home.hero.openAICopilot')}
 					</Button>
 				</div>
 			</div>
@@ -171,12 +170,12 @@
 			</div>
 
 			<div class="flex flex-wrap items-center justify-center gap-8 text-sm text-muted-foreground pt-8 border-t border-border">
-				<span class="font-medium">Trusted by modern lenders and broker networks</span>
+				<span class="font-medium">{$_('home.trustedBy')}</span>
 				<div class="flex flex-wrap gap-4 text-xs uppercase tracking-wider text-muted-foreground/80">
-					<span>Arcadia Lending</span>
-					<span>BlueMesa Mortgage</span>
-					<span>Summit Ops</span>
-					<span>HomeFirst Retail</span>
+					<span>{$_('home.companies.arcadia')}</span>
+					<span>{$_('home.companies.blueMesa')}</span>
+					<span>{$_('home.companies.summitOps')}</span>
+					<span>{$_('home.companies.homeFirst')}</span>
 				</div>
 			</div>
 		</div>
@@ -186,10 +185,10 @@
 	<section class="bg-background py-24">
 		<div class="mx-auto max-w-7xl px-6">
 			<div class="text-center space-y-4 mb-16">
-				<Badge variant="outline" class="bg-secondary text-secondary-foreground">Two powerful tools, one platform</Badge>
-				<h2 class="text-4xl font-bold text-foreground">Everything mortgage teams need to move faster</h2>
+				<Badge variant="outline" class="bg-secondary text-secondary-foreground">{$_('home.products.badge')}</Badge>
+				<h2 class="text-4xl font-bold text-foreground">{$_('home.products.title')}</h2>
 				<p class="text-lg text-muted-foreground max-w-2xl mx-auto">
-					Whether you're collecting borrower data or answering underwriting questions, we've built the tools that save hours every week.
+					{$_('home.products.subtitle')}
 				</p>
 			</div>
 
@@ -229,10 +228,10 @@
 	<section class="bg-gradient-to-b from-accent/40 via-background to-background py-24">
 		<div class="mx-auto max-w-6xl px-6">
 			<div class="text-center space-y-4 mb-16">
-				<Badge variant="outline" class="bg-secondary text-secondary-foreground">Why teams choose VistoCloud</Badge>
-				<h2 class="text-4xl font-bold text-foreground">Work smarter, not harder</h2>
+				<Badge variant="outline" class="bg-secondary text-secondary-foreground">{$_('home.benefits.badge')}</Badge>
+				<h2 class="text-4xl font-bold text-foreground">{$_('home.benefits.title')}</h2>
 				<p class="text-lg text-muted-foreground max-w-2xl mx-auto">
-					Mortgage professionals spend too much time on manual tasks. We built VistoCloud to give that time back.
+					{$_('home.benefits.subtitle')}
 				</p>
 			</div>
 
@@ -253,8 +252,8 @@
 	<section class="bg-background py-24">
 		<div class="mx-auto max-w-6xl px-6">
 			<div class="text-center space-y-4 mb-16">
-				<Badge variant="outline" class="bg-secondary text-secondary-foreground">Simple workflow</Badge>
-				<h2 class="text-4xl font-bold text-foreground">From borrower intake to submission in three steps</h2>
+				<Badge variant="outline" class="bg-secondary text-secondary-foreground">{$_('home.howItWorks.badge')}</Badge>
+				<h2 class="text-4xl font-bold text-foreground">{$_('home.howItWorks.title')}</h2>
 			</div>
 
 			<div class="grid gap-8 md:grid-cols-3">
@@ -283,9 +282,9 @@
 	<section class="bg-gradient-to-b from-background to-accent/20 py-24">
 		<div class="mx-auto max-w-6xl px-6">
 			<div class="text-center space-y-8 mb-12">
-				<h2 class="text-3xl font-semibold text-foreground">Built for overlay-heavy orgs and cross-program scenarios</h2>
+				<h2 class="text-3xl font-semibold text-foreground">{$_('home.aiNetwork.title')}</h2>
 				<p class="text-muted-foreground max-w-3xl mx-auto">
-					MortgageGuidesAI fuses agency guidelines with your overlays, then calls Vertex AI to deliver contextual answers across every product line.
+					{$_('home.aiNetwork.subtitle')}
 				</p>
 			</div>
 			
@@ -302,24 +301,24 @@
 				<ul class="space-y-3 text-sm text-muted-foreground">
 					<li class="flex gap-3">
 						<span class="mt-1 h-2 w-2 rounded-full bg-primary"></span>
-						<span>Compare FHA, VA, USDA, Conventional, and Non-QM eligibility in a single response.</span>
+						<span>{$_('home.aiNetwork.features.compare')}</span>
 					</li>
 					<li class="flex gap-3">
 						<span class="mt-1 h-2 w-2 rounded-full bg-primary"></span>
-						<span>Quickly toggle overlays on/off to see the delta between investor guidance and your internal policy.</span>
+						<span>{$_('home.aiNetwork.features.toggle')}</span>
 					</li>
 					<li class="flex gap-3">
 						<span class="mt-1 h-2 w-2 rounded-full bg-primary"></span>
-						<span>Share cited answers with processors and compliance directly from the portal.</span>
+						<span>{$_('home.aiNetwork.features.share')}</span>
 					</li>
 				</ul>
 				<div class="flex justify-center gap-4">
 					<Button variant="outline" class="px-6" onclick={() => goto('/ai/app')}>
-						See AI Copilot in action
+						{$_('home.aiNetwork.cta')}
 					</Button>
-				<Button class="px-6" onclick={openCreateDialog}>
-					Start a 1003 Application
-				</Button>
+					<Button class="px-6" onclick={openCreateDialog}>
+						{$_('home.hero.start1003')} Application
+					</Button>
 				</div>
 			</div>
 		</div>
@@ -329,10 +328,10 @@
 	<section class="bg-secondary/40 py-24">
 		<div class="mx-auto max-w-6xl space-y-10 px-6">
 			<div class="text-center space-y-4">
-				<Badge variant="outline" class="bg-secondary text-secondary-foreground">Real results</Badge>
-				<h2 class="text-4xl font-bold text-foreground">Teams feel the impact immediately</h2>
+				<Badge variant="outline" class="bg-secondary text-secondary-foreground">{$_('home.testimonials.badge')}</Badge>
+				<h2 class="text-4xl font-bold text-foreground">{$_('home.testimonials.title')}</h2>
 				<p class="text-lg text-muted-foreground max-w-2xl mx-auto">
-					Mortgage professionals across the country are using VistoCloud to work faster and reduce errors.
+					{$_('home.testimonials.subtitle')}
 				</p>
 			</div>
 			<div class="grid gap-6 md:grid-cols-2">
@@ -354,21 +353,21 @@
 	<!-- Final CTA Section -->
 	<section class="bg-background py-20">
 		<div class="mx-auto flex max-w-4xl flex-col items-center gap-6 px-6 text-center">
-			<Badge variant="outline" class="bg-primary/10 text-primary">Ready to get started?</Badge>
-			<h2 class="text-4xl font-bold text-foreground">Launch in days, not months</h2>
+			<Badge variant="outline" class="bg-primary/10 text-primary">{$_('home.finalCta.badge')}</Badge>
+			<h2 class="text-4xl font-bold text-foreground">{$_('home.finalCta.title')}</h2>
 			<p class="text-lg text-muted-foreground max-w-2xl">
-				Connect your Firebase project, drop in org overlays, and start generating 1003s and answering overlay questions today. No lengthy onboarding required.
+				{$_('home.finalCta.subtitle')}
 			</p>
 			<div class="flex flex-wrap justify-center gap-4">
 				<Button size="lg" class="px-8 text-base" onclick={openCreateDialog}>
-					Start a 1003 Application
+					{$_('home.finalCta.start1003')}
 				</Button>
 				<Button size="lg" variant="outline" class="px-8 text-base" onclick={() => goto('/ai/app')}>
-					Try AI Copilot
+					{$_('home.finalCta.tryAICopilot')}
 				</Button>
 			</div>
 			<p class="text-sm text-muted-foreground mt-4">
-				Questions? <a href="mailto:hello@vistocloud.com" class="text-primary hover:underline">Talk to our team</a>
+				{$_('home.finalCta.questions')} <a href="mailto:hello@vistocloud.com" class="text-primary hover:underline">{$_('home.finalCta.talkToTeam')}</a>
 			</p>
 		</div>
 	</section>
@@ -378,17 +377,17 @@
 <AlertDialog bind:open={showCreateDialog}>
 	<AlertDialogContent>
 		<AlertDialogHeader>
-			<AlertDialogTitle>Create New 1003 Application</AlertDialogTitle>
+			<AlertDialogTitle>{$_('dialogs.createApplication.title')}</AlertDialogTitle>
 			<AlertDialogDescription>
-				Are you sure you want to create a new 1003 application? This will start a fresh application form.
+				{$_('dialogs.createApplication.description')}
 			</AlertDialogDescription>
 		</AlertDialogHeader>
 		<AlertDialogFooter>
 			<AlertDialogCancel onclick={() => { showCreateDialog = false; }}>
-				Cancel
+				{$_('dialogs.createApplication.cancel')}
 			</AlertDialogCancel>
 			<AlertDialogAction onclick={createNewApplication}>
-				Create Application
+				{$_('dialogs.createApplication.confirm')}
 			</AlertDialogAction>
 		</AlertDialogFooter>
 	</AlertDialogContent>

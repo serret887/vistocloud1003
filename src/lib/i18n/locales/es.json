@@ -47,6 +47,140 @@
         "title": "Sincronización en Tiempo Real",
         "description": "Guardado automático con backend Firebase para persistencia de datos"
       }
+    },
+    "hero": {
+      "badge": "Hecho para profesionales hipotecarios",
+      "title": "Genere 1003 más rápido.\nResuelva overlays al instante.",
+      "subtitle": "Agilice la captura de prestatarios con formularios inteligentes y obtenga respuestas inmediatas con fuentes citadas a preguntas complejas de suscripción, todo en una sola plataforma.",
+      "start1003": "Comenzar Solicitud 1003",
+      "openAICopilot": "Abrir Copiloto IA"
+    },
+    "stats": {
+      "programsCovered": "Programas disponibles",
+      "applicationsGenerated": "Solicitudes generadas",
+      "orgOverlaysModeled": "Overlays organizacionales configurados"
+    },
+    "trustedBy": "Confiado por prestamistas y redes de corredores líderes",
+    "companies": {
+      "arcadia": "Arcadia Lending",
+      "blueMesa": "BlueMesa Mortgage",
+      "summitOps": "Summit Ops",
+      "homeFirst": "HomeFirst Retail"
+    },
+    "products": {
+      "badge": "Dos herramientas poderosas, una sola plataforma",
+      "title": "Todo lo que su equipo hipotecario necesita para trabajar más rápido",
+      "subtitle": "Ya sea que esté capturando datos de prestatarios o resolviendo dudas de suscripción, hemos creado las herramientas que le ahorrarán horas cada semana.",
+      "applicationGenerator": {
+        "title": "Generador de Solicitudes 1003",
+        "subtitle": "Agilice la captura de prestatarios",
+        "description": "Capture, valide y exporte solicitudes de hipoteca en minutos, no horas. Incluye dictado por voz, guardado automático y exportación a MISMO 3.4.",
+        "features": {
+          "workflow": "Proceso guiado paso a paso para información del cliente, empleo, ingresos, activos y documentos",
+          "dictation": "Dictado por voz con IA para capturar información del prestatario rápidamente",
+          "validation": "Validación en tiempo real y guardado automático: nunca pierda su trabajo",
+          "export": "Exporte a MISMO 3.4 XML para integración directa con su sistema LOS",
+          "multiClient": "Soporte para prestatarios principales y co-prestatarios"
+        },
+        "cta": "Comenzar Solicitud 1003"
+      },
+      "aiCopilot": {
+        "title": "Copiloto de Guías IA",
+        "subtitle": "Resuelva dudas de overlay al instante",
+        "description": "Obtenga respuestas con fuentes citadas y respeto a sus overlays en segundos. Compare programas lado a lado respetando las políticas internas de su organización.",
+        "features": {
+          "overlayAware": "Respuestas que combinan guías de agencias con las reglas internas de su organización",
+          "comparisons": "Compare elegibilidad entre FHA, VA, USDA, Convencional y Non-QM en una sola vista",
+          "citations": "Cada respuesta incluye fuentes: acceda directamente a los manuales con un clic",
+          "history": "Historial de conversaciones con búsqueda, favoritos y resúmenes",
+          "intelligence": "IA potenciada por Vertex AI que aprende las preguntas más frecuentes de su organización"
+        },
+        "cta": "Abrir Copiloto IA"
+      }
+    },
+    "benefits": {
+      "badge": "Por qué los equipos eligen VistoCloud",
+      "title": "Trabaje más inteligente, no más duro",
+      "subtitle": "Los profesionales hipotecarios invierten demasiado tiempo en tareas manuales. Creamos VistoCloud para recuperar ese tiempo.",
+      "saveTime": {
+        "title": "Ahorre horas cada semana",
+        "body": "Olvídese de cambiar entre PDFs, hojas de cálculo y sistemas LOS. Todo lo que necesita está en un solo lugar, con guardado y validación automática mientras trabaja."
+      },
+      "reduceErrors": {
+        "title": "Reduzca errores más del 60%",
+        "body": "La validación en tiempo real detecta campos faltantes e inconsistencias antes del envío. El cumplimiento MISMO integrado reduce significativamente los rechazos de prestamistas."
+      },
+      "answerQuestions": {
+        "title": "Resuelva dudas en segundos",
+        "body": "No más buscar en manuales de 500 páginas. Haga preguntas en lenguaje natural y obtenga respuestas con fuentes citadas que respetan automáticamente sus overlays organizacionales."
+      },
+      "scale": {
+        "title": "Escale sin aumentar personal",
+        "body": "Procese más solicitudes y resuelva más dudas con el mismo equipo. El dictado por voz y el copiloto IA permiten que procesadores y suscriptores trabajen con mayor eficiencia."
+      }
+    },
+    "howItWorks": {
+      "badge": "Proceso simple",
+      "title": "Desde la captura del prestatario hasta el envío en tres pasos",
+      "step1": {
+        "title": "Capture los datos del prestatario",
+        "body": "Utilice nuestro proceso 1003 guiado o el dictado por voz para capturar información del cliente, historial laboral, ingresos, activos y documentos requeridos. Todo se guarda automáticamente.",
+        "product": "Generador 1003"
+      },
+      "step2": {
+        "title": "Resuelva dudas de overlay",
+        "body": "Escriba preguntas en lenguaje natural sobre guías, escenarios o comparaciones entre programas. Nuestro copiloto IA proporciona respuestas con fuentes citadas que combinan reglas de agencias con los overlays de su organización.",
+        "product": "Copiloto IA"
+      },
+      "step3": {
+        "title": "Exporte y envíe",
+        "body": "Revise su solicitud, valide contra los requisitos MISMO y exporte a XML. Comparta las respuestas del copiloto con procesadores y equipos de cumplimiento.",
+        "product": "Ambos"
+      }
+    },
+    "testimonials": {
+      "badge": "Resultados comprobados",
+      "title": "Los equipos ven resultados desde el primer día",
+      "subtitle": "Profesionales hipotecarios en todo el país utilizan VistoCloud para trabajar más rápido y reducir errores.",
+      "testimonial1": {
+        "quote": "Redujimos el tiempo de procesamiento de solicitudes de 2 horas a 20 minutos. Solo la función de dictado por voz ahorra a nuestros procesadores 30 minutos por archivo.",
+        "author": "Gerente de Operaciones",
+        "org": "Corredor Hipotecario Regional"
+      },
+      "testimonial2": {
+        "quote": "El Copiloto IA ayudó a nuestro escritorio de suscripción a reducir los correos de aclaración en un 42%. La vista de comparación es increíblemente útil cuando analizamos escenarios \"qué pasaría si\".",
+        "author": "Director de Política Crediticia",
+        "org": "Prestamista Regional"
+      },
+      "testimonial3": {
+        "quote": "La gestión de overlays antes estaba en PDFs en una unidad compartida. Ahora cada respuesta respeta nuestros overlays automáticamente: un gran avance para cumplimiento.",
+        "author": "VP de Operaciones",
+        "org": "Red de Corredores Nacional"
+      },
+      "testimonial4": {
+        "quote": "La exportación MISMO funciona perfectamente con nuestro LOS. Eliminamos la entrada manual de datos y los errores de formato. Nuestra tasa de aceptación mejoró de inmediato.",
+        "author": "Oficial de Préstamos",
+        "org": "Compañía Hipotecaria Independiente"
+      }
+    },
+    "aiNetwork": {
+      "title": "Diseñado para organizaciones con overlays complejos y escenarios multi-programa",
+      "subtitle": "Nuestro Copiloto IA combina las guías de agencias con sus overlays organizacionales, utilizando Vertex AI para entregar respuestas contextuales precisas en cada línea de productos.",
+      "features": {
+        "compare": "Compare elegibilidad entre FHA, VA, USDA, Convencional y Non-QM en una sola respuesta.",
+        "toggle": "Active o desactive overlays rápidamente para ver la diferencia entre la guía del inversionista y su política interna.",
+        "share": "Comparta respuestas con fuentes citadas con procesadores y equipos de cumplimiento directamente desde el portal."
+      },
+      "cta": "Ver Copiloto IA en acción"
+    },
+    "finalCta": {
+      "badge": "¿Listo para comenzar?",
+      "title": "Implementación en días, no en meses",
+      "subtitle": "Conecte su proyecto Firebase, configure sus overlays organizacionales y comience a generar solicitudes 1003 y resolver dudas de overlay hoy mismo. Sin procesos de incorporación largos.",
+      "start1003": "Comenzar Solicitud 1003",
+      "tryAICopilot": "Probar Copiloto IA",
+      "questions": "¿Tiene preguntas?",
+      "talkToTeam": "Hable con nuestro equipo"
     }
   },
   "applications": {
@@ -417,6 +551,58 @@
     "selector": "Idioma",
     "english": "English",
     "spanish": "Español"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "applications": "Solicitudes",
+    "new1003": "Nueva 1003",
+    "aiCopilot": "Copiloto IA"
+  },
+  "dialogs": {
+    "createApplication": {
+      "title": "Crear Nueva Solicitud 1003",
+      "description": "¿Está seguro de que desea crear una nueva solicitud 1003? Esto iniciará un nuevo formulario de solicitud.",
+      "confirm": "Crear Solicitud",
+      "cancel": "Cancelar"
+    },
+    "deleteApplication": {
+      "title": "Eliminar Solicitud",
+      "description": "¿Está seguro de que desea eliminar esta solicitud? Esta acción no se puede deshacer.",
+      "client": "Cliente",
+      "applicationId": "ID de Solicitud",
+      "confirm": "Eliminar",
+      "cancel": "Cancelar"
+    }
+  },
+  "toast": {
+    "applicationCreated": "Solicitud creada exitosamente",
+    "applicationCreatedDescription": "Ahora puede comenzar a completar el formulario de solicitud.",
+    "applicationCreateFailed": "Error al crear la solicitud",
+    "applicationCreateFailedDescription": "Por favor, intente nuevamente.",
+    "recordingError": "Error de grabación",
+    "applicationDeleted": "Solicitud eliminada",
+    "applicationDeletedDescription": "La solicitud ha sido eliminada permanentemente.",
+    "applicationDeleteFailed": "Error al eliminar la solicitud",
+    "applicationDeleteFailedDescription": "Ocurrió un error al eliminar la solicitud."
+  },
+  "applications": {
+    "title": "Solicitudes",
+    "subtitle": "Ver y gestionar todas las solicitudes de hipoteca",
+    "newApplication": "Nueva Solicitud",
+    "createApplication": "Crear Solicitud",
+    "loading": "Cargando solicitudes...",
+    "noApplications": "No se Encontraron Solicitudes",
+    "noApplicationsDescription": "Cree su primera solicitud para comenzar",
+    "allApplications": "Todas las Solicitudes",
+    "allApplicationsDescription": "Haga clic en una solicitud para ver o editar",
+    "applicationId": "ID de Solicitud",
+    "clientName": "Nombre del Cliente",
+    "currentStep": "Paso Actual",
+    "lastUpdated": "Última Actualización",
+    "actions": "Acciones",
+    "unnamedApplication": "Solicitud Sin Nombre",
+    "failedToLoad": "Error al cargar las solicitudes",
+    "deleteTitle": "Eliminar solicitud"
   }
 }
 

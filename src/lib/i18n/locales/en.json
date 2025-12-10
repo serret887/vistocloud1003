@@ -31,48 +31,16 @@
     "tagline": "Streamlined Mortgage Processing",
     "subtitle": "Modern mortgage application processing platform. Collect, validate, and process applications with AI-powered assistance and real-time collaboration."
   },
-  "home": {
-    "newApplication": "New Application",
-    "viewApplications": "View Applications",
-    "features": {
-      "smartForms": {
-        "title": "Smart Forms",
-        "description": "Intelligent form validation and auto-completion powered by AI"
-      },
-      "multiClient": {
-        "title": "Multi-Client Support",
-        "description": "Handle primary borrowers and co-borrowers seamlessly"
-      },
-      "realtime": {
-        "title": "Real-time Sync",
-        "description": "Automatic saving with Firebase backend for data persistence"
-      }
-    }
-  },
-  "applications": {
-    "title": "Applications",
-    "subtitle": "View and manage all mortgage applications",
-    "newApplication": "New Application",
-    "createApplication": "Create Application",
-    "loading": "Loading applications...",
-    "noApplications": "No Applications Found",
-    "noApplicationsDescription": "Create your first application to get started",
-    "allApplications": "All Applications",
-    "allApplicationsDescription": "Click on an application to view or edit",
-    "applicationId": "Application ID",
-    "clientName": "Client Name",
-    "currentStep": "Current Step",
-    "lastUpdated": "Last Updated",
-    "actions": "Actions",
-    "unnamedApplication": "Unnamed Application",
-    "failedToLoad": "Failed to load applications"
-  },
   "toast": {
     "applicationCreated": "Application created successfully",
     "applicationCreatedDescription": "You can now start filling out the application form.",
     "applicationCreateFailed": "Failed to create application",
     "applicationCreateFailedDescription": "Please try again.",
-    "recordingError": "Recording error"
+    "recordingError": "Recording error",
+    "applicationDeleted": "Application deleted",
+    "applicationDeletedDescription": "The application has been permanently deleted.",
+    "applicationDeleteFailed": "Failed to delete application",
+    "applicationDeleteFailedDescription": "An error occurred while deleting the application."
   },
   "steps": {
     "clientInfo": {
@@ -417,6 +385,199 @@
     "selector": "Language",
     "english": "English",
     "spanish": "Español"
+  },
+  "navigation": {
+    "home": "Home",
+    "applications": "Applications",
+    "new1003": "New 1003",
+    "aiCopilot": "AI Copilot"
+  },
+  "dialogs": {
+    "createApplication": {
+      "title": "Create New 1003 Application",
+      "description": "Are you sure you want to create a new 1003 application? This will start a fresh application form.",
+      "confirm": "Create Application",
+      "cancel": "Cancel"
+    },
+    "deleteApplication": {
+      "title": "Delete Application",
+      "description": "Are you sure you want to delete this application? This action cannot be undone.",
+      "client": "Client",
+      "applicationId": "Application ID",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    }
+  },
+  "home": {
+    "newApplication": "New Application",
+    "viewApplications": "View Applications",
+    "features": {
+      "smartForms": {
+        "title": "Smart Forms",
+        "description": "Intelligent form validation and auto-completion powered by AI"
+      },
+      "multiClient": {
+        "title": "Multi-Client Support",
+        "description": "Handle primary borrowers and co-borrowers seamlessly"
+      },
+      "realtime": {
+        "title": "Real-time Sync",
+        "description": "Automatic saving with Firebase backend for data persistence"
+      }
+    },
+    "hero": {
+      "badge": "Purpose-built for mortgage professionals",
+      "title": "Build 1003s faster.\nAnswer overlays instantly.",
+      "subtitle": "Streamline borrower intake with AI-powered forms and get instant, cited answers to complex underwriting questions, all in one platform.",
+      "start1003": "Start a 1003",
+      "openAICopilot": "Open AI Copilot"
+    },
+    "stats": {
+      "programsCovered": "Programs covered",
+      "applicationsGenerated": "Applications generated",
+      "orgOverlaysModeled": "Org overlays modeled"
+    },
+    "trustedBy": "Trusted by modern lenders and broker networks",
+    "companies": {
+      "arcadia": "Arcadia Lending",
+      "blueMesa": "BlueMesa Mortgage",
+      "summitOps": "Summit Ops",
+      "homeFirst": "HomeFirst Retail"
+    },
+    "products": {
+      "badge": "Two powerful tools, one platform",
+      "title": "Everything mortgage teams need to move faster",
+      "subtitle": "Whether you're collecting borrower data or answering underwriting questions, we've built the tools that save hours every week.",
+      "applicationGenerator": {
+        "title": "1003 Application Generator",
+        "subtitle": "Streamline borrower intake",
+        "description": "Collect, validate, and export mortgage applications in minutes—not hours. Voice dictation, auto-save, and MISMO 3.4 export built in.",
+        "features": {
+          "workflow": "Multi-step guided workflow for client info, employment, income, assets, and documents",
+          "dictation": "AI-powered voice dictation to capture borrower scenarios quickly",
+          "validation": "Real-time validation and auto-save—never lose progress",
+          "export": "Export to MISMO 3.4 XML for seamless LOS integration",
+          "multiClient": "Multi-client support for borrowers and co-borrowers"
+        },
+        "cta": "Start a 1003"
+      },
+      "aiCopilot": {
+        "title": "AI Guideline Copilot",
+        "subtitle": "Answer overlay questions instantly",
+        "description": "Get cited, overlay-aware answers to underwriting questions in seconds. Compare programs side-by-side with your org's internal policies respected.",
+        "features": {
+          "overlayAware": "Overlay-aware responses that blend agency guidelines with your internal rules",
+          "comparisons": "Cross-program comparisons: FHA, VA, USDA, Conventional, and Non-QM in one view",
+          "citations": "Source-linked citations for every answer—click through to handbooks instantly",
+          "history": "Conversation history with search, favorites, and excerpts",
+          "intelligence": "Vertex AI-powered intelligence that learns your org's most common questions"
+        },
+        "cta": "Open AI Copilot"
+      }
+    },
+    "benefits": {
+      "badge": "Why teams choose VistoCloud",
+      "title": "Work smarter, not harder",
+      "subtitle": "Mortgage professionals spend too much time on manual tasks. We built VistoCloud to give that time back.",
+      "saveTime": {
+        "title": "Save hours every week",
+        "body": "Stop switching between PDFs, spreadsheets, and LOS systems. Everything you need lives in one workspace that auto-saves and validates as you go."
+      },
+      "reduceErrors": {
+        "title": "Reduce errors by 60%+",
+        "body": "Real-time validation catches missing fields and inconsistencies before submission. MISMO compliance built-in means fewer rejections from lenders."
+      },
+      "answerQuestions": {
+        "title": "Answer questions in seconds",
+        "body": "No more digging through 500-page handbooks. Ask natural-language questions and get cited answers that respect your overlays automatically."
+      },
+      "scale": {
+        "title": "Scale without hiring",
+        "body": "Handle more applications and questions with the same team. Voice dictation and AI copilot let processors and underwriters work faster."
+      }
+    },
+    "howItWorks": {
+      "badge": "Simple workflow",
+      "title": "From borrower intake to submission in three steps",
+      "step1": {
+        "title": "Collect borrower data",
+        "body": "Use our guided 1003 workflow or voice dictation to capture client information, employment history, income, assets, and required documents. Everything auto-saves to Firebase.",
+        "product": "1003 Generator"
+      },
+      "step2": {
+        "title": "Ask overlay questions",
+        "body": "Type natural-language questions about guidelines, scenarios, or program comparisons. Our AI copilot surfaces cited answers that blend agency rules with your org's overlays.",
+        "product": "AI Copilot"
+      },
+      "step3": {
+        "title": "Export and submit",
+        "body": "Review your application, validate against MISMO requirements, and export to XML. Share cited answers from the copilot with processors and compliance teams.",
+        "product": "Both"
+      }
+    },
+    "testimonials": {
+      "badge": "Real results",
+      "title": "Teams feel the impact immediately",
+      "subtitle": "Mortgage professionals across the country are using VistoCloud to work faster and reduce errors.",
+      "testimonial1": {
+        "quote": "We cut application processing time from 2 hours to 20 minutes. The voice dictation feature alone saves our processors 30 minutes per file.",
+        "author": "Operations Manager",
+        "org": "Regional Mortgage Broker"
+      },
+      "testimonial2": {
+        "quote": "MortgageGuidesAI helped our underwriting desk reduce clarification emails by 42%. The compare view is incredibly helpful when we run \"what if\" scenarios.",
+        "author": "Director of Credit Policy",
+        "org": "Regional Lender"
+      },
+      "testimonial3": {
+        "quote": "Overlay management used to live in PDFs on a shared drive. Now every answer respects our overlays automatically—huge win for compliance.",
+        "author": "VP of Operations",
+        "org": "Nationwide Broker Network"
+      },
+      "testimonial4": {
+        "quote": "MISMO export works flawlessly with our LOS. No more manual data entry or formatting errors. Our submission rate improved immediately.",
+        "author": "Loan Officer",
+        "org": "Independent Mortgage Company"
+      }
+    },
+    "aiNetwork": {
+      "title": "Built for overlay-heavy orgs and cross-program scenarios",
+      "subtitle": "MortgageGuidesAI fuses agency guidelines with your overlays, then calls Vertex AI to deliver contextual answers across every product line.",
+      "features": {
+        "compare": "Compare FHA, VA, USDA, Conventional, and Non-QM eligibility in a single response.",
+        "toggle": "Quickly toggle overlays on/off to see the delta between investor guidance and your internal policy.",
+        "share": "Share cited answers with processors and compliance directly from the portal."
+      },
+      "cta": "See AI Copilot in action"
+    },
+    "finalCta": {
+      "badge": "Ready to get started?",
+      "title": "Launch in days, not months",
+      "subtitle": "Connect your Firebase project, drop in org overlays, and start generating 1003s and answering overlay questions today. No lengthy onboarding required.",
+      "start1003": "Start a 1003 Application",
+      "tryAICopilot": "Try AI Copilot",
+      "questions": "Questions?",
+      "talkToTeam": "Talk to our team"
+    }
+  },
+  "applications": {
+    "title": "Applications",
+    "subtitle": "View and manage all mortgage applications",
+    "newApplication": "New Application",
+    "createApplication": "Create Application",
+    "loading": "Loading applications...",
+    "noApplications": "No Applications Found",
+    "noApplicationsDescription": "Create your first application to get started",
+    "allApplications": "All Applications",
+    "allApplicationsDescription": "Click on an application to view or edit",
+    "applicationId": "Application ID",
+    "clientName": "Client Name",
+    "currentStep": "Current Step",
+    "lastUpdated": "Last Updated",
+    "actions": "Actions",
+    "unnamedApplication": "Unnamed Application",
+    "failedToLoad": "Failed to load applications",
+    "deleteTitle": "Delete application"
   }
 }
 
