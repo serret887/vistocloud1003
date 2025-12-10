@@ -5,10 +5,9 @@
 	import { cn } from '$lib/utils';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { ChevronRight, Check, Circle, Home, AlertCircle } from 'lucide-svelte';
+	import { Check, AlertCircle } from 'lucide-svelte';
 	import DebugPanel from '$lib/components/DebugPanel.svelte';
 	import { getStepStatus } from '$lib/validation/index';
-	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
 	import { _ } from 'svelte-i18n';
 	
 	let { children } = $props();
@@ -78,28 +77,17 @@
 </script>
 
 <div class="min-h-screen bg-background">
-	<!-- Top Navigation -->
-	<header class="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-		<div class="container mx-auto px-4 h-16 flex items-center justify-between">
-			<div class="flex items-center gap-4">
-				<a href="/" class="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-					<Home class="h-5 w-5" />
-					<span class="font-medium">{$_('app.name')}</span>
-				</a>
-				<ChevronRight class="h-4 w-4 text-muted-foreground" />
-				<span class="font-medium">{$_('applications.title')}</span>
-			</div>
-			
-			<div class="flex items-center gap-4">
-				<LanguageSelector />
-				<div class="text-sm text-muted-foreground">
-					App ID: <code class="bg-muted px-2 py-1 rounded text-xs">{$page.params.appId?.slice(0, 12)}...</code>
-				</div>
+	<!-- Application Info Bar (below main header) -->
+	<div class="border-b bg-card/50 backdrop-blur-sm">
+		<div class="container mx-auto px-4 h-12 flex items-center justify-between">
+			<div class="flex items-center gap-2 text-sm text-muted-foreground">
+				<span class="font-medium">Application ID:</span>
+				<code class="bg-muted px-2 py-1 rounded text-xs">{$page.params.appId?.slice(0, 12)}...</code>
 			</div>
 		</div>
-	</header>
+	</div>
 	
-	<div class="flex h-[calc(100vh-4rem)]">
+	<div class="flex h-[calc(100vh-4rem-3rem)]">
 		<!-- Fixed Sidebar -->
 		<aside class="w-[280px] border-r bg-card/50 backdrop-blur-sm overflow-y-auto shrink-0">
 			<nav class="p-4 space-y-1">

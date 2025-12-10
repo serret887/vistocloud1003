@@ -48,6 +48,20 @@ export { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs';
 // Table
 export * from './table';
 
+// Alert Dialog
+export {
+	AlertDialog,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogOverlay
+} from './alert-dialog';
+
 // Validated Inputs
 export { ValidatedInput, ValidatedSelect, SSNInput, DateInput, NameInput, EmailInput, PhoneInput, MoneyInput } from './validated-input';
 

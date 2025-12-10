@@ -1,19 +1,31 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+	import { collection, getDocs, query, orderBy, limit, doc, deleteDoc } from 'firebase/firestore';
 	import { db } from '$lib/firebase';
 	import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui';
 	import { Button } from '$lib/components/ui';
 	import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '$lib/components/ui';
+	import {
+		AlertDialog,
+		AlertDialogAction,
+		AlertDialogCancel,
+		AlertDialogContent,
+		AlertDialogDescription,
+		AlertDialogFooter,
+		AlertDialogHeader,
+		AlertDialogTitle
+	} from '$lib/components/ui';
 	import { goto } from '$app/navigation';
-	import { FileText, Plus, Calendar, User } from 'lucide-svelte';
+	import { FileText, Plus, Calendar, User, Trash2 } from 'lucide-svelte';
 	import { debug } from '$lib/debug';
 	import { _ } from 'svelte-i18n';
-	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
+	import { toast } from 'svelte-sonner';
 	
 	let applications = $state<any[]>([]);
 	let isLoading = $state(true);
 	let error = $state<string | null>(null);
+	let deleteDialogOpen = $state(false);
+	let applicationToDelete = $state<{ id: string; name: string } | null>(null);
 	
 	onMount(async () => {
 		await loadApplications();
@@ -64,6 +76,38 @@
 		}
 		return $_('applications.unnamedApplication');
 	}
+
+	function openDeleteDialog(appId: string, clientName: string) {
+		applicationToDelete = { id: appId, name: clientName };
+		deleteDialogOpen = true;
+	}
+
+	async function confirmDelete() {
+		if (!applicationToDelete) return;
+
+		try {
+			const appRef = doc(db, 'applications', applicationToDelete.id);
+			await deleteDoc(appRef);
+			
+			// Remove from local state
+			applications = applications.filter(app => app.id !== applicationToDelete!.id);
+			
+			toast.success('Application deleted', {
+				description: 'The application has been permanently deleted.'
+			});
+			
+			debug.log('✅ Application deleted:', applicationToDelete.id);
+			
+			// Close dialog and reset
+			deleteDialogOpen = false;
+			applicationToDelete = null;
+		} catch (error) {
+			console.error('Failed to delete application:', error);
+			toast.error('Failed to delete application', {
+				description: error instanceof Error ? error.message : 'An error occurred while deleting the application.'
+			});
+		}
+	}
 </script>
 
 <div class="min-h-screen bg-background">
@@ -72,13 +116,6 @@
 			<div>
 				<h1 class="text-3xl font-bold">{$_('applications.title')}</h1>
 				<p class="text-muted-foreground mt-2">{$_('applications.subtitle')}</p>
-			</div>
-			<div class="flex items-center gap-4">
-				<LanguageSelector />
-				<Button onclick={() => goto('/')} class="gap-2">
-					<Plus class="h-5 w-5" />
-					{$_('applications.newApplication')}
-				</Button>
 			</div>
 		</div>
 		
@@ -162,16 +199,30 @@
 											</div>
 										</TableCell>
 										<TableCell class="text-right">
-											<Button 
-												variant="ghost" 
-												size="sm"
-												onclick={(e) => {
-													e.stopPropagation();
-													goto(`/application/${app.id}`);
-												}}
-											>
-												{$_('common.view')}
-											</Button>
+											<div class="flex items-center justify-end gap-2">
+												<Button 
+													variant="ghost" 
+													size="sm"
+													onclick={(e) => {
+														e.stopPropagation();
+														goto(`/application/${app.id}`);
+													}}
+												>
+													{$_('common.view')}
+												</Button>
+												<Button 
+													variant="ghost" 
+													size="sm"
+													class="text-destructive hover:text-destructive hover:bg-destructive/10"
+													onclick={(e) => {
+														e.stopPropagation();
+														openDeleteDialog(app.id, getClientName(app));
+													}}
+													title="Delete application"
+												>
+													<Trash2 class="h-4 w-4" />
+												</Button>
+											</div>
 										</TableCell>
 									</TableRow>
 								{/each}
@@ -182,6 +233,35 @@
 			</Card>
 		{/if}
 	</div>
+
+	<!-- Delete Confirmation Dialog -->
+	<AlertDialog bind:open={deleteDialogOpen}>
+		<AlertDialogContent>
+			<AlertDialogHeader>
+				<AlertDialogTitle>Delete Application</AlertDialogTitle>
+				<AlertDialogDescription>
+					Are you sure you want to delete this application? This action cannot be undone.
+					{#if applicationToDelete}
+						<div class="mt-4 space-y-1 text-sm">
+							<p><strong>Client:</strong> {applicationToDelete.name}</p>
+							<p><strong>Application ID:</strong> <code class="bg-muted px-1.5 py-0.5 rounded text-xs">{applicationToDelete.id.slice(0, 12)}...</code></p>
+						</div>
+					{/if}
+				</AlertDialogDescription>
+			</AlertDialogHeader>
+			<AlertDialogFooter>
+				<AlertDialogCancel onclick={() => { applicationToDelete = null; }}>
+					Cancel
+				</AlertDialogCancel>
+				<AlertDialogAction
+					class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+					onclick={confirmDelete}
+				>
+					Delete
+				</AlertDialogAction>
+			</AlertDialogFooter>
+		</AlertDialogContent>
+	</AlertDialog>
 </div>
 
 

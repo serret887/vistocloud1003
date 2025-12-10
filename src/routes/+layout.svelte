@@ -7,6 +7,7 @@
 	import { Toaster } from 'svelte-sonner';
 	import '$lib/i18n';
 	import { _, waitLocale } from 'svelte-i18n';
+	import AppHeader from '$lib/components/layout/AppHeader.svelte';
 	
 	let { children } = $props();
 	let ready = $state(false);
@@ -39,5 +40,10 @@
 
 {#if ready}
 	<Toaster position="top-right" richColors closeButton />
-	{@render children()}
+	<div class="min-h-screen bg-background">
+		<AppHeader />
+		<main>
+			{@render children()}
+		</main>
+	</div>
 {/if}

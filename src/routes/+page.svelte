@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Button, Badge, Card, CardContent } from '$lib/components/ui';
-	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
 	import { applicationStore } from '$lib/stores/application/index';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
@@ -119,7 +118,6 @@
 </script>
 
 <div class="min-h-screen bg-background">
-	<div class="container mx-auto px-4 py-4 flex justify-end"><LanguageSelector /></div>
 
 	<!-- Hero Section -->
 	<section class="relative overflow-hidden bg-background py-24">
