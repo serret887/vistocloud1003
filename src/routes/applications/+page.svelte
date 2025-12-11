@@ -20,9 +20,11 @@
 	import { debug } from '$lib/debug';
 	import { _ } from 'svelte-i18n';
 	import { toast } from 'svelte-sonner';
+	import { applicationStore } from '$lib/stores/application';
 	
 	let applications = $state<any[]>([]);
 	let isLoading = $state(true);
+	let isCreating = $state(false);
 	let error = $state<string | null>(null);
 	let deleteDialogOpen = $state(false);
 	let applicationToDelete = $state<{ id: string; name: string } | null>(null);
@@ -80,6 +82,26 @@
 	function openDeleteDialog(appId: string, clientName: string) {
 		applicationToDelete = { id: appId, name: clientName };
 		deleteDialogOpen = true;
+	}
+
+	async function createNewApplication() {
+		if (isCreating) return;
+		isCreating = true;
+		try {
+			const id = await applicationStore.createApplication();
+			toast.success($_('toast.applicationCreated'), {
+				description: $_('toast.applicationCreatedDescription')
+			});
+			goto(`/application/${id}/client-info`);
+		} catch (error) {
+			toast.error($_('toast.applicationCreateFailed'), {
+				description: error instanceof Error
+					? error.message
+					: $_('toast.applicationCreateFailedDescription')
+			});
+		} finally {
+			isCreating = false;
+		}
 	}
 
 	async function confirmDelete() {
@@ -145,7 +167,7 @@
 								{$_('applications.noApplicationsDescription')}
 							</p>
 						</div>
-						<Button onclick={() => goto('/')} class="gap-2">
+					<Button onclick={createNewApplication} class="gap-2" disabled={isCreating}>
 							<Plus class="h-4 w-4" />
 							{$_('applications.createApplication')}
 						</Button>

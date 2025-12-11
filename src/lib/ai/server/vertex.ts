@@ -81,3 +81,4 @@ export async function callVertex(question: string, mode: Mode, programs: Program
 	return { content: text as string, citations: [] as Citation[], lenderResponses: undefined };
 }
 
+

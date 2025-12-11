@@ -8,7 +8,8 @@ export {
   saveEmploymentDataToFirebase,
   saveIncomeDataToFirebase,
   saveAssetsDataToFirebase,
-  saveRealEstateDataToFirebase
+  saveRealEstateDataToFirebase,
+  saveLoanDataToFirebase
 } from './save/data';
 import { saveClientDataToFirebase } from './save/client';
 import {
@@ -16,7 +17,8 @@ import {
   saveEmploymentDataToFirebase,
   saveIncomeDataToFirebase,
   saveAssetsDataToFirebase,
-  saveRealEstateDataToFirebase
+  saveRealEstateDataToFirebase,
+  saveLoanDataToFirebase
 } from './save/data';
 import { debug } from '$lib/debug';
 
@@ -33,6 +35,7 @@ export async function saveAllClientDataToFirebase(
     incomeData?: any;
     assetsData?: any;
     realEstateData?: any;
+    loanData?: any;
   }
 ): Promise<void> {
   debug.group(`Saving all data for client ${clientId}`);
@@ -56,6 +59,9 @@ export async function saveAllClientDataToFirebase(
   }
   if (data.realEstateData) {
     promises.push(saveRealEstateDataToFirebase(applicationId, clientId, data.realEstateData));
+  }
+  if (data.loanData) {
+    promises.push(saveLoanDataToFirebase(applicationId, clientId, data.loanData));
   }
   
   await Promise.all(promises);

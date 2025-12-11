@@ -38,3 +38,4 @@ export async function getPlaceId(input: string, apiKey: string): Promise<string 
   return suggestions[0].placeResource || null;
 }
 
+

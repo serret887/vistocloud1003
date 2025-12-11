@@ -40,6 +40,7 @@ export async function loadApplicationFromFirebase(
     const incomeData: Record<string, any> = {};
     const assetsData: Record<string, any> = {};
     const realEstateData: Record<string, any> = {};
+    const loanData: Record<string, any> = {};
     const documentsData: Record<string, any> = {};
     
     // Load data for each client
@@ -112,6 +113,17 @@ export async function loadApplicationFromFirebase(
         console.warn(`⚠️ [FIREBASE] Failed to load real estate data for ${clientId}:`, error);
       }
       
+      // Load loan data
+      try {
+        const loanRef = doc(db, 'applications', applicationId, 'loans', clientId);
+        const loanSnap = await getDoc(loanRef);
+        if (loanSnap.exists()) {
+          loanData[clientId] = loanSnap.data();
+        }
+      } catch (error) {
+        console.warn(`⚠️ [FIREBASE] Failed to load loan data for ${clientId}:`, error);
+      }
+      
       // Load documents data
       try {
         const documentsRef = doc(db, 'applications', applicationId, 'documents', clientId);
@@ -136,6 +148,7 @@ export async function loadApplicationFromFirebase(
       incomeData: appData.incomeData || incomeData,
       assetsData: appData.assetsData || assetsData,
       realEstateData: appData.realEstateData || realEstateData,
+      loanData: appData.loanData || loanData,
       documentsData: appData.documentsData || documentsData,
       isLoading: false,
       isSaving: false,
@@ -178,6 +191,9 @@ export async function loadApplicationFromFirebase(
       }
       if (realEstateData[clientId]) {
         loadedState.realEstateData[clientId] = realEstateData[clientId];
+      }
+      if (loanData[clientId]) {
+        loadedState.loanData[clientId] = loanData[clientId];
       }
       if (documentsData[clientId]) {
         loadedState.documentsData[clientId] = documentsData[clientId];

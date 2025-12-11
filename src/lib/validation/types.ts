@@ -19,6 +19,7 @@ export const STEP_ORDER: ApplicationStepId[] = [
   'income',
   'assets',
   'real-estate',
+  'loan-info',
   'documents',
   'dictate',
   'review'

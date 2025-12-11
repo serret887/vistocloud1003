@@ -6,6 +6,7 @@
   import IncomeStep from '$lib/components/steps/IncomeStep/index.svelte';
   import AssetsStep from '$lib/components/steps/AssetsStep/index.svelte';
   import RealEstateStep from '$lib/components/steps/RealEstateStep/index.svelte';
+  import LoanInfoStep from '$lib/components/steps/LoanInfoStep/index.svelte';
   import DocumentsStep from '$lib/components/steps/DocumentsStep/index.svelte';
   import DictateStep from '$lib/components/steps/DictateStep/index.svelte';
   import ReviewStep from '$lib/components/steps/ReviewStep/index.svelte';
@@ -33,6 +34,8 @@
   <AssetsStep />
 {:else if stepId === 'real-estate'}
   <RealEstateStep />
+{:else if stepId === 'loan-info'}
+  <LoanInfoStep />
 {:else if stepId === 'documents'}
   <DocumentsStep />
 {:else if stepId === 'dictate'}

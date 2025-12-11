@@ -10,7 +10,7 @@ import { resetLastSavedHash } from '$lib/auto-save';
 
 // Import defaults and actions
 import * as defaults from './defaults';
-import { createClientActions, createAddressActions, createEmploymentActions, createIncomeActions, createAssetsActions, createRealEstateActions, createDocumentsActions, createValidationActions } from './actions';
+import { createClientActions, createAddressActions, createEmploymentActions, createIncomeActions, createAssetsActions, createRealEstateActions, createLoanActions, createDocumentsActions, createValidationActions } from './actions';
 import { createDerivedStores } from './derived';
 
 // Re-export types
@@ -30,6 +30,7 @@ function createInitialState(): ApplicationState {
     incomeData: { [primaryClientId]: defaults.createDefaultIncomeData(primaryClientId) },
     assetsData: { [primaryClientId]: defaults.createDefaultAssetsData(primaryClientId) },
     realEstateData: { [primaryClientId]: defaults.createDefaultRealEstateData(primaryClientId) },
+    loanData: { [primaryClientId]: defaults.createDefaultLoanData(primaryClientId) },
     documentsData: { [primaryClientId]: defaults.createDefaultDocumentsData(primaryClientId) },
     isLoading: false,
     isSaving: false,
@@ -52,6 +53,7 @@ function createApplicationStore() {
   const incomeActions = createIncomeActions(update);
   const assetsActions = createAssetsActions(update);
   const realEstateActions = createRealEstateActions(update);
+  const loanActions = createLoanActions(update);
   const documentsActions = createDocumentsActions(update);
   const validationActions = createValidationActions(update, getStore);
   
@@ -124,7 +126,8 @@ function createApplicationStore() {
             employmentData: state.employmentData[clientId],
             incomeData: state.incomeData[clientId],
             assetsData: state.assetsData[clientId],
-            realEstateData: state.realEstateData[clientId]
+            realEstateData: state.realEstateData[clientId],
+            loanData: state.loanData[clientId]
           })
         );
         savePromises.push(saveApplicationToFirebase(state.currentApplicationId, state));
@@ -209,6 +212,7 @@ function createApplicationStore() {
     ...incomeActions,
     ...assetsActions,
     ...realEstateActions,
+    ...loanActions,
     ...documentsActions,
     ...validationActions
   };
@@ -229,6 +233,7 @@ export const activeAssetsData = derivedStores.activeAssetsData;
 export const activeRealEstateData = derivedStores.activeRealEstateData;
 export const activeAddressData = derivedStores.activeAddressData;
 export const activeIncomeData = derivedStores.activeIncomeData;
+export const activeLoanData = derivedStores.activeLoanData;
 export const currentStepValidationErrors = derivedStores.currentStepValidationErrors;
 
 

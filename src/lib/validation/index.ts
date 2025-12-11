@@ -7,6 +7,7 @@ export { isEmploymentComplete, validateEmployment } from './employment';
 export { isIncomeComplete, validateIncome } from './income';
 export { isAssetsComplete, validateAssets } from './assets';
 export { isRealEstateComplete, validateRealEstate } from './real-estate';
+export { isLoanInfoComplete, validateLoanInfo } from './loan-info';
 export { isDocumentsComplete, validateDocuments } from './documents';
 
 import type { ApplicationState } from '$lib/stores/application/types';
@@ -20,6 +21,7 @@ import { isEmploymentComplete, validateEmployment } from './employment';
 import { isIncomeComplete, validateIncome } from './income';
 import { isAssetsComplete, validateAssets } from './assets';
 import { isRealEstateComplete, validateRealEstate } from './real-estate';
+import { isLoanInfoComplete, validateLoanInfo } from './loan-info';
 import { isDocumentsComplete, validateDocuments } from './documents';
 
 export function validateStep(stepId: ApplicationStepId, state: ApplicationState): StepValidationResult {
@@ -35,6 +37,7 @@ export function validateStep(stepId: ApplicationStepId, state: ApplicationState)
     case 'income': return validateIncome(state, clientId);
     case 'assets': return validateAssets(state, clientId);
     case 'real-estate': return validateRealEstate(state, clientId);
+    case 'loan-info': return validateLoanInfo(state, clientId);
     case 'documents': return validateDocuments(state, clientId);
     case 'dictate':
     case 'review':
@@ -54,13 +57,14 @@ export function isStepComplete(stepId: ApplicationStepId, state: ApplicationStat
     case 'income': return isIncomeComplete(state, clientId);
     case 'assets': return isAssetsComplete(state, clientId);
     case 'real-estate': return isRealEstateComplete(state, clientId);
+    case 'loan-info': return isLoanInfoComplete(state, clientId);
     case 'documents': return isDocumentsComplete(state, clientId);
     case 'dictate':
       // Voice dictation is a tool, not a data step - never shows as "complete"
       return false;
     case 'review':
       // Review is complete only when ALL data steps are complete for ALL clients
-      const dataSteps: ApplicationStepId[] = ['client-info', 'employment', 'income', 'assets', 'documents'];
+      const dataSteps: ApplicationStepId[] = ['client-info', 'employment', 'income', 'assets', 'real-estate', 'loan-info', 'documents'];
       return state.clientIds.every(cId => {
         const origClient = state.activeClientId;
         state.activeClientId = cId;

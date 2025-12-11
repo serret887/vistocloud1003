@@ -50,3 +50,4 @@ export function validateDateRange(startDate: string, endDate: string): boolean {
   return end >= start;
 }
 
+

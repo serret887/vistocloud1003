@@ -108,3 +108,4 @@ export function calculateTotalCoverage(employmentData: EmploymentRecord[]): numb
 }
 
 
+

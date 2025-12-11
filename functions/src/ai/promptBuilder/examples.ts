@@ -23,3 +23,4 @@ Reasoning: Step 1: Kelly Parrish is new client - create with all provided info. 
 Output: {"actions": [addClient with firstName: "Kelly", lastName: "Parrish", phone: "2345678181", ssn: "683-361-781", citizenship: "US Citizen", addEmploymentRecord, updateEmploymentRecord with employerName: "Sands Investments", selfEmployed: true, startDate: "${twoYearsAgo}", addActiveIncome, updateActiveIncome with monthlyAmount: 4000, updateAddressData with address1: "4027 Pierce Street", city: "Hollywood", fromDate: "${twoYearsAgo}"], "nextSteps": "Any additional information for Kelly's application?"}`;
 }
 
+

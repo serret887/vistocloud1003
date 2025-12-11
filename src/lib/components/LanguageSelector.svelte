@@ -1,14 +1,7 @@
 <script lang="ts">
   import { locale, setLocale } from '$lib/i18n';
   import { _ } from 'svelte-i18n';
-  import { Globe } from 'lucide-svelte';
-  import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-  } from '$lib/components/ui/select';
+  import { LanguageSwitcher, type Language } from '$lib/components/ui/language-switcher';
   
   let currentLocale = $state('en');
   
@@ -16,27 +9,25 @@
     currentLocale = $locale || 'en';
   });
   
-  function handleLocaleChange(value: string | undefined) {
-    if (value && (value === 'en' || value === 'es')) {
+  // Make languages reactive to translations
+  const languages = $derived.by(() => [
+    { code: 'en', name: $_('language.english'), flag: '🇺🇸' },
+    { code: 'es', name: $_('language.spanish'), flag: '🇪🇸' }
+  ] as Language[]);
+  
+  function handleLocaleChange(value: string) {
+    if (value === 'en' || value === 'es') {
       setLocale(value);
+      currentLocale = value;
     }
   }
 </script>
 
-<div class="flex items-center gap-2">
-  <Globe class="h-4 w-4 text-muted-foreground" />
-  <Select
-    type="single"
-    value={currentLocale}
-    onValueChange={handleLocaleChange}
-  >
-    <SelectTrigger class="w-[140px]">
-      <SelectValue placeholder={$_('language.selector')} />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="en">{$_('language.english')}</SelectItem>
-      <SelectItem value="es">{$_('language.spanish')}</SelectItem>
-    </SelectContent>
-  </Select>
-</div>
+<LanguageSwitcher
+  languages={languages}
+  bind:value={currentLocale}
+  onChange={handleLocaleChange}
+  align="end"
+  variant="outline"
+/>
 

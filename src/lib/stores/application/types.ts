@@ -5,6 +5,7 @@ import type { ClientIncomeData } from '$lib/types/income';
 import type { ClientAssetsData } from '$lib/types/assets';
 import type { ClientRealEstateData } from '$lib/types/real-estate';
 import type { ClientAddressData } from '$lib/types/address';
+import type { ClientLoanData } from '$lib/types/loan';
 import type { ApplicationStepId } from '$lib/types/application';
 
 // Local ValidationError type to avoid circular dependency
@@ -61,6 +62,7 @@ export interface ApplicationState {
   incomeData: Record<string, ClientIncomeData>;
   assetsData: Record<string, ClientAssetsData>;
   realEstateData: Record<string, ClientRealEstateData>;
+  loanData: Record<string, ClientLoanData>;
   documentsData: Record<string, ClientDocumentsData>;
   
   // UI State

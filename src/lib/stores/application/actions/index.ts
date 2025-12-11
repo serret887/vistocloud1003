@@ -5,6 +5,7 @@ export { createEmploymentActions } from './employment';
 export { createIncomeActions } from './income';
 export { createAssetsActions } from './assets';
 export { createRealEstateActions } from './real-estate';
+export { createLoanActions } from './loan';
 export { createDocumentsActions } from './documents';
 export { createValidationActions } from './validation';
 

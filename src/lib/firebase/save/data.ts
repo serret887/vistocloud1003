@@ -1,4 +1,4 @@
-// Data-specific save operations (address, employment, income, assets, real estate)
+// Data-specific save operations (address, employment, income, assets, real estate, loan)
 import { db } from '$lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { debug } from '$lib/debug';
@@ -105,6 +105,27 @@ export async function saveRealEstateDataToFirebase(
     debug.log(`✅ Real estate data for ${clientId} saved to Firebase`);
   } catch (error) {
     debug.firebase.error('saveRealEstateData', error);
+    throw error;
+  }
+}
+
+export async function saveLoanDataToFirebase(
+  applicationId: string,
+  clientId: string,
+  loanData: any
+): Promise<void> {
+  try {
+    debug.firebase.save(`applications/${applicationId}/loans`, clientId, loanData);
+    
+    const loanRef = doc(db, 'applications', applicationId, 'loans', clientId);
+    await setDoc(loanRef, sanitizeForFirebase({
+      ...loanData,
+      updatedAt: new Date().toISOString()
+    }), { merge: true });
+    
+    debug.log(`✅ Loan data for ${clientId} saved to Firebase`);
+  } catch (error) {
+    debug.firebase.error('saveLoanData', error);
     throw error;
   }
 }

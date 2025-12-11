@@ -16,7 +16,8 @@
 	function getStepTranslationKey(stepId: string): string {
 		const mapping: Record<string, string> = {
 			'client-info': 'clientInfo',
-			'real-estate': 'realEstate'
+			'real-estate': 'realEstate',
+			'loan-info': 'loanInfo'
 		};
 		return mapping[stepId] || stepId;
 	}

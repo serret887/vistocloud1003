@@ -13,3 +13,4 @@ function getApp() {
 
 export const db = getFirestore(getApp());
 
+

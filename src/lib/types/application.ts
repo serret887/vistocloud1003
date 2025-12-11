@@ -17,6 +17,7 @@ export type ApplicationStepId =
   | 'income'
   | 'real-estate'
   | 'assets'
+  | 'loan-info'
   | 'documents'
   | 'dictate'
   | 'review'

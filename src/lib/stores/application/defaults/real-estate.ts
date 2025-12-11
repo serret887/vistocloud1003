@@ -28,3 +28,4 @@ export const createDefaultRealEstateRecord = (clientId: string): RealEstateOwned
 
 
 
+

@@ -8,6 +8,7 @@ import type { ClientIncomeData } from '$lib/types/income';
 import type { ClientAssetsData } from '$lib/types/assets';
 import type { ClientRealEstateData } from '$lib/types/real-estate';
 import type { ClientAddressData } from '$lib/types/address';
+import type { ClientLoanData } from '$lib/types/loan';
 import type { ApplicationStepId } from '$lib/types/application';
 
 export function createDerivedStores(store: Readable<ApplicationState>) {
@@ -37,6 +38,10 @@ export function createDerivedStores(store: Readable<ApplicationState>) {
   
   const activeIncomeData = derived(store, $state =>
     $state.incomeData[$state.activeClientId]
+  );
+  
+  const activeLoanData = derived(store, $state =>
+    $state.loanData[$state.activeClientId]
   );
   
   // Validation errors for current step - per client
@@ -76,6 +81,7 @@ export function createDerivedStores(store: Readable<ApplicationState>) {
     activeRealEstateData,
     activeAddressData,
     activeIncomeData,
+    activeLoanData,
     currentStepValidationErrors
   };
 }

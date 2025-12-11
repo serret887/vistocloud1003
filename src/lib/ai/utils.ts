@@ -13,3 +13,4 @@ export const programLabels: Record<Program, string> = {
 	NONQM: 'Non-QM'
 };
 
+
