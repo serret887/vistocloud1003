@@ -649,7 +649,7 @@
   "dialogs": {
     "createApplication": {
       "title": "Crear Nueva Solicitud 1003",
-      "description": "¿Está seguro de que desea crear una nueva solicitud 1003? Esto iniciará un nuevo formulario de solicitud.",
+      "description": "¿Está seguro de que desea crear una nueva solicitud 1003? Esto iniciará un nuevo formulario de solicitud. Por favor, confirme para continuar.",
       "confirm": "Crear Solicitud",
       "cancel": "Cancelar"
     },

@@ -1,14 +1,7 @@
 // Address action handlers
 import type { LLMAction, VoiceUpdate } from '$lib/types/voice-assistant';
 import type { DynamicIdMap } from '../types';
-
-function getClientName(store: any, clientId: string): string {
-  const clientData = store.clients?.[clientId];
-  if (clientData?.firstName && clientData?.lastName) {
-    return `${clientData.firstName} ${clientData.lastName}`;
-  }
-  return clientData?.firstName || clientData?.lastName || 'Client';
-}
+import { getClientNameFromLLMState } from '$lib/utils/client';
 
 function resolveClientId(clientId: string, dynamicIdMap: DynamicIdMap): string {
   return clientId.startsWith('$') ? dynamicIdMap.get(clientId) || clientId : clientId;
@@ -56,7 +49,7 @@ export function handleUpdateAddressData(
   };
   
   store.updateAddressData(clientId, updatedAddressData);
-  const clientName = getClientName(store, clientId);
+  const clientName = getClientNameFromLLMState(store, clientId);
   
   return {
     description: `Updated address for ${clientName}`,
@@ -75,7 +68,7 @@ export function handleAddFormerAddress(
 ): VoiceUpdate {
   const clientId = resolveClientId(action.params.clientId, dynamicIdMap);
   store.addFormerAddress(clientId, action.params.address);
-  const clientName = getClientName(store, clientId);
+  const clientName = getClientNameFromLLMState(store, clientId);
   
   return {
     description: `Added former address for ${clientName}`,

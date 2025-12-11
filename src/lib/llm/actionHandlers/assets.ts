@@ -1,14 +1,7 @@
 // Asset action handlers
 import type { LLMAction, VoiceUpdate } from '$lib/types/voice-assistant';
 import type { DynamicIdMap } from '../types';
-
-function getClientName(store: any, clientId: string): string {
-  const clientData = store.clients?.[clientId];
-  if (clientData?.firstName && clientData?.lastName) {
-    return `${clientData.firstName} ${clientData.lastName}`;
-  }
-  return clientData?.firstName || clientData?.lastName || 'Client';
-}
+import { getClientNameFromLLMState } from '$lib/utils/client';
 
 function resolveClientId(clientId: string, dynamicIdMap: DynamicIdMap): string {
   return clientId.startsWith('$') ? dynamicIdMap.get(clientId) || clientId : clientId;
@@ -46,7 +39,7 @@ export function handleAddAsset(
     dynamicIdMap.set(action.returnId, assetId);
   }
   
-  const clientName = getClientName(store, clientId);
+  const clientName = getClientNameFromLLMState(store, clientId);
   
   return {
     description: `Added asset for ${clientName}`,
@@ -73,7 +66,7 @@ export function handleUpdateAsset(
   );
   
   store.updateAsset(clientId, recordId, action.params.updates);
-  const clientName = getClientName(store, clientId);
+  const clientName = getClientNameFromLLMState(store, clientId);
   
   return {
     description: `Updated asset for ${clientName}`,

@@ -1,22 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
 	import { Home, FileText, Plus, MessageCircle } from 'lucide-svelte';
-	import { applicationStore } from '$lib/stores/application/index';
-	import { toast } from 'svelte-sonner';
 	import { _ } from 'svelte-i18n';
 	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
 	import { cn } from '$lib/utils';
-	import {
-		AlertDialog,
-		AlertDialogAction,
-		AlertDialogCancel,
-		AlertDialogContent,
-		AlertDialogDescription,
-		AlertDialogFooter,
-		AlertDialogHeader,
-		AlertDialogTitle
-	} from '$lib/components/ui';
+	import CreateApplicationDialog from '$lib/components/application/CreateApplicationDialog.svelte';
 
 	const navItems = $derived([
 		{ label: $_('navigation.home'), href: '/', icon: Home },
@@ -29,19 +17,6 @@
 
 	const openCreateDialog = () => {
 		showCreateDialog = true;
-	};
-
-	const createNewApplication = async () => {
-		showCreateDialog = false;
-		try {
-			const id = await applicationStore.createApplication();
-			toast.success($_('toast.applicationCreated'), { description: $_('toast.applicationCreatedDescription') });
-			goto(`/application/${id}/client-info`);
-		} catch (error) {
-			toast.error($_('toast.applicationCreateFailed'), {
-				description: error instanceof Error ? error.message : $_('toast.applicationCreateFailedDescription')
-			});
-		}
 	};
 
 	const isActive = (href: string) => {
@@ -97,23 +72,6 @@
 	</nav>
 
 	<!-- Create Application Confirmation Dialog -->
-	<AlertDialog bind:open={showCreateDialog}>
-		<AlertDialogContent>
-			<AlertDialogHeader>
-				<AlertDialogTitle>{$_('dialogs.createApplication.title')}</AlertDialogTitle>
-				<AlertDialogDescription>
-					{$_('dialogs.createApplication.description')}
-				</AlertDialogDescription>
-			</AlertDialogHeader>
-			<AlertDialogFooter>
-				<AlertDialogCancel onclick={() => { showCreateDialog = false; }}>
-					{$_('dialogs.createApplication.cancel')}
-				</AlertDialogCancel>
-				<AlertDialogAction onclick={createNewApplication}>
-					{$_('dialogs.createApplication.confirm')}
-				</AlertDialogAction>
-			</AlertDialogFooter>
-		</AlertDialogContent>
-	</AlertDialog>
+	<CreateApplicationDialog bind:open={showCreateDialog} />
 </header>
 

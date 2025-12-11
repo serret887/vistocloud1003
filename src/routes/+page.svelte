@@ -1,37 +1,13 @@
 <script lang="ts">
 	import { Button, Badge, Card, CardContent } from '$lib/components/ui';
-	import {
-		AlertDialog,
-		AlertDialogAction,
-		AlertDialogCancel,
-		AlertDialogContent,
-		AlertDialogDescription,
-		AlertDialogFooter,
-		AlertDialogHeader,
-		AlertDialogTitle
-	} from '$lib/components/ui';
-	import { applicationStore } from '$lib/stores/application/index';
 	import { goto } from '$app/navigation';
-	import { toast } from 'svelte-sonner';
 	import { _ } from 'svelte-i18n';
+	import CreateApplicationDialog from '$lib/components/application/CreateApplicationDialog.svelte';
 
 	let showCreateDialog = $state(false);
 
 	const openCreateDialog = () => {
 		showCreateDialog = true;
-	};
-
-	const createNewApplication = async () => {
-		showCreateDialog = false;
-		try {
-			const id = await applicationStore.createApplication();
-			toast.success($_('toast.applicationCreated'), { description: $_('toast.applicationCreatedDescription') });
-			goto(`/application/${id}/client-info`);
-		} catch (error) {
-			toast.error($_('toast.applicationCreateFailed'), {
-				description: error instanceof Error ? error.message : $_('toast.applicationCreateFailedDescription')
-			});
-		}
 	};
 
 	const stats = $derived([
@@ -374,21 +350,4 @@
 </div>
 
 <!-- Create Application Confirmation Dialog -->
-<AlertDialog bind:open={showCreateDialog}>
-	<AlertDialogContent>
-		<AlertDialogHeader>
-			<AlertDialogTitle>{$_('dialogs.createApplication.title')}</AlertDialogTitle>
-			<AlertDialogDescription>
-				{$_('dialogs.createApplication.description')}
-			</AlertDialogDescription>
-		</AlertDialogHeader>
-		<AlertDialogFooter>
-			<AlertDialogCancel onclick={() => { showCreateDialog = false; }}>
-				{$_('dialogs.createApplication.cancel')}
-			</AlertDialogCancel>
-			<AlertDialogAction onclick={createNewApplication}>
-				{$_('dialogs.createApplication.confirm')}
-			</AlertDialogAction>
-		</AlertDialogFooter>
-	</AlertDialogContent>
-</AlertDialog>
+<CreateApplicationDialog bind:open={showCreateDialog} />

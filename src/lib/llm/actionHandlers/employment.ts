@@ -1,14 +1,7 @@
 // Employment action handlers
 import type { LLMAction, VoiceUpdate } from '$lib/types/voice-assistant';
 import type { DynamicIdMap } from '../types';
-
-function getClientName(store: any, clientId: string): string {
-  const clientData = store.clients?.[clientId];
-  if (clientData?.firstName && clientData?.lastName) {
-    return `${clientData.firstName} ${clientData.lastName}`;
-  }
-  return clientData?.firstName || clientData?.lastName || 'Client';
-}
+import { getClientNameFromLLMState } from '$lib/utils/client';
 
 function resolveClientId(clientId: string, dynamicIdMap: DynamicIdMap): string {
   return clientId.startsWith('$') ? dynamicIdMap.get(clientId) || clientId : clientId;
@@ -47,7 +40,7 @@ export function handleAddEmploymentRecord(
     dynamicIdMap.set(action.returnId, empId);
   }
   
-  const clientName = getClientName(store, clientId);
+  const clientName = getClientNameFromLLMState(store, clientId);
   
   return {
     description: `Added employment record for ${clientName}`,
@@ -80,7 +73,7 @@ export function handleUpdateEmploymentRecord(
   const updatedRecord = store.getEmploymentRecords(clientId).find((emp: any) => emp.id === recordId);
   console.log('🔍 Updated employment record:', updatedRecord);
   
-  const clientName = getClientName(store, clientId);
+  const clientName = getClientNameFromLLMState(store, clientId);
   
   return {
     description: `Updated employment for ${clientName}`,

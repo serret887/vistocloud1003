@@ -20,14 +20,16 @@
 	import { debug } from '$lib/debug';
 	import { _ } from 'svelte-i18n';
 	import { toast } from 'svelte-sonner';
-	import { applicationStore } from '$lib/stores/application';
+	import { getClientNameFromApp } from '$lib/utils/client';
+	import { formatDate } from '$lib/utils/date';
+	import CreateApplicationDialog from '$lib/components/application/CreateApplicationDialog.svelte';
 	
 	let applications = $state<any[]>([]);
 	let isLoading = $state(true);
-	let isCreating = $state(false);
 	let error = $state<string | null>(null);
 	let deleteDialogOpen = $state(false);
 	let applicationToDelete = $state<{ id: string; name: string } | null>(null);
+	let showCreateDialog = $state(false);
 	
 	onMount(async () => {
 		await loadApplications();
@@ -58,50 +60,13 @@
 		}
 	}
 	
-	function formatDate(date: any): string {
-		if (!date) return $_('common.na');
-		if (date.toDate) {
-			return date.toDate().toLocaleDateString();
-		}
-		if (typeof date === 'string') {
-			return new Date(date).toLocaleDateString();
-		}
-		return $_('common.na');
-	}
-	
-	function getClientName(app: any): string {
-		const clientData = app.clientData || {};
-		const firstClientId = Object.keys(clientData)[0];
-		const client = clientData[firstClientId];
-		if (client?.firstName && client?.lastName) {
-			return `${client.firstName} ${client.lastName}`;
-		}
-		return $_('applications.unnamedApplication');
-	}
-
 	function openDeleteDialog(appId: string, clientName: string) {
 		applicationToDelete = { id: appId, name: clientName };
 		deleteDialogOpen = true;
 	}
 
-	async function createNewApplication() {
-		if (isCreating) return;
-		isCreating = true;
-		try {
-			const id = await applicationStore.createApplication();
-			toast.success($_('toast.applicationCreated'), {
-				description: $_('toast.applicationCreatedDescription')
-			});
-			goto(`/application/${id}/client-info`);
-		} catch (error) {
-			toast.error($_('toast.applicationCreateFailed'), {
-				description: error instanceof Error
-					? error.message
-					: $_('toast.applicationCreateFailedDescription')
-			});
-		} finally {
-			isCreating = false;
-		}
+	function openCreateDialog() {
+		showCreateDialog = true;
 	}
 
 	async function confirmDelete() {
@@ -167,7 +132,7 @@
 								{$_('applications.noApplicationsDescription')}
 							</p>
 						</div>
-					<Button onclick={createNewApplication} class="gap-2" disabled={isCreating}>
+					<Button onclick={openCreateDialog} class="gap-2">
 							<Plus class="h-4 w-4" />
 							{$_('applications.createApplication')}
 						</Button>
@@ -206,7 +171,7 @@
 										<TableCell>
 											<div class="flex items-center gap-2">
 												<User class="h-4 w-4 text-muted-foreground" />
-												{getClientName(app)}
+												{getClientNameFromApp(app)}
 											</div>
 										</TableCell>
 										<TableCell>
@@ -238,7 +203,7 @@
 													class="text-destructive hover:text-destructive hover:bg-destructive/10"
 													onclick={(e) => {
 														e.stopPropagation();
-														openDeleteDialog(app.id, getClientName(app));
+														openDeleteDialog(app.id, getClientNameFromApp(app));
 													}}
 													title={$_('applications.deleteTitle')}
 												>
@@ -284,6 +249,9 @@
 			</AlertDialogFooter>
 		</AlertDialogContent>
 	</AlertDialog>
+
+	<!-- Create Application Confirmation Dialog -->
+	<CreateApplicationDialog bind:open={showCreateDialog} />
 </div>
 
 

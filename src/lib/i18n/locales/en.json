@@ -483,7 +483,7 @@
   "dialogs": {
     "createApplication": {
       "title": "Create New 1003 Application",
-      "description": "Are you sure you want to create a new 1003 application? This will start a fresh application form.",
+      "description": "Are you sure you want to create a new 1003 application? This will start a fresh application form. Please confirm to proceed.",
       "confirm": "Create Application",
       "cancel": "Cancel"
     },
