@@ -4,6 +4,7 @@
 	import { Eye, EyeOff } from 'lucide-svelte';
 	import { cn } from '$lib/utils';
 	import type { HTMLInputAttributes } from 'svelte/elements';
+	import { _ } from 'svelte-i18n';
 
 	interface Props extends Omit<HTMLInputAttributes, 'value' | 'oninput' | 'type'> {
 		label?: string;
@@ -85,7 +86,7 @@
 
 	function validateSSN(ssn: string): string | null {
 		if (!ssn) {
-			return required ? 'SSN is required' : null;
+			return required ? $_('errors.ssnRequired') : null;
 		}
 
 		// Remove formatting
@@ -93,7 +94,7 @@
 		
 		// Check length
 		if (digits.length !== 9) {
-			return 'SSN must be 9 digits';
+			return $_('errors.ssnMustBe9Digits');
 		}
 
 		// Check for invalid patterns
@@ -103,17 +104,17 @@
 
 		// Invalid area numbers
 		if (areaNumber === '000' || areaNumber === '666' || areaNumber.startsWith('9')) {
-			return 'Invalid SSN: area number is not valid';
+			return $_('errors.ssnInvalidAreaNumber');
 		}
 
 		// Invalid group numbers
 		if (groupNumber === '00') {
-			return 'Invalid SSN: group number is not valid';
+			return $_('errors.ssnInvalidGroupNumber');
 		}
 
 		// Invalid serial numbers
 		if (serialNumber === '0000') {
-			return 'Invalid SSN: serial number is not valid';
+			return $_('errors.ssnInvalidSerialNumber');
 		}
 
 		return null; // Valid
