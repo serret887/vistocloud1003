@@ -1,5 +1,8 @@
 <script lang="ts">
 	import ValidatedInput from './validated-input.svelte';
+	import { Button } from '$lib/components/ui';
+	import { Eye, EyeOff } from 'lucide-svelte';
+	import { cn } from '$lib/utils';
 	import type { HTMLInputAttributes } from 'svelte/elements';
 
 	interface Props extends Omit<HTMLInputAttributes, 'value' | 'oninput' | 'type'> {
@@ -14,16 +17,45 @@
 		value = $bindable(''),
 		onValueChange,
 		required = false,
+		class: className,
+		id,
 		...restProps
 	}: Props = $props();
 	
-	// Internal value for formatting
+	// Internal value for formatting - always stores the actual SSN
 	let internalValue = $state(value);
+	let isVisible = $state(false);
+	let containerRef: HTMLDivElement | null = $state(null);
+	let inputElement: HTMLInputElement | null = $state(null);
+	let buttonRef = $state<HTMLElement | null>(null);
 	
 	// Sync external value changes
 	$effect(() => {
 		if (value !== internalValue) {
 			internalValue = value;
+		}
+	});
+
+	// Find the input element within the ValidatedInput
+	$effect(() => {
+		if (containerRef) {
+			const input = containerRef.querySelector('input') as HTMLInputElement | null;
+			if (input) {
+				inputElement = input;
+				// Add focus handler to auto-reveal
+				input.addEventListener('focus', handleFocus);
+				// Add padding to make room for the button
+				const inputContainer = input.parentElement as HTMLElement | null;
+				if (inputContainer && inputContainer.classList.contains('relative')) {
+					inputContainer.style.paddingRight = '2.5rem';
+				}
+				return () => {
+					input.removeEventListener('focus', handleFocus);
+					if (inputContainer && inputContainer.classList.contains('relative')) {
+						inputContainer.style.paddingRight = '';
+					}
+				};
+			}
 		}
 	});
 
@@ -42,6 +74,13 @@
 		} else {
 			return `${limited.slice(0, 3)}-${limited.slice(3, 5)}-${limited.slice(5)}`;
 		}
+	}
+
+	function maskSSN(ssn: string): string {
+		if (!ssn) return '';
+		const digits = ssn.replace(/\D/g, '');
+		if (digits.length !== 9) return ssn;
+		return `***-**-${digits.slice(-4)}`;
 	}
 
 	function validateSSN(ssn: string): string | null {
@@ -86,17 +125,69 @@
 		value = formatted;
 		onValueChange?.(formatted);
 	}
+
+	function handleFocus() {
+		// Automatically show the SSN when user focuses on the input
+		if (!isVisible && internalValue) {
+			isVisible = true;
+			// Update the input value to show the actual SSN
+			if (inputElement) {
+				setTimeout(() => {
+					if (inputElement) {
+						inputElement.value = internalValue;
+						// Move cursor to end
+						inputElement.setSelectionRange(internalValue.length, internalValue.length);
+					}
+				}, 0);
+			}
+		}
+	}
+
+	function toggleVisibility() {
+		isVisible = !isVisible;
+		// If making visible, focus the input
+		if (isVisible && inputElement) {
+			inputElement.focus();
+		}
+	}
+
+	// Display value: show masked version when not visible and has value, otherwise show actual value
+	const displayValue = $derived(
+		!isVisible && internalValue ? maskSSN(internalValue) : internalValue
+	);
 </script>
 
-<ValidatedInput
-	{label}
-	value={internalValue}
-	onValueChange={handleInput}
-	validate={validateSSN}
-	{required}
-	showError={true}
-	placeholder="XXX-XX-XXXX"
-	maxlength={11}
-	{...restProps}
-/>
+<div bind:this={containerRef} class="relative">
+	<ValidatedInput
+		{label}
+		value={displayValue}
+		onValueChange={handleInput}
+		validate={validateSSN}
+		{required}
+		showError={true}
+		placeholder="XXX-XX-XXXX"
+		maxlength={11}
+		class={className}
+		{id}
+		{...restProps}
+	/>
+	{#if internalValue}
+		<Button
+			bind:ref={buttonRef}
+			type="button"
+			variant="ghost"
+			size="icon-sm"
+			class="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground z-10"
+			onclick={toggleVisibility}
+			aria-label={isVisible ? 'Hide SSN' : 'Show SSN'}
+			style="margin-top: {label ? '1.5rem' : '0'};"
+		>
+			{#if isVisible}
+				<EyeOff class="h-4 w-4" />
+			{:else}
+				<Eye class="h-4 w-4" />
+			{/if}
+		</Button>
+	{/if}
+</div>
 
